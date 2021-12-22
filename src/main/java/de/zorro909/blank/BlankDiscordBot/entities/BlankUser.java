@@ -1,7 +1,10 @@
 package de.zorro909.blank.BlankDiscordBot.entities;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -32,7 +35,11 @@ public class BlankUser {
     private Long id;
 
     @NotNull
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
+    private Long guildId;
+
+    @NotNull
+    @Column(nullable = false)
     private Long discordId;
 
     @NotNull
@@ -48,4 +55,8 @@ public class BlankUser {
     @OneToMany
     private Map<ClaimDataType, UserClaimData> claims = new HashMap<>();
 
+    @LazyCollection(LazyCollectionOption.TRUE)
+    @ElementCollection
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
+    private List<Item> items;
 }

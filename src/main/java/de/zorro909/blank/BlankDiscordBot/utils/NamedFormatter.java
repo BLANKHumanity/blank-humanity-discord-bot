@@ -45,8 +45,14 @@ public class NamedFormatter {
 	return RE
 		.matcher(fmt)
 		.replaceAll(match -> match.group(1) != null ? match.group(1)
-			: values
-				.getOrDefault(match.group(3), match.group(2))
-				.toString());
+			: debug(values, match.group(3), match.group(2)));
+    }
+
+    private static String debug(Map<String, Object> values, String key,
+	    String defaultValue) {
+	System.out
+		.println("Trying to replace '" + key + "' with '"
+			+ values.getOrDefault(key, "___") + "'");
+	return values.getOrDefault(key, defaultValue).toString();
     }
 }

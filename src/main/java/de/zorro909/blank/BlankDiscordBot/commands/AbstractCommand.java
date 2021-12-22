@@ -1,17 +1,14 @@
 package de.zorro909.blank.BlankDiscordBot.commands;
 
 import java.sql.Connection;
-
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-
 import de.zorro909.blank.BlankDiscordBot.config.DiscordBotConfig;
 import de.zorro909.blank.BlankDiscordBot.config.MessagesConfig;
 import de.zorro909.blank.BlankDiscordBot.services.BlankUserService;
@@ -89,15 +86,19 @@ public abstract class AbstractCommand extends ListenerAdapter {
     protected void reply(SlashCommandEvent event, String format,
 	    @Valid FormattingData formattingData) {
 	EmbedBuilder builder = new EmbedBuilder();
-	builder
-		.setDescription(NamedFormatter
-			.namedFormat(format, formattingData.getDataPairings()));
+	builder.setDescription(format(format, formattingData));
 
 	event.getHook().editOriginalEmbeds(builder.build()).queue();
     }
 
     protected void reply(SlashCommandEvent event, MessageEmbed... embeds) {
 	event.getHook().editOriginalEmbeds(embeds).queue();
+    }
+
+    protected String format(String format,
+	    @Valid FormattingData formattingData) {
+	return NamedFormatter
+		.namedFormat(format, formattingData.getDataPairings());
     }
 
     protected abstract void onCommand(SlashCommandEvent event);

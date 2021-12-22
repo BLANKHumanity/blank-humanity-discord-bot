@@ -44,7 +44,8 @@ public class MigrationListener extends ListenerAdapter {
 
     private void checkEmbed(TextChannel textChannel, Matcher matcher) {
 	BlankUser user = blankUserService
-		.getUser(matcher.group(1), matcher.group(2));
+		.getUser(textChannel.getGuild().getIdLong(), matcher.group(1),
+			matcher.group(2));
 	if (user == null) {
 	    textChannel
 		    .sendMessage(matcher.group(1) + "#" + matcher.group(2)
@@ -55,7 +56,9 @@ public class MigrationListener extends ListenerAdapter {
 
 	int mee6Balance = Integer.valueOf(matcher.group(3));
 	if (!user.isMigrated()) {
-	    blankUserService.migrateUser(user.getDiscordId(), mee6Balance);
+	    blankUserService
+		    .migrateUser(user.getGuildId(), user.getDiscordId(),
+			    mee6Balance);
 	    textChannel
 		    .sendMessage("<@" + user.getDiscordId()
 			    + "> migrated successfully with a balance of "

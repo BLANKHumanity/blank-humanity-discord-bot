@@ -1,7 +1,6 @@
 package de.zorro909.blank.BlankDiscordBot.services;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import javax.transaction.Transactional;
@@ -17,6 +16,7 @@ import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 @Service
 public class BlankUserService {
@@ -33,30 +33,36 @@ public class BlankUserService {
     @Autowired
     private JDA jda;
 
-    public BlankUser getUser(long discordId) {
+    public BlankUser getUser(long discordId, long guildId) {
 	System.out.println("Requesting User: " + discordId);
 	return blankUserDao
 		.findByDiscordId(discordId)
-		.orElseGet(() -> registerUser(discordId));
+		.orElseGet(() -> registerUser(discordId, guildId));
     }
 
-    private BlankUser registerUser(long discordId) {
+    public BlankUser getUser(SlashCommandEvent event) {
+	return getUser(event.getUser().getIdLong(),
+		event.getGuild().getIdLong());
+    }
+
+    private BlankUser registerUser(long discordId, long guildId) {
 	System.out.println("Registering New User: " + discordId);
 	BlankUser blankUser = new BlankUser();
 	blankUser.setDiscordId(discordId);
+	blankUser.setGuildId(guildId);
 	return blankUserDao.save(blankUser);
     }
 
     @Transactional
-    public void migrateUser(long discordId, int money) {
-	BlankUser user = getUser(discordId);
+    public void migrateUser(long discordId, long guildId, int money) {
+	BlankUser user = getUser(discordId, guildId);
 	increaseUserBalance(user, money);
 	user.setMigrated(true);
     }
 
     @Transactional
-    public void increaseUserBalance(long discordId, int money) {
-	increaseUserBalance(getUser(discordId), money);
+    public void increaseUserBalance(long discordId, long guildId, int money) {
+	increaseUserBalance(getUser(discordId, guildId), money);
     }
 
     @Transactional
@@ -65,8 +71,9 @@ public class BlankUserService {
     }
 
     @Transactional
-    public boolean decreaseUserBalance(long discordId, int money) {
-	return decreaseUserBalance(getUser(discordId), money);
+    public boolean decreaseUserBalance(long discordId, long guildId,
+	    int money) {
+	return decreaseUserBalance(getUser(discordId, guildId), money);
     }
 
     @Transactional
@@ -93,6 +100,11 @@ public class BlankUserService {
 	    blankUser.getClaims().put(claimDataType, data);
 	}
 	return data;
+    }
+
+    public FormattingData createSimpleFormattingData(SlashCommandEvent event) {
+	return createFormattingData(getUser(event.getUser().getIdLong(),
+		event.getGuild().getIdLong())).build();
     }
 
     public FormattingData.FormattingDataBuilder createFormattingData(
@@ -157,12 +169,13 @@ public class BlankUserService {
 	}
     }
 
-    public BlankUser getUser(String username, String discriminator) {
+    public BlankUser getUser(long guildId, String username,
+	    String discriminator) {
 	User user = jda.getUserByTag(username, discriminator);
 	if (user == null)
 	    return null;
 
-	return getUser(user.getIdLong());
+	return getUser(user.getIdLong(), guildId);
     }
 
     public void deleteUser(BlankUser user) {

@@ -1,10 +1,11 @@
-package de.zorro909.blank.BlankDiscordBot.commands;
+package de.zorro909.blank.BlankDiscordBot.commands.economy;
 
 import org.springframework.stereotype.Component;
 
+import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -26,14 +27,15 @@ public class BalanceCommand extends AbstractCommand {
     @Override
     protected void onCommand(SlashCommandEvent event) {
 	OptionMapping option = event.getOption("user");
-	User user;
+	Member member;
 	if (option == null) {
-	    user = event.getUser();
+	    member = event.getMember();
 	} else {
-	    user = option.getAsUser();
+	    member = option.getAsMember();
 	}
 
-	BlankUser blankUser = blankUserService.getUser(user.getIdLong());
+	BlankUser blankUser = blankUserService
+		.getUser(member.getIdLong(), member.getGuild().getIdLong());
 	int balance = blankUser.getBalance();
 
 	reply(event, messagesConfig.BALANCE_COMMAND_MESSAGE,

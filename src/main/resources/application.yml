@@ -1,0 +1,31 @@
+discord:
+ authToken: DISCORD_AUTH_TOKEN
+items:
+ definitions:
+  -
+   id: 1
+   name: "First Class Ticket"
+   description: "Useful for you"
+   useName: "firstClassTicket"
+   action: "ROLE_REWARD"
+   actionArguments:
+    roleId: 923197747153223700
+  -
+   id: 2
+   name: "Second Class Ticket"
+   description: "Why is this more expensive?"
+shop:
+ itemsPerPage: 8
+ shopItems:
+  -
+   id: 1
+   itemId: 1
+   buyName: "test"
+   price: 32
+   amountAvailable: 10
+  -
+   id: 2
+   itemId: 2
+   buyName: "test2"
+   price: 64
+   amountAvailable: 20
