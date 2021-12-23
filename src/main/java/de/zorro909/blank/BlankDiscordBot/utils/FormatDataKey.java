@@ -17,7 +17,10 @@ public enum FormatDataKey {
     SHOP_ITEM_PRICE("shopItemPrice"), SHOP_ITEM_BUY_NAME("shopItemBuyName"),
     ITEM_DESCRIPTION("itemDescription"),
     SHOP_ITEM_AVAILABLE_AMOUNT("shopItemAvailableAmount"),
-    ITEM_USE_NAME("itemUseName"), ITEM_AMOUNT("itemAmount");
+    ITEM_USE_NAME("itemUseName"), ITEM_AMOUNT("itemAmount"),
+    INVENTORY_BODY("inventoryBody"), ERROR_MESSAGE("errorMessage"),
+    ROLE("role"), RICHEST_LIST_PAGE("richestListPage"),
+    RICHEST_COMMAND_BODY("richestCommandBody"), LEADERBOARD_PLACE("leaderboardPlace");
 
     private FormatDataKey(String key) {
 	this(key, false);

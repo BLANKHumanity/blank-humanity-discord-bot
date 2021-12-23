@@ -46,6 +46,11 @@ public class CommandConfig {
     @Min(1)
     @Value("1.1")
     private double streakMultiplier;
+    
+    @NotNull
+    @Min(1)
+    @Value("8")
+    private int userListPageSize;
 
     public int getMinimumReward(ClaimDataType claimType) {
 	return switch (claimType) {

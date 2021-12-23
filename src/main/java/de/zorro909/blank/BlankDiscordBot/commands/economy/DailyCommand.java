@@ -1,10 +1,11 @@
 package de.zorro909.blank.BlankDiscordBot.commands.economy;
 
 import org.springframework.stereotype.Component;
-
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.entities.ClaimDataType;
+import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -26,15 +27,22 @@ public class DailyCommand extends AbstractCommand {
 	BlankUser blankUser = blankUserService.getUser(event);
 
 	FormattingData formattingData = blankUserService
-		.claimReward(blankUser, ClaimDataType.DAILY_CLAIM,
-			dayMilliSeconds, 2 * dayMilliSeconds)
+		.claimReward(blankUser, ClaimDataType.DAILY_CLAIM)
 		.build();
 
-	if (formattingData.isSuccess()) {
-	    reply(event, messagesConfig.DAILY_COMMAND_MESSAGE, formattingData);
+	if (formattingData.success()) {
+	    if (formattingData
+		    .containsKey(FormatDataKey.CLAIM_STREAK.getKey())) {
+		reply(event, formattingData
+			.messageType(MessageType.DAILY_COMMAND_MESSAGE_STREAK));
+	    } else {
+		reply(event, formattingData
+			.messageType(MessageType.DAILY_COMMAND_MESSAGE));
+	    }
 	} else {
-	    reply(event, messagesConfig.DAILY_COMMAND_ALREADY_CLAIMED_MESSAGE,
-		    formattingData);
+	    reply(event, formattingData
+		    .messageType(
+			    MessageType.DAILY_COMMAND_ALREADY_CLAIMED_MESSAGE));
 	}
     }
 }

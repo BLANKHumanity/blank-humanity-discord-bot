@@ -1,42 +1,39 @@
 package de.zorro909.blank.BlankDiscordBot.utils;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
 import lombok.Singular;
+import lombok.experimental.Accessors;
 import lombok.experimental.Delegate;
 
 @Data
 @Builder
+@ValidateFormattingData(message = "Formatting Data is invalid!")
+@Accessors(fluent = true)
 public class FormattingData {
 
-    public static class FormattingDataBuilder {
+    @NotNull
+    private MessageType messageType;
 
-	Map<String, Object> dataPairings = new HashMap<String, Object>();
-
-	public FormattingDataBuilder dataPairing(FormatDataKey key,
-		Object value) {
-	    this.dataPairings.put(key.getKey(), value);
-	    return this;
-	}
-
-    }
-
-    @ValidateFormattingData
     @Delegate
-    private Map<String, Object> dataPairings;
+    @Singular
+    private Map<FormatDataKey, Object> dataPairings;
 
     @Default
     private boolean success = false;
 
-    public void put(FormatDataKey key, Object value) {
-	dataPairings.put(key.getKey(), value);
-    }
-
-    public Object get(FormatDataKey key) {
-	return dataPairings.get(key.getKey());
+    public Map<String, Object> getDataPairings() {
+	return dataPairings
+		.entrySet()
+		.stream()
+		.collect(Collectors
+			.toMap(entry -> entry.getKey().getKey(),
+				Map.Entry::getValue));
     }
 
 }

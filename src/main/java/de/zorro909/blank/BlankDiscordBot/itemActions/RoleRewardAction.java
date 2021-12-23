@@ -5,10 +5,14 @@ import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.entities.Item;
+import de.zorro909.blank.BlankDiscordBot.services.BlankUserService;
 import de.zorro909.blank.BlankDiscordBot.services.InventoryService;
 import de.zorro909.blank.BlankDiscordBot.services.item.ExecutableItemAction;
+import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -20,6 +24,9 @@ import net.dv8tion.jda.api.entities.Role;
 public class RoleRewardAction implements ExecutableItemAction {
 
     @Autowired
+    private BlankUserService blankUserService;
+
+    @Autowired
     private InventoryService inventoryService;
 
     @Autowired
@@ -27,7 +34,7 @@ public class RoleRewardAction implements ExecutableItemAction {
 
     @Override
     public ItemActionStatus executeAction(BlankUser user, Item item,
-	    Consumer<MessageEmbed[]> reply) {
+	    Consumer<FormattingData> reply) {
 	Guild guild = jda.getGuildById(user.getGuildId());
 	Member discordMember = guild
 		.retrieveMemberById(user.getDiscordId())
@@ -42,45 +49,44 @@ public class RoleRewardAction implements ExecutableItemAction {
 
 	if (roleId.isEmpty()) {
 	    reply
-		    .accept(error("Item '" + item.getItemId()
+		    .accept(error(user, "Item '" + item.getItemId()
 			    + "' has no associated roleId to reward!"));
 	    return ItemActionStatus.ITEM_CONFIGURATION_ERROR;
 	}
 	if (role.isEmpty()) {
 	    reply
-		    .accept(error("Role Id '" + roleId.get()
+		    .accept(error(user, "Role Id '" + roleId.get()
 			    + "' could not be found!"));
 	    return ItemActionStatus.ITEM_CONFIGURATION_ERROR;
 	}
 
 	if (discordMember.getRoles().contains(role.get())) {
-	    MessageEmbed embed = new EmbedBuilder()
-		    .setTitle("Role Already claimed")
-		    .setDescription(discordMember.getAsMention()
-			    + " already has the Role '" + role.get().getName()
-			    + "'")
-		    .build();
-	    reply.accept(new MessageEmbed[] { embed });
+	    reply
+		    .accept(blankUserService
+			    .createFormattingData(user,
+				    MessageType.ROLE_REWARD_ALREADY_CLAIMED)
+			    .dataPairing(FormatDataKey.ROLE,
+				    role.get().getName())
+			    .build());
 	    return ItemActionStatus.GENERIC_ERROR;
 	} else {
 	    guild.addRoleToMember(discordMember, role.get()).complete();
-	    MessageEmbed embed = new EmbedBuilder()
-		    .setTitle("Role claimed!")
-		    .setDescription(
-			    discordMember.getAsMention() + " claimed the Role '"
-				    + role.get().getName() + "'")
-		    .build();
-	    reply.accept(new MessageEmbed[] { embed });
+	    reply
+		    .accept(blankUserService
+			    .createFormattingData(user,
+				    MessageType.ROLE_REWARD_CLAIMED)
+			    .dataPairing(FormatDataKey.ROLE,
+				    role.get().getName())
+			    .build());
 	    return ItemActionStatus.SUCCESS;
 	}
     }
 
-    private MessageEmbed[] error(String description) {
-	MessageEmbed embed = new EmbedBuilder()
-		.setDescription(
-			description + "\nPlease contact an administrator")
+    private FormattingData error(BlankUser user, String errorDescription) {
+	return blankUserService
+		.createFormattingData(user, MessageType.ERROR_MESSAGE)
+		.dataPairing(FormatDataKey.ERROR_MESSAGE, errorDescription)
 		.build();
-	return new MessageEmbed[] { embed };
     }
 
 }

@@ -1,8 +1,8 @@
 package de.zorro909.blank.BlankDiscordBot.commands.economy;
 
 import org.springframework.stereotype.Component;
-
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import net.dv8tion.jda.api.entities.Member;
@@ -38,9 +38,10 @@ public class BalanceCommand extends AbstractCommand {
 		.getUser(member.getIdLong(), member.getGuild().getIdLong());
 	int balance = blankUser.getBalance();
 
-	reply(event, messagesConfig.BALANCE_COMMAND_MESSAGE,
+	reply(event,
 		blankUserService
-			.createFormattingData(blankUser)
+			.createFormattingData(blankUser,
+				MessageType.BALANCE_COMMAND_MESSAGE)
 			.dataPairing(FormatDataKey.BALANCE, balance)
 			.build());
     }

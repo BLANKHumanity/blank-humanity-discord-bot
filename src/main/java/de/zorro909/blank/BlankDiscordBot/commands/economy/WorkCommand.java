@@ -1,8 +1,8 @@
 package de.zorro909.blank.BlankDiscordBot.commands.economy;
 
 import org.springframework.stereotype.Component;
-
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.entities.ClaimDataType;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
@@ -11,8 +11,6 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
 @Component
 public class WorkCommand extends AbstractCommand {
-
-    private final Long hourMilliSeconds = 60L * 60L * 1000L;
 
     @Override
     protected CommandData createCommandData() {
@@ -26,15 +24,16 @@ public class WorkCommand extends AbstractCommand {
 	BlankUser blankUser = blankUserService.getUser(event);
 
 	FormattingData formattingData = blankUserService
-		.claimReward(blankUser, ClaimDataType.WORK_CLAIM,
-			hourMilliSeconds, Long.MAX_VALUE)
+		.claimReward(blankUser, ClaimDataType.WORK_CLAIM)
 		.build();
 
-	if (formattingData.isSuccess()) {
-	    reply(event, messagesConfig.WORK_COMMAND_MESSAGE, formattingData);
+	if (formattingData.success()) {
+	    reply(event, formattingData
+		    .messageType(MessageType.WORK_COMMAND_MESSAGE));
 	} else {
-	    reply(event, messagesConfig.WORK_COMMAND_ALREADY_CLAIMED_MESSAGE,
-		    formattingData);
+	    reply(event, formattingData
+		    .messageType(
+			    MessageType.WORK_COMMAND_ALREADY_CLAIMED_MESSAGE));
 	}
     }
 }

@@ -8,6 +8,7 @@ import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemConfiguration;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
 import de.zorro909.blank.BlankDiscordBot.config.items.ShopItem;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.services.ShopService;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
@@ -44,23 +45,28 @@ public class ShopCommand extends AbstractCommand {
 		.intValue();
 
 	if (page < 1 || page > shopService.amountShopPages()) {
-	    reply(event, messagesConfig.SHOP_COMMAND_WRONG_PAGE,
-		    blankUserService.createSimpleFormattingData(event));
+	    reply(event,
+		    blankUserService
+			    .createSimpleFormattingData(event,
+				    MessageType.SHOP_COMMAND_WRONG_PAGE));
 	    return;
 	}
 	BlankUser blankUser = blankUserService.getUser(event);
 
 	FormattingDataBuilder formatBuilder = blankUserService
-		.createFormattingData(blankUser);
+		.createFormattingData(blankUser, null);
 	formatBuilder.dataPairing(FormatDataKey.SHOP_PAGE, page);
 
 	EmbedBuilder embedBuilder = new EmbedBuilder();
 
 	embedBuilder
-		.setTitle(format(messagesConfig.SHOP_TITLE_MESSAGE,
-			formatBuilder.build()));
+		.setTitle(format(formatBuilder
+			.messageType(MessageType.SHOP_TITLE_MESSAGE)
+			.build()));
 
-	String shopDescription = messagesConfig.SHOP_HEADER + "\n";
+	String shopDescription = format(
+		formatBuilder.messageType(MessageType.SHOP_HEADER).build())
+		+ "\n";
 
 	shopDescription += shopService
 		.getShopPage(page)
@@ -69,7 +75,8 @@ public class ShopCommand extends AbstractCommand {
 		.map(item -> generateShopItemDescription(item, formatBuilder))
 		.collect(Collectors.joining("\n"));
 
-	shopDescription += "\n" + messagesConfig.SHOP_FOOTER;
+	shopDescription += "\n" + format(
+		formatBuilder.messageType(MessageType.SHOP_FOOTER).build());
 
 	embedBuilder.setDescription(shopDescription);
 
@@ -102,8 +109,9 @@ public class ShopCommand extends AbstractCommand {
 		.dataPairing(FormatDataKey.ITEM_DESCRIPTION,
 			definition.getDescription());
 
-	return format(messagesConfig.SHOP_ITEM_DESCRIPTION,
-		formatBuilder.build());
+	return format(formatBuilder
+		.messageType(MessageType.SHOP_ITEM_DESCRIPTION)
+		.build());
     }
 
 }

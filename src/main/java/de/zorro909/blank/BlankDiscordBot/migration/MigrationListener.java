@@ -34,9 +34,11 @@ public class MigrationListener extends ListenerAdapter {
 	if (mre.isFromGuild() && mre.getAuthor().isBot()) {
 	    mre.getMessage().getEmbeds().forEach(embed -> {
 		String description = embed.getDescription();
-		Matcher matcher = coinPattern.matcher(description);
-		if (matcher.matches()) {
-		    checkEmbed(mre.getTextChannel(), matcher);
+		if (description != null) {
+		    Matcher matcher = coinPattern.matcher(description);
+		    if (matcher.matches()) {
+			checkEmbed(mre.getTextChannel(), matcher);
+		    }
 		}
 	    });
 	}
@@ -57,7 +59,7 @@ public class MigrationListener extends ListenerAdapter {
 	int mee6Balance = Integer.valueOf(matcher.group(3));
 	if (!user.isMigrated()) {
 	    blankUserService
-		    .migrateUser(user.getGuildId(), user.getDiscordId(),
+		    .migrateUser(user.getDiscordId(), user.getGuildId(),
 			    mee6Balance);
 	    textChannel
 		    .sendMessage("<@" + user.getDiscordId()

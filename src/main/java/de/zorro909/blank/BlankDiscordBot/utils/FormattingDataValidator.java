@@ -1,29 +1,42 @@
 package de.zorro909.blank.BlankDiscordBot.utils;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
 
 public class FormattingDataValidator
-	implements ConstraintValidator<ValidateFormattingData, Map> {
+	implements ConstraintValidator<ValidateFormattingData, FormattingData> {
 
-    private List<String> keysToCheck;
+    private List<FormatDataKey> keysToCheck;
 
     @Override
     public void initialize(ValidateFormattingData formattingValidator) {
-	keysToCheck = new ArrayList<>();
-	for (FormatDataKey key : FormatDataKey.values()) {
-	    if (key.isRequired()) {
-		keysToCheck.add(key.getKey());
-	    }
-	}
+	keysToCheck = Arrays
+		.stream(FormatDataKey.values())
+		.filter(FormatDataKey::isRequired)
+		.toList();
     }
 
     @Override
-    public boolean isValid(Map map, ConstraintValidatorContext cxt) {
-	return keysToCheck.stream().allMatch(map::containsKey);
+    public boolean isValid(FormattingData formattingData,
+	    ConstraintValidatorContext cxt) {
+	FormatDataKey[] messageTypeSpecificKeys = formattingData
+		.messageType()
+		.getAvailableDataKeys();
+	return Stream
+		.concat(Arrays.stream(messageTypeSpecificKeys),
+			keysToCheck.stream())
+		.filter(key -> formattingData.get(key) == null)
+		.map(key -> "FormatData Key '" + key.getKey()
+			+ "' is unspecified, even though it is required!")
+		.map(cxt::buildConstraintViolationWithTemplate)
+		.map(ConstraintViolationBuilder::addConstraintViolation)
+		.count() == 0;
     }
 
 }

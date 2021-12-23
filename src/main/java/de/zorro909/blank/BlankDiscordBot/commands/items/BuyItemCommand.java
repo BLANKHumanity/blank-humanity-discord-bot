@@ -1,14 +1,13 @@
 package de.zorro909.blank.BlankDiscordBot.commands.items;
 
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemConfiguration;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
 import de.zorro909.blank.BlankDiscordBot.config.items.ShopItem;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.services.ShopService;
 import de.zorro909.blank.BlankDiscordBot.services.item.ItemBuyStatus;
@@ -45,25 +44,25 @@ public class BuyItemCommand extends AbstractCommand {
 
 	if (shopItem.isEmpty()) {
 	    FormattingData data = blankUserService
-		    .createFormattingData(user)
+		    .createFormattingData(user, MessageType.ITEM_NOT_EXISTS)
 		    .dataPairing(FormatDataKey.ITEM_NAME,
 			    event.getOption("item").getAsString())
 		    .build();
-	    reply(event, messagesConfig.ITEM_NOT_EXISTS, data);
+	    reply(event, data);
 	    return;
 	}
 
 	ShopItem item = shopItem.get();
 	ItemBuyStatus status = shopService.buyItem(user, item);
 
-	String description = switch (status) {
-	case NO_AVAILABLE_SUPPLY -> messagesConfig.BUY_ITEM_NO_SUPPLY;
-	case NOT_ENOUGH_MONEY -> messagesConfig.BUY_ITEM_NOT_ENOUGH_MONEY;
-	case SUCCESS -> messagesConfig.BUY_ITEM_SUCCESS;
+	MessageType messageType = switch (status) {
+	case NO_AVAILABLE_SUPPLY -> MessageType.BUY_ITEM_NO_SUPPLY;
+	case NOT_ENOUGH_MONEY -> MessageType.BUY_ITEM_NOT_ENOUGH_MONEY;
+	case SUCCESS -> MessageType.BUY_ITEM_SUCCESS;
 	};
 
 	FormattingData data = blankUserService
-		.createFormattingData(user)
+		.createFormattingData(user, messageType)
 		.dataPairing(FormatDataKey.SHOP_ITEM_BUY_NAME,
 			item.getBuyName())
 		.dataPairing(FormatDataKey.SHOP_ITEM_ID, item.getItemId())
@@ -78,7 +77,7 @@ public class BuyItemCommand extends AbstractCommand {
 				.orElse("NAME_ERROR"))
 		.build();
 
-	reply(event, description, data);
+	reply(event, data);
     }
 
 }

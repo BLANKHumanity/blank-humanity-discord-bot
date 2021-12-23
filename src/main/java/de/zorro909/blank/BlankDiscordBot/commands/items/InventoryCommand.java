@@ -2,16 +2,16 @@ package de.zorro909.blank.BlankDiscordBot.commands.items;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.entities.Item;
 import de.zorro909.blank.BlankDiscordBot.services.InventoryService;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData.FormattingDataBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -34,7 +34,7 @@ public class InventoryCommand extends AbstractCommand {
 	BlankUser user = blankUserService.getUser(event);
 
 	FormattingDataBuilder builder = blankUserService
-		.createFormattingData(user);
+		.createFormattingData(user, null);
 
 	String inventoryDisplay = user
 		.getItems()
@@ -42,7 +42,12 @@ public class InventoryCommand extends AbstractCommand {
 		.map(item -> generateItemDescription(item, builder))
 		.collect(Collectors.joining("\n"));
 
-	reply(event, "Inventory\n" + inventoryDisplay, builder.build());
+	FormattingData inventoryViewer = blankUserService
+		.createFormattingData(user, MessageType.INVENTORY_DISPLAY)
+		.dataPairing(FormatDataKey.INVENTORY_BODY, inventoryDisplay)
+		.build();
+
+	reply(event, inventoryViewer);
     }
 
     private String generateItemDescription(Item item,
@@ -60,16 +65,19 @@ public class InventoryCommand extends AbstractCommand {
 		.dataPairing(FormatDataKey.ITEM_ID, definition.getId())
 		.dataPairing(FormatDataKey.ITEM_AMOUNT, item.getAmount())
 		.dataPairing(FormatDataKey.ITEM_NAME, definition.getName())
-		.dataPairing(FormatDataKey.ITEM_USE_NAME,
-			definition.getUseName())
 		.dataPairing(FormatDataKey.ITEM_DESCRIPTION,
 			definition.getDescription());
-	if(definition.getUseName() == null) {
-	    return format(messagesConfig.INVENTORY_ITEM_DESCRIPTION,
-			formatBuilder.build());
-	}else {
-	    return format(messagesConfig.INVENTORY_ITEM_DESCRIPTION_WITH_USE,
-			formatBuilder.build());
+	if (definition.getUseName() == null) {
+	    return format(formatBuilder
+		    .messageType(MessageType.INVENTORY_ITEM_DESCRIPTION)
+		    .build());
+	} else {
+	    return format(formatBuilder
+		    .dataPairing(FormatDataKey.ITEM_USE_NAME,
+			    definition.getUseName())
+		    .messageType(
+			    MessageType.INVENTORY_ITEM_DESCRIPTION_WITH_USE)
+		    .build());
 	}
     }
 }

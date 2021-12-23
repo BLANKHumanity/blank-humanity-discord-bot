@@ -1,12 +1,18 @@
 package de.zorro909.blank.BlankDiscordBot.services;
 
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import de.zorro909.blank.BlankDiscordBot.config.CommandConfig;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.database.BlankUserDao;
 import de.zorro909.blank.BlankDiscordBot.database.UserClaimDataDao;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
@@ -102,30 +108,32 @@ public class BlankUserService {
 	return data;
     }
 
-    public FormattingData createSimpleFormattingData(SlashCommandEvent event) {
+    public FormattingData createSimpleFormattingData(SlashCommandEvent event,
+	    MessageType messageType) {
 	return createFormattingData(getUser(event.getUser().getIdLong(),
-		event.getGuild().getIdLong())).build();
+		event.getGuild().getIdLong()), messageType).build();
     }
 
     public FormattingData.FormattingDataBuilder createFormattingData(
-	    BlankUser user) {
+	    BlankUser user, MessageType messageType) {
 	User discordUser = jda.retrieveUserById(user.getDiscordId()).complete();
 	return FormattingData
 		.builder()
+		.messageType(messageType)
 		.dataPairing(FormatDataKey.USER, discordUser.getName())
 		.dataPairing(FormatDataKey.USER_MENTION,
-			discordUser.getAsMention());
+			discordUser.getAsMention())
+		.dataPairing(FormatDataKey.BALANCE, user.getBalance());
     }
 
     @Transactional
     public FormattingData.FormattingDataBuilder claimReward(BlankUser blankUser,
-	    ClaimDataType claimType, Long millisBetweenClaims,
-	    Long millisStreakDelay) {
+	    ClaimDataType claimType) {
 	UserClaimData claimData = fetchClaimData(blankUser, claimType);
 
 	long milliSecondsSinceLastClaim = claimData
 		.getMilliSecondsSinceLastClaim();
-	if (milliSecondsSinceLastClaim >= millisBetweenClaims) {
+	if (milliSecondsSinceLastClaim >= claimType.getMillisBetweenClaims()) {
 	    int reward = new Random()
 		    .nextInt(commandConfig.getMinimumReward(claimType),
 			    commandConfig.getMaximumReward(claimType) + 1);
@@ -133,20 +141,23 @@ public class BlankUserService {
 	    increaseUserBalance(blankUser, reward);
 
 	    FormattingData.FormattingDataBuilder builder = createFormattingData(
-		    blankUser);
+		    blankUser, null);
 
-	    if (milliSecondsSinceLastClaim < millisStreakDelay) {
-		if (claimData.getClaimStreak() > 0) {
-		    reward *= Math
-			    .pow(commandConfig.getStreakMultiplier(),
-				    claimData.getClaimStreak());
-		    builder
-			    .dataPairing(FormatDataKey.CLAIM_STREAK,
-				    claimData.getClaimStreak());
+	    if (claimType.isStreaksEnabled()) {
+		if (milliSecondsSinceLastClaim < claimType
+			.getMillisStreakDelay()) {
+		    if (claimData.getClaimStreak() > 0) {
+			reward *= Math
+				.pow(commandConfig.getStreakMultiplier(),
+					claimData.getClaimStreak());
+			builder
+				.dataPairing(FormatDataKey.CLAIM_STREAK,
+					claimData.getClaimStreak());
+		    }
+		    claimData.setClaimStreak(claimData.getClaimStreak() + 1);
+		} else {
+		    claimData.setClaimStreak(0);
 		}
-		claimData.setClaimStreak(claimData.getClaimStreak() + 1);
-	    } else {
-		claimData.setClaimStreak(0);
 	    }
 	    claimData.setLastClaimTime(LocalDateTime.now());
 
@@ -154,14 +165,15 @@ public class BlankUserService {
 		    .dataPairing(FormatDataKey.CLAIM_REWARD, reward)
 		    .success(true);
 	} else {
-	    long needWait = millisBetweenClaims - milliSecondsSinceLastClaim;
+	    long needWait = claimType.getMillisBetweenClaims()
+		    - milliSecondsSinceLastClaim;
 	    long remainingHours = TimeUnit.MILLISECONDS.toHours(needWait);
 	    long remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(needWait)
 		    % 60;
 	    long remainingSeconds = TimeUnit.MILLISECONDS.toSeconds(needWait)
 		    % 60;
 
-	    return createFormattingData(blankUser)
+	    return createFormattingData(blankUser, null)
 		    .dataPairing(FormatDataKey.CLAIM_HOURS, remainingHours)
 		    .dataPairing(FormatDataKey.CLAIM_MINUTES, remainingMinutes)
 		    .dataPairing(FormatDataKey.CLAIM_SECONDS, remainingSeconds)
@@ -178,8 +190,19 @@ public class BlankUserService {
 	return getUser(user.getIdLong(), guildId);
     }
 
+    @Transactional
     public void deleteUser(BlankUser user) {
 	blankUserDao.delete(user);
+    }
+
+    public Page<BlankUser> listUsers(Sort sortedBy, int page) {
+	return blankUserDao
+		.findAll(PageRequest
+			.of(page, commandConfig.getUserListPageSize(), sortedBy));
+    }
+
+    public int getUserListPageSize() {
+	return commandConfig.getUserListPageSize();
     }
 
 }

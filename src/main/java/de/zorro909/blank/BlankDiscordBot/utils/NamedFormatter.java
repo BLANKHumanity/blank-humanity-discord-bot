@@ -2,6 +2,7 @@ package de.zorro909.blank.BlankDiscordBot.utils;
 
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.validation.Valid;
 import lombok.experimental.ExtensionMethod;
 
 public class NamedFormatter {
@@ -30,29 +31,24 @@ public class NamedFormatter {
      * → <code>"Hello, %(name)!"</code></li>
      * </ul>
      *
-     * @param fmt    The format string. Any character in the format string that
-     *               follows a backslash is treated literally. Any
-     *               <code>%(key)</code> is replaced by its corresponding value
-     *               in the <code>values</code> map. If the key does not exist
-     *               in the <code>values</code> map, then it is left
-     *               unsubstituted.
+     * @param fmt The format string. Any character in the format string that
+     *            follows a backslash is treated literally. Any
+     *            <code>%(key)</code> is replaced by its corresponding value in
+     *            the <code>values</code> map. If the key does not exist in the
+     *            <code>values</code> map, then it is left unsubstituted.
      *
-     * @param values Key-value pairs to be used in the substitutions.
+     * @param map Key-value pairs to be used in the substitutions.
      *
      * @return The formatted string.
      */
-    public static String namedFormat(String fmt, Map<String, Object> values) {
+    public static String namedFormat(String fmt,
+	    Map<String, Object> map) {
 	return RE
 		.matcher(fmt)
 		.replaceAll(match -> match.group(1) != null ? match.group(1)
-			: debug(values, match.group(3), match.group(2)));
+			: map
+				.getOrDefault(match.group(3), match.group(2))
+				.toString());
     }
 
-    private static String debug(Map<String, Object> values, String key,
-	    String defaultValue) {
-	System.out
-		.println("Trying to replace '" + key + "' with '"
-			+ values.getOrDefault(key, "___") + "'");
-	return values.getOrDefault(key, defaultValue).toString();
-    }
 }

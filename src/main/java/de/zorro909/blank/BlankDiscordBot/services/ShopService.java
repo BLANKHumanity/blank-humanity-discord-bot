@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemShopConfig;
 import de.zorro909.blank.BlankDiscordBot.config.items.ShopItem;
+import de.zorro909.blank.BlankDiscordBot.database.BuyLogDao;
 import de.zorro909.blank.BlankDiscordBot.database.ItemDao;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
+import de.zorro909.blank.BlankDiscordBot.entities.BuyLogEntry;
 import de.zorro909.blank.BlankDiscordBot.services.item.ItemBuyStatus;
 
 @Service
@@ -26,6 +28,9 @@ public class ShopService {
 
     @Autowired
     private ItemShopConfig itemShopConfig;
+
+    @Autowired
+    private BuyLogDao buyLogDao;
 
     @Autowired
     private ItemDao itemDao;
@@ -62,12 +67,18 @@ public class ShopService {
 
 	blankUserService.decreaseUserBalance(user, item.getPrice());
 	inventoryService.giveItem(user, item.getItemId());
+	buyLogDao
+		.save(BuyLogEntry
+			.builder()
+			.buyer(user)
+			.shopId(item.getId())
+			.build());
 	return ItemBuyStatus.SUCCESS;
     }
 
     public int getAvailableItemAmount(ShopItem item) {
 	return item.getAmountAvailable()
-		- itemDao.sumOfAllExistingItems(item.getItemId());
+		- buyLogDao.sumOfBoughtItems(item.getId());
     }
 
 }

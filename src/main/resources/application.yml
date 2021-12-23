@@ -1,31 +1,66 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/blankbot
+    username: root
+    password: mypass
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
 discord:
- authToken: DISCORD_AUTH_TOKEN
+  authToken: DISCORD_AUTH_TOKEN
+messages:
+  BALANCE_COMMAND_MESSAGE: "%(user) has %(balance)"
+  DAILY_COMMAND_MESSAGE: "%(userMention) got %(claimReward) as a daily Reward!"
+  DAILY_COMMAND_MESSAGE_STREAK: "Congrats for %(claimStreak) Days! %(userMention) got %(claimReward) as a daily Reward!"
+  DAILY_COMMAND_ALREADY_CLAIMED_MESSAGE: "%(userMention) you can't claim more than once per day. You need to wait %(claimHours):%(claimMinutes):%(claimSeconds) to claim again."
+  WORK_COMMAND_MESSAGE: "%(userMention) worked and got %(claimReward) as Reward!"
+  WORK_COMMAND_ALREADY_CLAIMED_MESSAGE: "%(userMention) you can't work more than once per hour. You need to wait %(claimMinutes) minutes %(claimSeconds) seconds to work again."
+  SHOP_COMMAND_WRONG_PAGE: "%(userMention) you tried to access a non existing Shop Page!"
+  SHOP_TITLE_MESSAGE: "Shop Page %(shopPage)"
+  SHOP_HEADER: "Use /buy <item name> to buy an Item"
+  SHOP_FOOTER: ""
+  SHOP_ITEM_DESCRIPTION: "%(shopItemId) - %(itemName) - %(shopItemPrice) - Available: %(shopItemAvailableAmount)\n----%(itemDescription) : /buy %(shopItemBuyName)"
+  ITEM_USE_ACTION_UNDEFINED: "%(userMention), this Item has no usage Action defined. This is likely a configuration error. Please contact an administrator!"
+  ITEM_NOT_EXISTS: "%(userMention), the Item '%(itemName)' does not exist"
+  ITEM_USE_NOT_OWNED: "%(userMention), you don't have this item"
+  BUY_ITEM_NO_SUPPLY: "%(userMention), this Item has no Supply left"
+  BUY_ITEM_NOT_ENOUGH_MONEY: "%(userMention), you need to have %(shopItemPrice), but you only have %(balance)"
+  BUY_ITEM_SUCCESS: "%(userMention), you bought the Item '%(itemName)'"
+  INVENTORY_ITEM_DESCRIPTION: "%(itemAmount)x %(itemName)"
+  INVENTORY_ITEM_DESCRIPTION_WITH_USE: "%(itemAmount)x %(itemName) - /use %(itemUseName)"
+  INVENTORY_DISPLAY: "Inventory\n%(inventoryBody)"
+  ERROR_MESSAGE: "%(errorMessage)\nPlease contact an Administrator!"
+  ROLE_REWARD_ALREADY_CLAIMED: "%(userMention), you already have the Role '%(role)'"
+  ROLE_REWARD_CLAIMED: "%(userMention), you successfully claimed the Role '%(role)'"
+  RICHEST_COMMAND: "BLANK_HUMANITY Richest Players\n%(richestCommandBody)"
+  RICHEST_COMMAND_ENTRY: "%(leaderboardPlace) %(user)\n%(balance)"
 items:
- definitions:
-  -
-   id: 1
-   name: "First Class Ticket"
-   description: "Useful for you"
-   useName: "firstClassTicket"
-   action: "ROLE_REWARD"
-   actionArguments:
-    roleId: 923197747153223700
-  -
-   id: 2
-   name: "Second Class Ticket"
-   description: "Why is this more expensive?"
+  definitions:
+    -
+      id: 1
+      name: "First Class Ticket"
+      description: "Useful for you"
+      useName: "firstClassTicket"
+      action: "ROLE_REWARD"
+      actionArguments:
+        roleId: 923197747153223700
+    -
+      id: 2
+      name: "Second Class Ticket"
+      description: "Why is this more expensive?"
 shop:
- itemsPerPage: 8
- shopItems:
-  -
-   id: 1
-   itemId: 1
-   buyName: "test"
-   price: 32
-   amountAvailable: 10
-  -
-   id: 2
-   itemId: 2
-   buyName: "test2"
-   price: 64
-   amountAvailable: 20
+  itemsPerPage: 8
+  shopItems:
+    -
+     id: 1
+     itemId: 1
+     buyName: "test"
+     price: 32
+     amountAvailable: 10
+    -
+     id: 2
+     itemId: 2
+     buyName: "test2"
+     price: 64
+     amountAvailable: 20

@@ -6,9 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import de.zorro909.blank.BlankDiscordBot.config.MessagesConfig;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemConfiguration;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessagesConfig;
 import de.zorro909.blank.BlankDiscordBot.database.ItemDao;
 import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.entities.Item;
@@ -90,7 +91,7 @@ public class InventoryService {
 
     @Transactional
     public ItemActionStatus useItem(BlankUser user, String useName,
-	    Consumer<MessageEmbed[]> reply) {
+	    Consumer<FormattingData> reply) {
 	Optional<Item> item = itemConfiguration
 		.getDefinitions()
 		.stream()
@@ -110,46 +111,31 @@ public class InventoryService {
 
 	if (item.isEmpty()) {
 	    FormattingData data = blankUserService
-		    .createFormattingData(user)
+		    .createFormattingData(user, MessageType.ITEM_NOT_EXISTS)
 		    .dataPairing(FormatDataKey.ITEM_NAME, useName)
 		    .build();
-	    MessageEmbed embed = new EmbedBuilder()
-		    .setDescription(NamedFormatter
-			    .namedFormat(messagesConfig.ITEM_NOT_EXISTS,
-				    data.getDataPairings()))
-		    .build();
-	    reply.accept(new MessageEmbed[] { embed });
+	    reply.accept(data);
 	    return ItemActionStatus.ITEM_CONFIGURATION_ERROR;
 	}
 
 	if (action.isEmpty()) {
 	    FormattingData data = blankUserService
-		    .createFormattingData(user)
+		    .createFormattingData(user,
+			    MessageType.ITEM_USE_ACTION_UNDEFINED)
 		    .dataPairing(FormatDataKey.ITEM_ID, item.get().getItemId())
 		    .dataPairing(FormatDataKey.ITEM_NAME, useName)
 		    .build();
-	    MessageEmbed embed = new EmbedBuilder()
-		    .setDescription(NamedFormatter
-			    .namedFormat(
-				    messagesConfig.ITEM_USE_ACTION_UNDEFINED,
-				    data.getDataPairings()))
-		    .build();
-	    reply.accept(new MessageEmbed[] { embed });
+	    reply.accept(data);
 	    return ItemActionStatus.ITEM_CONFIGURATION_ERROR;
 	}
 
 	if (!removeItem(user, item.get().getItemId())) {
 	    FormattingData data = blankUserService
-		    .createFormattingData(user)
+		    .createFormattingData(user, MessageType.ITEM_USE_NOT_OWNED)
 		    .dataPairing(FormatDataKey.ITEM_ID, item.get().getItemId())
 		    .dataPairing(FormatDataKey.ITEM_NAME, useName)
 		    .build();
-	    MessageEmbed embed = new EmbedBuilder()
-		    .setDescription(NamedFormatter
-			    .namedFormat(messagesConfig.ITEM_USE_NOT_OWNED,
-				    data.getDataPairings()))
-		    .build();
-	    reply.accept(new MessageEmbed[] { embed });
+	    reply.accept(data);
 	    return ItemActionStatus.ITEM_NOT_OWNED;
 	}
 
