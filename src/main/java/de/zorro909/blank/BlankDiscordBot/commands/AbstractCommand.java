@@ -1,6 +1,6 @@
 package de.zorro909.blank.BlankDiscordBot.commands;
 
-import java.sql.Connection;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -8,24 +8,30 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 import de.zorro909.blank.BlankDiscordBot.config.DiscordBotConfig;
+import de.zorro909.blank.BlankDiscordBot.config.commands.CommandConfig;
+import de.zorro909.blank.BlankDiscordBot.config.commands.CommandDefinition;
+import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessagesConfig;
 import de.zorro909.blank.BlankDiscordBot.services.BlankUserService;
+import de.zorro909.blank.BlankDiscordBot.services.TransactionExecutor;
+import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import de.zorro909.blank.BlankDiscordBot.utils.NamedFormatter;
+import de.zorro909.blank.BlankDiscordBot.utils.menu.ReactionMenu;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
 @Component
 @Getter
@@ -45,34 +51,71 @@ public abstract class AbstractCommand extends ListenerAdapter {
     protected MessagesConfig messagesConfig;
 
     @Autowired
-    private PlatformTransactionManager transactionManager;
-
-    @Autowired
-    private TaskExecutor taskExecutor;
+    private CommandConfig commandConfig;
 
     @Autowired
     private DiscordBotConfig discordBotConfig;
 
+    @Autowired
+    private TransactionExecutor transactionExecutor;
+
+    @Autowired
+    private TaskScheduler taskScheduler;
+
     private CommandData commandData;
+
+    private String commandName;
+
+    private CommandDefinition commandDefinition;
+
+    private static HashMap<SlashCommandEvent, MessageEmbed[]> cachedEmbeds = new HashMap<>();
+
+    private static HashMap<SlashCommandEvent, ReactionMenu> cachedMenus = new HashMap<>();
+
+    public AbstractCommand(String command) {
+	this.commandName = command;
+    }
 
     @PostConstruct
     void setupCommand() {
-	commandData = createCommandData();
 	try {
 	    jda.awaitReady();
 	} catch (InterruptedException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
-	jda
-		.getGuildById(556216333201702942L)
-		.upsertCommand(commandData)
-		.queue();
+
+	updateCommandDefinition();
 
 	jda.addEventListener(this);
     }
 
-    protected abstract CommandData createCommandData();
+    public void updateCommandDefinition() {
+	this.commandDefinition = commandConfig
+		.getCommandDefinition(commandName);
+	commandData = createCommandData(new CommandData(commandName,
+		getCommandDefinition().getDescription()));
+
+	Guild guild = jda.getGuildById(commandConfig.getGuildId());
+
+	if (commandDefinition.isRoleRestricted()) {
+	    commandData.setDefaultEnabled(false);
+	    guild.upsertCommand(commandData).queue(command -> {
+		guild
+			.updateCommandPrivilegesById(command.getIdLong(),
+				commandDefinition
+					.getAllowedRoles()
+					.stream()
+					.map(CommandPrivilege::enableRole)
+					.toList())
+			.queue();
+	    });
+	} else {
+	    guild.upsertCommand(commandData).queue();
+	}
+    }
+
+    protected abstract CommandData createCommandData(CommandData commandData);
 
     protected boolean isEphemeral() {
 	return false;
@@ -81,19 +124,50 @@ public abstract class AbstractCommand extends ListenerAdapter {
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
 	if (commandData.getName().equals(event.getName())) {
-	    event.deferReply(isEphemeral()).queue();
+	    event
+		    .deferReply(isEphemeral() || commandDefinition.isHidden()
+			    || isChannelHidden(event.getChannel().getIdLong()))
+		    .queue();
 
-	    TransactionTemplate txTemplate = new TransactionTemplate(
-		    transactionManager);
-	    txTemplate
-		    .setPropagationBehavior(
-			    TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-	    txTemplate
-		    .setIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ);
-	    taskExecutor.execute(() -> {
-		txTemplate.executeWithoutResult((status) -> onCommand(event));
+	    transactionExecutor.executeAsTransaction((status) -> {
+		onCommand(event);
+		return null;
+	    }, (e) -> {
+		e.printStackTrace();
+		reply(event,
+			FormattingData
+				.builder()
+				.messageType(MessageType.ERROR_MESSAGE)
+				.dataPairing(FormatDataKey.ERROR_MESSAGE,
+					"This Command threw this error '"
+						+ e.getMessage() + "'")
+				.build());
+	    }, (unused) -> {
+		if (!cachedEmbeds.containsKey(event)) {
+		    reply(event, FormattingData
+			    .builder()
+			    .messageType(MessageType.ERROR_MESSAGE)
+			    .dataPairing(FormatDataKey.ERROR_MESSAGE,
+				    "This Command somehow didn't respond!")
+			    .build());
+		}
+
+		Message message = event
+			.getHook()
+			.editOriginalEmbeds(cachedEmbeds.remove(event))
+			.complete();
+		if (cachedMenus.containsKey(event)) {
+		    cachedMenus
+			    .remove(event)
+			    .buildMenu(getJda(), message, getTaskScheduler(),
+				    getTransactionExecutor());
+		}
 	    });
 	}
+    }
+
+    private boolean isChannelHidden(long channelId) {
+	return commandConfig.getHiddenCommandChannels().contains(channelId);
     }
 
     protected void reply(SlashCommandEvent event,
@@ -101,11 +175,11 @@ public abstract class AbstractCommand extends ListenerAdapter {
 	EmbedBuilder builder = new EmbedBuilder();
 	builder.setDescription(format(formattingData));
 
-	event.getHook().editOriginalEmbeds(builder.build()).queue();
+	cachedEmbeds.put(event, new MessageEmbed[] { builder.build() });
     }
 
     protected void reply(SlashCommandEvent event, MessageEmbed... embeds) {
-	event.getHook().editOriginalEmbeds(embeds).queue();
+	cachedEmbeds.put(event, embeds);
     }
 
     protected String format(FormattingData formattingData) {
@@ -132,6 +206,11 @@ public abstract class AbstractCommand extends ListenerAdapter {
 	}
 	return NamedFormatter
 		.namedFormat(messageFormat, formattingData.getDataPairings());
+    }
+
+    protected void addReactionMenu(SlashCommandEvent event,
+	    ReactionMenu reactionMenu) {
+	cachedMenus.put(event, reactionMenu);
     }
 
     protected abstract void onCommand(SlashCommandEvent event);

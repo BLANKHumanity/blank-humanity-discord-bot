@@ -1,0 +1,26 @@
+version: "3.7"
+services:
+  frontend:
+    build: .
+    image: zorro909/blankdiscordbot
+    volumes:
+     - type: bind
+       source: ./application.yml
+       target: /blankbot/application.yml
+       read_only: true
+    networks:
+     - blank-bot-bridge
+  mysql:
+    image: "mariadb"
+    environment:
+      MYSQL_DATABASE: "blankbot"
+      MYSQL_ROOT_PASSWORD: "mypass"
+    networks:
+      - blank-bot-bridge
+    volumes:
+      - blankBotMysqlData:/var/lib/mysql
+networks:
+  blank-bot-bridge:
+    driver: bridge
+volumes:
+  blankBotMysqlData:

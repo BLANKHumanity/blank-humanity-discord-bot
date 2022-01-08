@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>de.zorro909.blank</groupId>
 	<artifactId>BlankDiscordBot</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>BlankDiscordBot</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
@@ -20,7 +20,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>

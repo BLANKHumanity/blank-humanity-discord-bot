@@ -1,10 +1,11 @@
 package de.zorro909.blank.BlankDiscordBot.commands.economy;
 
 import org.springframework.stereotype.Component;
+
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.entities.ClaimDataType;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
+import de.zorro909.blank.BlankDiscordBot.entities.user.ClaimDataType;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -12,10 +13,12 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 @Component
 public class WorkCommand extends AbstractCommand {
 
+    public WorkCommand() {
+	super("work");
+    }
+
     @Override
-    protected CommandData createCommandData() {
-	CommandData workCommand = new CommandData("work",
-		"Lets you do work hourly!");
+    protected CommandData createCommandData(CommandData workCommand) {
 	return workCommand;
     }
 

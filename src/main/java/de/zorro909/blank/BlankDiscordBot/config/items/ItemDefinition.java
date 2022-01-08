@@ -28,7 +28,7 @@ public class ItemDefinition {
     @NotNull(message = "Description null")
     private String description;
 
-    @Nullable
+    @NotNull
     private String useName;
 
     @Nullable

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractHiddenCommand;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -18,13 +18,17 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
 @Component
-public class RichestCommand extends AbstractHiddenCommand {
+public class RichestCommand extends AbstractCommand {
+
+    public RichestCommand() {
+	super("richest");
+    }
 
     @Override
-    protected CommandData createCommandData() {
-	CommandData commandData = new CommandData("richest",
-		"Shows Richest Leaderboard");
-	commandData.addOption(OptionType.INTEGER, "page", "Leaderboard Page");
+    protected CommandData createCommandData(CommandData commandData) {
+	commandData
+		.addOption(OptionType.INTEGER, "page",
+			getCommandDefinition().getOptionDescription("page"));
 	return commandData;
     }
 

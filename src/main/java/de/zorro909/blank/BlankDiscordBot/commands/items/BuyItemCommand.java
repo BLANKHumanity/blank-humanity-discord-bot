@@ -8,7 +8,7 @@ import de.zorro909.blank.BlankDiscordBot.config.items.ItemConfiguration;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
 import de.zorro909.blank.BlankDiscordBot.config.items.ShopItem;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.services.ShopService;
 import de.zorro909.blank.BlankDiscordBot.services.item.ItemBuyStatus;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
@@ -16,9 +16,14 @@ import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 @Component
 public class BuyItemCommand extends AbstractCommand {
+
+    public BuyItemCommand() {
+	super("buy");
+    }
 
     @Autowired
     private ShopService shopService;
@@ -27,11 +32,15 @@ public class BuyItemCommand extends AbstractCommand {
     private ItemConfiguration itemConfiguration;
 
     @Override
-    protected CommandData createCommandData() {
-	CommandData commandData = new CommandData("buy", "Buys an Item");
+    protected CommandData createCommandData(CommandData commandData) {
 	commandData
 		.addOption(OptionType.STRING, "item",
-			"The name of the Shop Item to buy", true);
+			getCommandDefinition().getOptionDescription("item"),
+			true);
+	OptionData amount = new OptionData(OptionType.INTEGER, "amount",
+		getCommandDefinition().getOptionDescription("amount"));
+	amount.setMinValue(1);
+	commandData.addOptions(amount);
 	return commandData;
     }
 
@@ -41,6 +50,11 @@ public class BuyItemCommand extends AbstractCommand {
 
 	Optional<ShopItem> shopItem = shopService
 		.getShopItem(event.getOption("item").getAsString());
+
+	int amount = Optional
+		.ofNullable(event.getOption("amount").getAsLong())
+		.orElse(1L)
+		.intValue();
 
 	if (shopItem.isEmpty()) {
 	    FormattingData data = blankUserService
@@ -53,7 +67,7 @@ public class BuyItemCommand extends AbstractCommand {
 	}
 
 	ShopItem item = shopItem.get();
-	ItemBuyStatus status = shopService.buyItem(user, item);
+	ItemBuyStatus status = shopService.buyItem(user, item, amount);
 
 	MessageType messageType = switch (status) {
 	case NO_AVAILABLE_SUPPLY -> MessageType.BUY_ITEM_NO_SUPPLY;

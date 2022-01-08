@@ -13,8 +13,8 @@ import de.zorro909.blank.BlankDiscordBot.config.items.ItemShopConfig;
 import de.zorro909.blank.BlankDiscordBot.config.items.ShopItem;
 import de.zorro909.blank.BlankDiscordBot.database.BuyLogDao;
 import de.zorro909.blank.BlankDiscordBot.database.ItemDao;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.entities.BuyLogEntry;
+import de.zorro909.blank.BlankDiscordBot.entities.item.BuyLogEntry;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.services.item.ItemBuyStatus;
 
 @Service
@@ -57,28 +57,34 @@ public class ShopService {
 
     @Transactional
     public ItemBuyStatus buyItem(BlankUser user, ShopItem item) {
-	if (user.getBalance() < item.getPrice()) {
-	    return ItemBuyStatus.NOT_ENOUGH_MONEY;
-	}
-
-	if (getAvailableItemAmount(item) <= 0) {
-	    return ItemBuyStatus.NO_AVAILABLE_SUPPLY;
-	}
-
-	blankUserService.decreaseUserBalance(user, item.getPrice());
-	inventoryService.giveItem(user, item.getItemId());
-	buyLogDao
-		.save(BuyLogEntry
-			.builder()
-			.buyer(user)
-			.shopId(item.getId())
-			.build());
-	return ItemBuyStatus.SUCCESS;
+	return buyItem(user, item, 1);
     }
 
     public int getAvailableItemAmount(ShopItem item) {
 	return item.getAmountAvailable()
 		- buyLogDao.sumOfBoughtItems(item.getId());
+    }
+
+    @Transactional
+    public ItemBuyStatus buyItem(BlankUser user, ShopItem item, int amount) {
+	if (user.getBalance() < item.getPrice() * amount) {
+	    return ItemBuyStatus.NOT_ENOUGH_MONEY;
+	}
+
+	if (getAvailableItemAmount(item) < amount) {
+	    return ItemBuyStatus.NO_AVAILABLE_SUPPLY;
+	}
+
+	blankUserService.decreaseUserBalance(user, item.getPrice() * amount);
+	inventoryService.giveItem(user, item.getItemId(), amount);
+	buyLogDao
+		.save(BuyLogEntry
+			.builder()
+			.buyer(user)
+			.shopId(item.getId())
+			.amount(amount)
+			.build());
+	return ItemBuyStatus.SUCCESS;
     }
 
 }

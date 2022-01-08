@@ -3,8 +3,8 @@ package de.zorro909.blank.BlankDiscordBot.commands.economy;
 import org.springframework.stereotype.Component;
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.entities.ClaimDataType;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
+import de.zorro909.blank.BlankDiscordBot.entities.user.ClaimDataType;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -13,12 +13,12 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 @Component
 public class DailyCommand extends AbstractCommand {
 
-    private final Long dayMilliSeconds = 24L * 60L * 60L * 1000L;
+    public DailyCommand() {
+	super("daily");
+    }
 
     @Override
-    protected CommandData createCommandData() {
-	CommandData dailyCommand = new CommandData("daily",
-		"Gives daily Income");
+    protected CommandData createCommandData(CommandData dailyCommand) {
 	return dailyCommand;
     }
 
@@ -31,8 +31,7 @@ public class DailyCommand extends AbstractCommand {
 		.build();
 
 	if (formattingData.success()) {
-	    if (formattingData
-		    .containsKey(FormatDataKey.CLAIM_STREAK.getKey())) {
+	    if (formattingData.containsKey(FormatDataKey.CLAIM_STREAK)) {
 		reply(event, formattingData
 			.messageType(MessageType.DAILY_COMMAND_MESSAGE_STREAK));
 	    } else {

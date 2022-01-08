@@ -11,8 +11,8 @@ import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessagesConfig;
 import de.zorro909.blank.BlankDiscordBot.database.ItemDao;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.entities.Item;
+import de.zorro909.blank.BlankDiscordBot.entities.item.Item;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.itemActions.ItemActionStatus;
 import de.zorro909.blank.BlankDiscordBot.services.item.ExecutableItemAction;
 import de.zorro909.blank.BlankDiscordBot.services.item.ItemAction;
@@ -30,9 +30,6 @@ public class InventoryService {
 
     @Autowired
     private ItemConfiguration itemConfiguration;
-
-    @Autowired
-    private MessagesConfig messagesConfig;
 
     @Autowired
     private BlankUserService blankUserService;
@@ -90,7 +87,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public ItemActionStatus useItem(BlankUser user, String useName,
+    public ItemActionStatus useItem(BlankUser user, String useName, int amount,
 	    Consumer<FormattingData> reply) {
 	Optional<Item> item = itemConfiguration
 		.getDefinitions()
@@ -129,11 +126,12 @@ public class InventoryService {
 	    return ItemActionStatus.ITEM_CONFIGURATION_ERROR;
 	}
 
-	if (!removeItem(user, item.get().getItemId())) {
+	if (!removeItem(user, item.get().getItemId(), amount)) {
 	    FormattingData data = blankUserService
 		    .createFormattingData(user, MessageType.ITEM_USE_NOT_OWNED)
 		    .dataPairing(FormatDataKey.ITEM_ID, item.get().getItemId())
 		    .dataPairing(FormatDataKey.ITEM_NAME, useName)
+		    .dataPairing(FormatDataKey.ITEM_AMOUNT, amount)
 		    .build();
 	    reply.accept(data);
 	    return ItemActionStatus.ITEM_NOT_OWNED;
@@ -141,7 +139,7 @@ public class InventoryService {
 
 	ItemActionStatus status = action
 		.get()
-		.executeAction(user, item.get(), reply);
+		.executeAction(user, item.get(), amount, reply);
 
 	if (status != ItemActionStatus.SUCCESS) {
 	    // On Error give Item back
@@ -152,6 +150,14 @@ public class InventoryService {
 
     public Optional<ItemDefinition> getItemDefinition(int itemId) {
 	return itemConfiguration.getItemDefinition(itemId);
+    }
+
+    public Optional<ItemDefinition> getItemDefinition(String itemName) {
+	return itemConfiguration
+		.getDefinitions()
+		.stream()
+		.filter((item) -> item.getUseName().equalsIgnoreCase(itemName))
+		.findAny();
     }
 
 }

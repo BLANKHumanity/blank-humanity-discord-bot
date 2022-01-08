@@ -1,4 +1,4 @@
-package de.zorro909.blank.BlankDiscordBot.entities;
+package de.zorro909.blank.BlankDiscordBot.entities.user;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;

@@ -1,4 +1,4 @@
-package de.zorro909.blank.BlankDiscordBot.entities;
+package de.zorro909.blank.BlankDiscordBot.entities.item;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.validation.annotation.Validated;
 
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
-
 import lombok.Setter;
 
 @Validated
@@ -81,10 +80,101 @@ public class MessagesConfig {
 
     @NotNull
     public String ROLE_REWARD_CLAIMED;
-    
+
     @NotNull
     public String RICHEST_COMMAND;
-    
+
     @NotNull
     public String RICHEST_COMMAND_ENTRY;
+
+    @NotNull
+    public String VOTE_CAMPAIGN_CREATED;
+
+    @NotNull
+    public String VOTE_CAMPAIGN_EXISTS_ALREADY;
+
+    @NotNull
+    public String VOTE_CAMPAIGN_CHOICE_ADDED;
+
+    @NotNull
+    public String VOTE_CAMPAIGN_NOT_FOUND;
+
+    @NotNull
+    public String VOTE_CAMPAIGN_STARTED;
+    
+    @NotNull
+    public String VOTE_CAMPAIGN_STOPPED;
+    
+    @NotNull
+    public String VOTE_CAMPAIGN_CHOICE_REMOVED;
+    
+    @NotNull
+    public String VOTE_CAMPAIGN_CHOICE_NOT_FOUND;
+    
+    @NotNull
+    public String VOTE_CAMPAIGN_VOTE_DISPLAY_HEADER;
+    
+    @NotNull
+    public String VOTE_CAMPAIGN_VOTE_CHOICE_DISPLAY;
+    
+    @NotNull
+    public String VOTE_CAMPAIGN_LIST;
+    
+    @NotNull
+    public String VOTE_CAMPAIGN_LIST_DESCRIPTION;
+    
+    @NotNull
+    public String VOTE_COMMAND_ALREADY_VOTED;
+    
+    @NotNull
+    public String VOTE_COMMAND_VOTED;
+    
+    @NotNull
+    public String ITEM_GIVE_NOT_ENOUGH_OWNED;
+
+    @NotNull
+    public String ITEM_GIVE_SUCCESS;
+    
+    @NotNull
+    public String GAME_ON_COOLDOWN;
+    
+    @NotNull
+    public String ROCK_PAPER_SCISSORS_TIE;
+    
+    @NotNull
+    public String ROCK_PAPER_SCISSORS_WIN;
+    
+    @NotNull
+    public String ROCK_PAPER_SCISSORS_LOSS;
+    
+    @NotNull
+    public String GAME_BET_NOT_ENOUGH_MONEY;
+    
+    @NotNull
+    public String ROULETTE_GAME_RUNNING;
+    
+    @NotNull
+    public String ROULETTE_BET_AND_PULL;
+    
+    @NotNull
+    public String ROULETTE_WIN_MESSAGE;
+    
+    @NotNull
+    public String ROULETTE_LOSE_MESSAGE;
+    
+    @NotNull
+    public String ROULETTE_DISPLAY;
+    
+    @NotNull
+    public String DICE_GAME_LOSS;
+    
+    @NotNull
+    public String DICE_GAME_WIN;
+    
+    @NotNull
+    public String DICE_GAME_JACKPOT;
+    
+    @NotNull
+    public String ITEM_USE_ONLY_SINGLE_ITEM;
+
 }

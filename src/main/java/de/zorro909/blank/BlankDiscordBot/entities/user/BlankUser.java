@@ -1,4 +1,4 @@
-package de.zorro909.blank.BlankDiscordBot.entities;
+package de.zorro909.blank.BlankDiscordBot.entities.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +19,8 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.validation.annotation.Validated;
+
+import de.zorro909.blank.BlankDiscordBot.entities.item.Item;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -59,4 +61,5 @@ public class BlankUser {
     @ElementCollection
     @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
     private List<Item> items;
+    
 }

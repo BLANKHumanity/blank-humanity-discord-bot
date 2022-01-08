@@ -3,7 +3,7 @@ package de.zorro909.blank.BlankDiscordBot.commands.economy;
 import org.springframework.stereotype.Component;
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -14,14 +14,17 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 @Component
 public class BalanceCommand extends AbstractCommand {
 
+    public BalanceCommand() {
+	super("balance");
+    }
+
     @Override
-    protected CommandData createCommandData() {
-	CommandData balanceCommand = new CommandData("balance",
-		"🪙 /balance [user] - Displays the users current Balance, Job and Daily Income");
-	balanceCommand
+    protected CommandData createCommandData(CommandData commandData) {
+	commandData
 		.addOption(OptionType.USER, "user",
-			"Displays Balance of the specified user", false);
-	return balanceCommand;
+			getCommandDefinition().getOptionDescription("user"),
+			false);
+	return commandData;
     }
 
     @Override

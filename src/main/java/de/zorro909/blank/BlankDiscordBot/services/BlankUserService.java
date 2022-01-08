@@ -1,28 +1,29 @@
 package de.zorro909.blank.BlankDiscordBot.services;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
+import java.time.temporal.ChronoUnit;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import de.zorro909.blank.BlankDiscordBot.config.CommandConfig;
+import de.zorro909.blank.BlankDiscordBot.config.commands.CommandConfig;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.database.BlankUserDao;
 import de.zorro909.blank.BlankDiscordBot.database.UserClaimDataDao;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.entities.ClaimDataType;
-import de.zorro909.blank.BlankDiscordBot.entities.UserClaimData;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
+import de.zorro909.blank.BlankDiscordBot.entities.user.ClaimDataType;
+import de.zorro909.blank.BlankDiscordBot.entities.user.UserClaimData;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 @Service
 public class BlankUserService {
@@ -116,14 +117,19 @@ public class BlankUserService {
 
     public FormattingData.FormattingDataBuilder createFormattingData(
 	    BlankUser user, MessageType messageType) {
+	return addUserDetailsFormattingData(FormattingData.builder(), user,
+		FormatDataKey.USER, FormatDataKey.USER_MENTION)
+			.messageType(messageType)
+			.dataPairing(FormatDataKey.BALANCE, user.getBalance());
+    }
+
+    public FormattingData.FormattingDataBuilder addUserDetailsFormattingData(
+	    FormattingData.FormattingDataBuilder builder, BlankUser user,
+	    FormatDataKey userName, FormatDataKey userMention) {
 	User discordUser = jda.retrieveUserById(user.getDiscordId()).complete();
-	return FormattingData
-		.builder()
-		.messageType(messageType)
-		.dataPairing(FormatDataKey.USER, discordUser.getName())
-		.dataPairing(FormatDataKey.USER_MENTION,
-			discordUser.getAsMention())
-		.dataPairing(FormatDataKey.BALANCE, user.getBalance());
+	return builder
+		.dataPairing(userName, discordUser.getName())
+		.dataPairing(userMention, discordUser.getAsMention());
     }
 
     @Transactional
@@ -133,52 +139,70 @@ public class BlankUserService {
 
 	long milliSecondsSinceLastClaim = claimData
 		.getMilliSecondsSinceLastClaim();
+
+	LocalDateTime claimTimestamp = LocalDateTime.of(2000, 1, 1, 0, 0);
+
 	if (milliSecondsSinceLastClaim >= claimType.getMillisBetweenClaims()) {
-	    int reward = new Random()
-		    .nextInt(commandConfig.getMinimumReward(claimType),
-			    commandConfig.getMaximumReward(claimType) + 1);
-	    reward *= commandConfig.getRewardMultiplier();
-	    increaseUserBalance(blankUser, reward);
-
-	    FormattingData.FormattingDataBuilder builder = createFormattingData(
-		    blankUser, null);
-
-	    if (claimType.isStreaksEnabled()) {
-		if (milliSecondsSinceLastClaim < claimType
-			.getMillisStreakDelay()) {
-		    if (claimData.getClaimStreak() > 0) {
-			reward *= Math
-				.pow(commandConfig.getStreakMultiplier(),
-					claimData.getClaimStreak());
-			builder
-				.dataPairing(FormatDataKey.CLAIM_STREAK,
-					claimData.getClaimStreak());
-		    }
-		    claimData.setClaimStreak(claimData.getClaimStreak() + 1);
-		} else {
-		    claimData.setClaimStreak(0);
-		}
-	    }
-	    claimData.setLastClaimTime(LocalDateTime.now());
-
-	    return builder
-		    .dataPairing(FormatDataKey.CLAIM_REWARD, reward)
-		    .success(true);
+	    claimTimestamp = LocalDateTime.now();
+	    // Allow claiming 1 hour (or 1/24 of the Delay) before the timer
+	    // runs out.
+	} else if (milliSecondsSinceLastClaim >= claimType
+		.getMillisBetweenClaims() / (23d / 24d)) {
+	    // Claim Timestamp set to when user would actually be able to claim
+	    claimTimestamp = claimData
+		    .getLastClaimTime()
+		    .plus(claimData.getMilliSecondsSinceLastClaim(),
+			    ChronoUnit.MILLIS);
 	} else {
-	    long needWait = claimType.getMillisBetweenClaims()
-		    - milliSecondsSinceLastClaim;
-	    long remainingHours = TimeUnit.MILLISECONDS.toHours(needWait);
-	    long remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(needWait)
-		    % 60;
-	    long remainingSeconds = TimeUnit.MILLISECONDS.toSeconds(needWait)
-		    % 60;
-
-	    return createFormattingData(blankUser, null)
-		    .dataPairing(FormatDataKey.CLAIM_HOURS, remainingHours)
-		    .dataPairing(FormatDataKey.CLAIM_MINUTES, remainingMinutes)
-		    .dataPairing(FormatDataKey.CLAIM_SECONDS, remainingSeconds)
-		    .success(false);
+	    return _claimWaitMessage(blankUser, claimType,
+		    milliSecondsSinceLastClaim);
 	}
+
+	int reward = new Random()
+		.nextInt(commandConfig.getMinimumReward(claimType),
+			commandConfig.getMaximumReward(claimType) + 1);
+	reward *= commandConfig.getRewardMultiplier();
+
+	FormattingData.FormattingDataBuilder builder = createFormattingData(
+		blankUser, null);
+
+	if (claimType.isStreaksEnabled()) {
+	    if (milliSecondsSinceLastClaim < claimType.getMillisStreakDelay()) {
+		if (claimData.getClaimStreak() > 0) {
+		    reward *= Math
+			    .pow(commandConfig.getStreakMultiplier(),
+				    claimData.getClaimStreak());
+		    builder
+			    .dataPairing(FormatDataKey.CLAIM_STREAK,
+				    claimData.getClaimStreak());
+		}
+		claimData.setClaimStreak(claimData.getClaimStreak() + 1);
+	    } else {
+		claimData.setClaimStreak(0);
+	    }
+	}
+	claimData.setLastClaimTime(claimTimestamp);
+	increaseUserBalance(blankUser, reward);
+
+	return builder
+		.dataPairing(FormatDataKey.CLAIM_REWARD, reward)
+		.success(true);
+    }
+
+    private FormattingData.FormattingDataBuilder _claimWaitMessage(
+	    BlankUser blankUser, ClaimDataType claimType,
+	    long milliSecondsSinceLastClaim) {
+	long needWait = claimType.getMillisBetweenClaims()
+		- milliSecondsSinceLastClaim;
+	long remainingHours = TimeUnit.MILLISECONDS.toHours(needWait);
+	long remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(needWait) % 60;
+	long remainingSeconds = TimeUnit.MILLISECONDS.toSeconds(needWait) % 60;
+
+	return createFormattingData(blankUser, null)
+		.dataPairing(FormatDataKey.COOLDOWN_HOURS, remainingHours)
+		.dataPairing(FormatDataKey.COOLDOWN_MINUTES, remainingMinutes)
+		.dataPairing(FormatDataKey.COOLDOWN_SECONDS, remainingSeconds)
+		.success(false);
     }
 
     public BlankUser getUser(long guildId, String username,
@@ -198,11 +222,24 @@ public class BlankUserService {
     public Page<BlankUser> listUsers(Sort sortedBy, int page) {
 	return blankUserDao
 		.findAll(PageRequest
-			.of(page, commandConfig.getUserListPageSize(), sortedBy));
+			.of(page, commandConfig.getUserListPageSize(),
+				sortedBy));
     }
 
     public int getUserListPageSize() {
 	return commandConfig.getUserListPageSize();
+    }
+
+    public BlankUser getUser(OptionMapping option) {
+	return getUser(option.getAsMember());
+    }
+
+    public BlankUser getUser(Member member) {
+	return getUser(member.getIdLong(), member.getGuild().getIdLong());
+    }
+
+    public String getUsername(BlankUser user) {
+	return jda.retrieveUserById(user.getDiscordId()).complete().getName();
     }
 
 }

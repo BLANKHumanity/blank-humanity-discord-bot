@@ -7,31 +7,41 @@ import org.springframework.stereotype.Component;
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.entities.Item;
+import de.zorro909.blank.BlankDiscordBot.entities.item.Item;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.services.InventoryService;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData.FormattingDataBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
 @Component
 public class InventoryCommand extends AbstractCommand {
 
+    public InventoryCommand() {
+	super("inventory");
+    }
+
     @Autowired
     private InventoryService inventoryService;
 
     @Override
-    protected CommandData createCommandData() {
-	CommandData commandData = new CommandData("inventory",
-		"Displays your Inventory");
+    protected CommandData createCommandData(CommandData commandData) {
+	commandData
+		.addOption(OptionType.USER, "user",
+			getCommandDefinition().getOptionDescription("user"));
 	return commandData;
     }
 
     @Override
     protected void onCommand(SlashCommandEvent event) {
-	BlankUser user = blankUserService.getUser(event);
+	Member discordUser = Optional
+		.ofNullable(event.getOption("user").getAsMember())
+		.orElse(event.getMember());
+	BlankUser user = getBlankUserService().getUser(discordUser);
 
 	FormattingDataBuilder builder = blankUserService
 		.createFormattingData(user, null);

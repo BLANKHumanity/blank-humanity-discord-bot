@@ -9,7 +9,7 @@ import de.zorro909.blank.BlankDiscordBot.config.items.ItemConfiguration;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
 import de.zorro909.blank.BlankDiscordBot.config.items.ShopItem;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.services.ShopService;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData.FormattingDataBuilder;
@@ -18,9 +18,14 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 @Component
 public class ShopCommand extends AbstractCommand {
+
+    public ShopCommand() {
+	super("shop");
+    }
 
     @Autowired
     private ShopService shopService;
@@ -29,10 +34,12 @@ public class ShopCommand extends AbstractCommand {
     private ItemConfiguration itemConfiguration;
 
     @Override
-    protected CommandData createCommandData() {
-	CommandData shopCommand = new CommandData("shop",
-		"Displays all buyable Items from the Shop");
-	shopCommand.addOption(OptionType.INTEGER, "page", "Shop-Page");
+    protected CommandData createCommandData(CommandData shopCommand) {
+	OptionData page = new OptionData(OptionType.INTEGER, "page",
+		getCommandDefinition().getOptionDescription("page"));
+	page.setMinValue(1);
+	page.setMaxValue(shopService.amountShopPages());
+	shopCommand.addOptions(page);
 	return shopCommand;
     }
 

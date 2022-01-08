@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.entities.Item;
+import de.zorro909.blank.BlankDiscordBot.entities.item.Item;
+import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.services.BlankUserService;
 import de.zorro909.blank.BlankDiscordBot.services.InventoryService;
 import de.zorro909.blank.BlankDiscordBot.services.item.ExecutableItemAction;
@@ -33,8 +33,24 @@ public class RoleRewardAction implements ExecutableItemAction {
     private JDA jda;
 
     @Override
-    public ItemActionStatus executeAction(BlankUser user, Item item,
+    public ItemActionStatus executeAction(BlankUser user, Item item, int amount,
 	    Consumer<FormattingData> reply) {
+	if (amount > 1) {
+	    ItemDefinition definition = inventoryService
+		    .getItemDefinition(item.getItemId())
+		    .get();
+	    reply
+		    .accept(blankUserService
+			    .createFormattingData(user,
+				    MessageType.ITEM_USE_ONLY_SINGLE_ITEM)
+			    .dataPairing(FormatDataKey.ITEM_ID,
+				    item.getItemId())
+			    .dataPairing(FormatDataKey.ITEM_NAME,
+				    definition.getName())
+			    .build());
+	    return ItemActionStatus.GENERIC_ERROR;
+	}
+
 	Guild guild = jda.getGuildById(user.getGuildId());
 	Member discordMember = guild
 		.retrieveMemberById(user.getDiscordId())
