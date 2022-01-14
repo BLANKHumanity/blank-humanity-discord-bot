@@ -5,9 +5,9 @@ mvn clean install
 cp target/BlankDiscordBot-*.jar dockerBuild/BlankDiscordBot.jar
 cp src/main/resources/application.yml dockerBuild/
 
+export TAG=$(echo '${project.version}' | mvn help:evaluate | grep -v '^[[]')
+
 cd dockerBuild
 
-docker build -t zorro909/blankdiscordbot:develop .
-docker push zorro909/blankdiscordbot:develop
-
-ssh -t $1 'cd BlankDiscordBot; docker-compose down; docker-compose pull; docker-compose up -d'
+docker build -t zorro909/blankdiscordbot:$TAG .
+docker push zorro909/blankdiscordbot:$TAG
