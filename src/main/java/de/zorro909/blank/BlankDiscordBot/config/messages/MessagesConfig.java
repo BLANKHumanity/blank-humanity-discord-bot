@@ -176,5 +176,17 @@ public class MessagesConfig {
     
     @NotNull
     public String ITEM_USE_ONLY_SINGLE_ITEM;
+    
+    @NotNull
+    public String GIVE_COINS_COMMAND;
+    
+    @NotNull
+    public String CHAT_SUMMARY_LIST;
+    
+    @NotNull
+    public String CHAT_SUMMARY_ENTRY;
+    
+    @NotNull
+    public String CHAT_SUMMARY_PENDING;
 
 }

@@ -1,15 +1,15 @@
 spring:
   datasource:
-    url: jdbc:mysql://mysql:3306/blankbot
-    username: root
-    password: mypass
+    url: ${MYSQL_HOST}/${MYSQL_DATABASE}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   jpa:
     generate-ddl: true
     hibernate:
       ddl-auto: update
 discord:
-  authToken: INSERTAUTHTOKEN
-  guildId: 556216333201702942
+  authToken: ${DISCORD_AUTH_TOKEN}
+  guildId: ${DISCORD_GUILD_ID}
   minimum-daily-reward: 25
   maximum-daily-reward: 100
   minimum-work-reward: 25
@@ -49,6 +49,14 @@ discord:
       options:
         item: "The name of the Shop Item to buy"
         amount: "The amount of items you want to buy (default: 1)"
+    give-coins:
+      description: "Create coins from the void and give them to someone"
+      options:
+        user: "The coin receiving user"
+        amount: "Amount of coins to give"
+      roleRestricted: true
+      allowedRoles:
+        - 923652378803187802
     gift:
       description: "Gifts an item from the void to a user"
       options:
@@ -108,6 +116,15 @@ discord:
       roleRestricted: true
       allowedRoles:
         - 923652378803187802
+    chatsummary: 
+      description: "Lists the number of messages of every User in the past x hours in a specific channel"
+      roleRestricted: true
+      allowedRoles:
+        - 923652378803187802
+      options:
+        channel: "Which channel should be summarised?"
+        hours: "How many hours back should be summarised?"
+        startmessageid: "Id of last message to count"
 messages:
   BALANCE_COMMAND_MESSAGE: "%(user) has %(balance)"
   DAILY_COMMAND_MESSAGE: "%(userMention) got %(claimReward) as a daily reward!"
@@ -176,6 +193,13 @@ messages:
     :game_die: %(user) gets %(diceRollUser) ...
     :game_die: %(user), your opponent throws their dice... and gets %(diceRollOpponent)...
     :game_die: %(user), you rolled a snake eyes and win the jackpot of %(rewardAmount) 🔳
+  GIVE_COINS_COMMAND: "%(userMention) has been given %(rewardAmount) 🔳"
+  CHAT_SUMMARY_LIST: |-
+    Chat Summary for %(channelMention) - Page %(page)
+    %(pendingMarker)
+    %(chatSummaryBody)
+  CHAT_SUMMARY_ENTRY: "%(user): %(messageCount) messages"
+  CHAT_SUMMARY_PENDING: "Messages are still counted, please wait!"
 items:
   definitions:
     -

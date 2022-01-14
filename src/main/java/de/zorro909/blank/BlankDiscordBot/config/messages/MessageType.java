@@ -70,7 +70,11 @@ public enum MessageType {
     DICE_GAME_LOSS(FormatDataKey.BET_AMOUNT, FormatDataKey.DICE_ROLL_USER, FormatDataKey.DICE_ROLL_OPPONENT),
     DICE_GAME_WIN(FormatDataKey.BET_AMOUNT, FormatDataKey.REWARD_AMOUNT, FormatDataKey.DICE_ROLL_USER, FormatDataKey.DICE_ROLL_OPPONENT),
     DICE_GAME_JACKPOT(FormatDataKey.BET_AMOUNT, FormatDataKey.REWARD_AMOUNT, FormatDataKey.DICE_ROLL_USER, FormatDataKey.DICE_ROLL_OPPONENT), 
-    ITEM_USE_ONLY_SINGLE_ITEM(FormatDataKey.ITEM_ID, FormatDataKey.ITEM_NAME);
+    ITEM_USE_ONLY_SINGLE_ITEM(FormatDataKey.ITEM_ID, FormatDataKey.ITEM_NAME), 
+    GIVE_COINS_COMMAND(FormatDataKey.REWARD_AMOUNT),
+    CHAT_SUMMARY_LIST(FormatDataKey.PAGE, FormatDataKey.CHANNEL, FormatDataKey.CHANNEL_MENTION, FormatDataKey.PENDING_MARKER, FormatDataKey.CHAT_SUMMARY_BODY),
+    CHAT_SUMMARY_ENTRY(FormatDataKey.MESSAGE_COUNT), 
+    CHAT_SUMMARY_PENDING;
 
     private MessageType(FormatDataKey... dataKeys) {
 	this.availableDataKeys = dataKeys;

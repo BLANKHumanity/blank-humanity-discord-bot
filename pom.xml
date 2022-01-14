@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>de.zorro909.blank</groupId>
 	<artifactId>BlankDiscordBot</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>BlankDiscordBot</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>

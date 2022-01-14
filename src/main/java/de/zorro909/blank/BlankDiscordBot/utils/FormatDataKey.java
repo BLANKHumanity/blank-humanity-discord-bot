@@ -31,7 +31,9 @@ public enum FormatDataKey {
     BET_AMOUNT("betAmount"), RPS_USER("rpsUser"), RPS_BOT("rpsBot"),
     REWARD_AMOUNT("rewardAmount"), ROULETTE_HEADER("rouletteHeader"),
     ROULETTE_RESULT("rouletteResult"), DICE_ROLL_USER("diceRollUser"),
-    DICE_ROLL_OPPONENT("diceRollOpponent");
+    DICE_ROLL_OPPONENT("diceRollOpponent"), PAGE("page"), CHANNEL("channel"),
+    CHANNEL_MENTION("channelMention"), PENDING_MARKER("pendingMarker"),
+    CHAT_SUMMARY_BODY("chatSummaryBody"), MESSAGE_COUNT("messageCount");
 
     private FormatDataKey(String key) {
 	this(key, false);

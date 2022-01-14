@@ -86,6 +86,7 @@ public class DiceGameCommand extends AbstractGame {
 			.dataPairing(FormatDataKey.DICE_ROLL_OPPONENT,
 				opponentRoll.toString())
 			.build());
+	finish(metadata);
 	return null;
     }
 

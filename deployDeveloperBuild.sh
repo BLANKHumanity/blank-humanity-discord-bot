@@ -1,8 +1,8 @@
 rm dockerBuild/*.jar
 rm dockerBuild/application.yml
 rm dockerBuild/dockerbuild.dab
-mvn install
-cp target/BlankDiscordBot-0.0.1-SNAPSHOT.jar dockerBuild/
+mvn clean install
+cp target/BlankDiscordBot-*.jar dockerBuild/BlankDiscordBot.jar
 cp src/main/resources/application.yml dockerBuild/
 
 cd dockerBuild

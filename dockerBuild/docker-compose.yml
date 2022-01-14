@@ -1,20 +1,25 @@
 version: "3.7"
 services:
   frontend:
-    build: .
-    image: zorro909/blankdiscordbot
+    image: zorro909/blankdiscordbot:latest
     volumes:
-     - type: bind
-       source: ./application.yml
-       target: /blankbot/application.yml
-       read_only: true
+     - blankBotConfig:/blankbot/config
     networks:
      - blank-bot-bridge
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USERNAME: ${MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      DISCORD_AUTH_TOKEN: ${DISCORD_AUTH_TOKEN}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
   mysql:
     image: "mariadb"
     environment:
-      MYSQL_DATABASE: "blankbot"
-      MYSQL_ROOT_PASSWORD: "mypass"
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USERNAME}
+      MYSQL_USER_PASSWORD: ${MYSQL_PASSWORD}
     networks:
       - blank-bot-bridge
     volumes:
@@ -24,3 +29,4 @@ networks:
     driver: bridge
 volumes:
   blankBotMysqlData:
+  blankBotConfig

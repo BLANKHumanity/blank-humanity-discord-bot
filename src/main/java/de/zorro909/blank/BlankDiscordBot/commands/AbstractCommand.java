@@ -2,7 +2,9 @@ package de.zorro909.blank.BlankDiscordBot.commands;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
@@ -20,6 +22,7 @@ import de.zorro909.blank.BlankDiscordBot.services.TransactionExecutor;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import de.zorro909.blank.BlankDiscordBot.utils.NamedFormatter;
+import de.zorro909.blank.BlankDiscordBot.utils.Wrapper;
 import de.zorro909.blank.BlankDiscordBot.utils.menu.ReactionMenu;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +35,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
+import net.dv8tion.jda.internal.utils.Checks;
 
 @Component
 @Getter
@@ -71,6 +75,8 @@ public abstract class AbstractCommand extends ListenerAdapter {
     private static HashMap<SlashCommandEvent, MessageEmbed[]> cachedEmbeds = new HashMap<>();
 
     private static HashMap<SlashCommandEvent, ReactionMenu> cachedMenus = new HashMap<>();
+
+    private static HashMap<SlashCommandEvent, Runnable> cachedTasks = new HashMap<>();
 
     public AbstractCommand(String command) {
 	this.commandName = command;
@@ -124,46 +130,63 @@ public abstract class AbstractCommand extends ListenerAdapter {
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
 	if (commandData.getName().equals(event.getName())) {
-	    event
-		    .deferReply(isEphemeral() || commandDefinition.isHidden()
-			    || isChannelHidden(event.getChannel().getIdLong()))
-		    .queue();
+	    boolean hidden = isEphemeral() || commandDefinition.isHidden()
+		    || isChannelHidden(event.getChannel().getIdLong());
+	    event.deferReply(hidden).queue();
 
-	    transactionExecutor.executeAsTransaction((status) -> {
-		onCommand(event);
-		return null;
-	    }, (e) -> {
-		e.printStackTrace();
-		reply(event,
-			FormattingData
-				.builder()
-				.messageType(MessageType.ERROR_MESSAGE)
-				.dataPairing(FormatDataKey.ERROR_MESSAGE,
-					"This Command threw this error '"
-						+ e.getMessage() + "'")
-				.build());
-	    }, (unused) -> {
-		if (!cachedEmbeds.containsKey(event)) {
-		    reply(event, FormattingData
-			    .builder()
-			    .messageType(MessageType.ERROR_MESSAGE)
-			    .dataPairing(FormatDataKey.ERROR_MESSAGE,
-				    "This Command somehow didn't respond!")
-			    .build());
-		}
+	    transactionExecutor
+		    .executeAsTransaction(
+			    Wrapper
+				    .transactionCallback(Wrapper
+					    .supplyOut(Wrapper
+						    .wrap(this::onCommand,
+							    event),
+						    null)),
+			    ex -> transactionExceptionHandler(event, ex),
+			    o -> transactionFinishHandler(event));
 
-		Message message = event
-			.getHook()
-			.editOriginalEmbeds(cachedEmbeds.remove(event))
-			.complete();
-		if (cachedMenus.containsKey(event)) {
-		    cachedMenus
-			    .remove(event)
-			    .buildMenu(getJda(), message, getTaskScheduler(),
-				    getTransactionExecutor());
-		}
-	    });
 	}
+    }
+
+    private void transactionFinishHandler(SlashCommandEvent event) {
+	if (event == null) {
+	    System.out.println("Event is null!!!");
+	}
+	System.out.println("Event ID:" + event.getIdLong());
+	if (!cachedEmbeds.containsKey(event)) {
+	    sendErrorMessage(event, "This Command somehow didn't respond!");
+	}
+
+	Message message = event
+		.getHook()
+		.editOriginalEmbeds(cachedEmbeds.remove(event))
+		.complete();
+	if (cachedMenus.containsKey(event)) {
+	    cachedMenus
+		    .remove(event)
+		    .buildMenu(getJda(), message, getTaskScheduler(),
+			    getTransactionExecutor());
+	}
+	if (cachedTasks.containsKey(event)) {
+	    System.out.println("Running Long running Task");
+	    cachedTasks.remove(event).run();
+	}
+    }
+
+    private void transactionExceptionHandler(SlashCommandEvent event,
+	    Exception e) {
+	e.printStackTrace();
+	sendErrorMessage(event,
+		"This Command threw this error '" + e.getMessage() + "'");
+    }
+
+    protected void sendErrorMessage(SlashCommandEvent event, String message) {
+	reply(event,
+		FormattingData
+			.builder()
+			.messageType(MessageType.ERROR_MESSAGE)
+			.dataPairing(FormatDataKey.ERROR_MESSAGE, message)
+			.build());
     }
 
     private boolean isChannelHidden(long channelId) {
@@ -179,6 +202,7 @@ public abstract class AbstractCommand extends ListenerAdapter {
     }
 
     protected void reply(SlashCommandEvent event, MessageEmbed... embeds) {
+	Checks.noneNull(embeds, "MessageEmbeds");
 	cachedEmbeds.put(event, embeds);
     }
 
@@ -211,6 +235,28 @@ public abstract class AbstractCommand extends ListenerAdapter {
     protected void addReactionMenu(SlashCommandEvent event,
 	    ReactionMenu reactionMenu) {
 	cachedMenus.put(event, reactionMenu);
+    }
+
+    protected void addLongRunningTask(SlashCommandEvent event, Subtask task) {
+	Consumer<FormattingData[]> updateMessages = messages -> event
+		.getHook()
+		.editOriginalEmbeds(Stream
+			.of(messages)
+			.map(this::format)
+			.map((msg) -> new EmbedBuilder().setDescription(msg))
+			.map(EmbedBuilder::build)
+			.toList())
+		.queue();
+
+	Runnable run = () -> transactionExecutor
+		.executeAsTransaction(Wrapper
+			.transactionCallback(Wrapper
+				.supplyOut(Wrapper.wrap(task, updateMessages),
+					null)),
+			Exception::printStackTrace, (t) -> {
+			});
+
+	cachedTasks.put(event, run);
     }
 
     protected abstract void onCommand(SlashCommandEvent event);
