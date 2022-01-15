@@ -29,7 +29,7 @@ public enum MessageType {
 	    FormatDataKey.ITEM_NAME, FormatDataKey.SHOP_ITEM_BUY_NAME,
 	    FormatDataKey.SHOP_ITEM_PRICE),
     BUY_ITEM_SUCCESS(FormatDataKey.SHOP_ITEM_ID,
-	    FormatDataKey.SHOP_ITEM_BUY_NAME, FormatDataKey.ITEM_NAME),
+	    FormatDataKey.SHOP_ITEM_BUY_NAME, FormatDataKey.ITEM_NAME, FormatDataKey.ITEM_AMOUNT),
     INVENTORY_ITEM_DESCRIPTION(FormatDataKey.ITEM_ID, FormatDataKey.ITEM_AMOUNT,
 	    FormatDataKey.ITEM_DESCRIPTION, FormatDataKey.ITEM_NAME),
     INVENTORY_ITEM_DESCRIPTION_WITH_USE(FormatDataKey.ITEM_ID,
@@ -74,7 +74,8 @@ public enum MessageType {
     GIVE_COINS_COMMAND(FormatDataKey.REWARD_AMOUNT),
     CHAT_SUMMARY_LIST(FormatDataKey.PAGE, FormatDataKey.CHANNEL, FormatDataKey.CHANNEL_MENTION, FormatDataKey.PENDING_MARKER, FormatDataKey.CHAT_SUMMARY_BODY),
     CHAT_SUMMARY_ENTRY(FormatDataKey.MESSAGE_COUNT), 
-    CHAT_SUMMARY_PENDING;
+    CHAT_SUMMARY_PENDING, 
+    ITEM_REMOVE_SUCCESS(FormatDataKey.ITEM_NAME, FormatDataKey.ITEM_ID, FormatDataKey.ITEM_AMOUNT, FormatDataKey.RECEIVING_USER, FormatDataKey.RECEIVING_USER_MENTION);
 
     private MessageType(FormatDataKey... dataKeys) {
 	this.availableDataKeys = dataKeys;

@@ -143,7 +143,7 @@ public class InventoryService {
 
 	if (status != ItemActionStatus.SUCCESS) {
 	    // On Error give Item back
-	    giveItem(user, item.get().getItemId());
+	    giveItem(user, item.get().getItemId(), amount);
 	}
 	return status;
     }

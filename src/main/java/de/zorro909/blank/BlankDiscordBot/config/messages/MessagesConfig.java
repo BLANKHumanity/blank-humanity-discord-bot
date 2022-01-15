@@ -188,5 +188,8 @@ public class MessagesConfig {
     
     @NotNull
     public String CHAT_SUMMARY_PENDING;
+    
+    @NotNull
+    public String ITEM_REMOVE_SUCCESS;
 
 }

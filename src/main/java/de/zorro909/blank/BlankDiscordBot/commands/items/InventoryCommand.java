@@ -15,6 +15,7 @@ import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData.FormattingDataBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
@@ -39,7 +40,8 @@ public class InventoryCommand extends AbstractCommand {
     @Override
     protected void onCommand(SlashCommandEvent event) {
 	Member discordUser = Optional
-		.ofNullable(event.getOption("user").getAsMember())
+		.ofNullable(event.getOption("user"))
+		.map(OptionMapping::getAsMember)
 		.orElse(event.getMember());
 	BlankUser user = getBlankUserService().getUser(discordUser);
 

@@ -1,8 +1,10 @@
 package de.zorro909.blank.BlankDiscordBot.commands.items;
 
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemConfiguration;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
@@ -14,6 +16,7 @@ import de.zorro909.blank.BlankDiscordBot.services.item.ItemBuyStatus;
 import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -52,7 +55,8 @@ public class BuyItemCommand extends AbstractCommand {
 		.getShopItem(event.getOption("item").getAsString());
 
 	int amount = Optional
-		.ofNullable(event.getOption("amount").getAsLong())
+		.ofNullable(event.getOption("amount"))
+		.map(OptionMapping::getAsLong)
 		.orElse(1L)
 		.intValue();
 
@@ -83,6 +87,7 @@ public class BuyItemCommand extends AbstractCommand {
 		.dataPairing(FormatDataKey.SHOP_ITEM_PRICE, item.getPrice())
 		.dataPairing(FormatDataKey.SHOP_ITEM_AVAILABLE_AMOUNT,
 			shopService.getAvailableItemAmount(item))
+		.dataPairing(FormatDataKey.ITEM_AMOUNT, amount)
 		.dataPairing(FormatDataKey.BALANCE, user.getBalance())
 		.dataPairing(FormatDataKey.ITEM_NAME,
 			itemConfiguration

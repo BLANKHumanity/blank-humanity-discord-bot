@@ -71,7 +71,7 @@ public class ShopService {
 	    return ItemBuyStatus.NOT_ENOUGH_MONEY;
 	}
 
-	if (getAvailableItemAmount(item) < amount) {
+	if (getAvailableItemAmount(item) != -1 && getAvailableItemAmount(item) < amount) {
 	    return ItemBuyStatus.NO_AVAILABLE_SUPPLY;
 	}
 

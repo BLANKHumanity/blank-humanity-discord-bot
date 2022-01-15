@@ -7,7 +7,7 @@ services:
     networks:
      - blank-bot-bridge
     environment:
-      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_HOST: jdbc:mysql://${MYSQL_HOST}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USERNAME: ${MYSQL_USERNAME}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}

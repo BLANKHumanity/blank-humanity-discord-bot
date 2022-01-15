@@ -1,5 +1,7 @@
 package de.zorro909.blank.BlankDiscordBot.commands.economy;
 
+import org.springframework.stereotype.Component;
+
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
@@ -9,6 +11,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
+@Component
 public class GiveCoinsCommand extends AbstractCommand {
 
     public GiveCoinsCommand() {

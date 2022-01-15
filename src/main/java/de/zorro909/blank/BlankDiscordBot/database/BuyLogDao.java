@@ -14,7 +14,7 @@ public interface BuyLogDao extends JpaRepository<BuyLogEntry, Integer> {
 
     public List<BuyLogEntry> findByBuyer(BlankUser buyer);
     
-    @Query("SELECT SUM(b.amount) FROM BuyLogEntry b WHERE b.shopId = ?1")
+    @Query("SELECT COALESCE(SUM(b.amount),0) FROM BuyLogEntry b WHERE b.shopId = ?1")
     public int sumOfBoughtItems(int shopId);
     
 }

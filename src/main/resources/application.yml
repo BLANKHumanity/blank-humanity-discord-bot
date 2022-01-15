@@ -66,6 +66,15 @@ discord:
       roleRestricted: true
       allowedRoles:
         - 923652378803187802
+    remove-item:
+      description: "Removes an item from a users inventory"
+      options:
+        user: "The User"
+        item: "Name of the item to remove"
+        amount: "The amount of items to remove (default: 1)"
+      roleRestricted: true
+      allowedRoles:
+        - 923652378803187802
     give:
       description: "Gives an item from your inventory to another user"
       options:
@@ -145,7 +154,7 @@ messages:
   ITEM_GIVE_SUCCESS: "%(userMention), you gave %(receivingUserMention) %(itemAmount) x %(itemName)"
   BUY_ITEM_NO_SUPPLY: "%(userMention), this item has no supply left"
   BUY_ITEM_NOT_ENOUGH_MONEY: "%(userMention), you need to have %(shopItemPrice), but you only have %(balance)"
-  BUY_ITEM_SUCCESS: "%(userMention), you bought the item '%(itemName)'"
+  BUY_ITEM_SUCCESS: "%(userMention), you bought %(itemAmount)x '%(itemName)'"
   INVENTORY_ITEM_DESCRIPTION: "%(itemAmount)x %(itemName)"
   INVENTORY_ITEM_DESCRIPTION_WITH_USE: "%(itemAmount)x %(itemName) - /use %(itemUseName)"
   INVENTORY_DISPLAY: "Inventory\n%(inventoryBody)"
@@ -200,6 +209,7 @@ messages:
     %(chatSummaryBody)
   CHAT_SUMMARY_ENTRY: "%(user): %(messageCount) messages"
   CHAT_SUMMARY_PENDING: "Messages are still counted, please wait!"
+  ITEM_REMOVE_SUCCESS: "You have removed %(itemAmount) x %(itemName) from %(user)'s inventory"
 items:
   definitions:
     -
