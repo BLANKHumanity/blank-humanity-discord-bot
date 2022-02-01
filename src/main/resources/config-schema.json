@@ -870,10 +870,13 @@
 					"allowedRoles"
 				]
 			},
-			"required": [
-				"description"
-			],
-			"unevaluatedProperties": false
+			"allOf": [
+				{
+					"required": [
+						"description"
+					]
+				}
+			]
 		},
 		"argument": {
 			"type": "string",
@@ -930,7 +933,9 @@
 					},
 					"else": {
 						"not": {
-							"required": ["actionArguments"]
+							"required": [
+								"actionArguments"
+							]
 						}
 					}
 				},
@@ -953,7 +958,7 @@
 								"const": "ROLE_REWARD"
 							}
 						},
-						"required":[
+						"required": [
 							"action"
 						]
 					},
@@ -996,7 +1001,7 @@
 					"pattern": "^[a-zA-Z0-9]+$",
 					"description": "Name used for buying this entry (/buy [buyName])"
 				},
-				"price":{
+				"price": {
 					"type": "number"
 				},
 				"amountAvailable": {

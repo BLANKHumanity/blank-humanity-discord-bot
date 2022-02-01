@@ -13,9 +13,3 @@ jobs:
     - uses: actions/checkout@v2
     - name: YAML Schema Validator
       uses: nwisbeta/validate-yaml-schema@v2.0.0
-      with:
-        # The yaml.schemas config as inline JSON
-        yamlSchemasJson: |
-          {
-                "/src/main/resources/config-schema.json": "/src/main/resources/application.yml"
-          }
