@@ -1,0 +1,22 @@
+name: Validate application.yml
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: InoUno/yaml-ls-check@v1.1.0
+      with:
+        root: src/main/resources
+        schemaMapping: |
+          {
+            "config-schema.json": [ "application.yml" ]
+          }
