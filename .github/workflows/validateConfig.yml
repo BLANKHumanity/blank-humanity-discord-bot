@@ -13,11 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: YAML Schema Validator
-      uses: nwisbeta/validate-yaml-schema@v2.0.0
-    - run: |
-        if $(jq "split(\",\") | all(. != \"src/main/resources/application.yml\")" <<< '"${{ steps.validate-yaml-schema.outputs.validFiles }}"'); then
-          echo "application.yml was not validated"
-          exit 1
-        fi
-      shell: bash
+    - uses: InoUno/yaml-ls-check@1.1.0
+      with:
+        root: src/main/resources
+        schemaMapping: |
+          {
+            "config-schema.json": [ "application.yml" ]
+          }
