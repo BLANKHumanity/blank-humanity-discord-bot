@@ -1,5 +1,5 @@
  {
     "yaml.schemas": {
-        "src/main/resources/config-schema.json": "application.yml"
+        "./src/main/resources/config-schema.json": "application.yml"
     }
 }
