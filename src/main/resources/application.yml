@@ -20,7 +20,7 @@ discord:
   max-game-bet-amount: 300
   command-definitions:
     balance:
-      dessacription: "🪙 /balance [user] - Displays the users current Balance, Job and Daily Income"
+      description: "🪙 /balance [user] - Displays the users current Balance, Job and Daily Income"
       options:
         user: "Displays Balance of the specified user"
     daily:
