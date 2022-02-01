@@ -1,0 +1,1018 @@
+{
+	"$id": "/schemas/config",
+	"type": "object",
+	"required": [
+		"spring",
+		"discord",
+		"messages"
+	],
+	"additionalProperties": false,
+	"properties": {
+		"spring": {
+			"type": "object",
+			"properties": {
+				"datasource": {
+					"type": "object",
+					"properties": {
+						"url": {
+							"type": "string",
+							"pattern": "\\$\\{MYSQL_HOST\\}/\\$\\{MYSQL_DATABASE\\}"
+						},
+						"username": {
+							"type": "string",
+							"pattern": "\\$\\{MYSQL_USERNAME\\}"
+						},
+						"password": {
+							"type": "string",
+							"pattern": "\\$\\{MYSQL_PASSWORD\\}"
+						}
+					},
+					"required": [
+						"url",
+						"username",
+						"password"
+					]
+				},
+				"jpa": {
+					"type": "object",
+					"properties": {
+						"generate-ddl": {
+							"type": "boolean"
+						},
+						"hibernate": {
+							"type": "object",
+							"properties": {
+								"ddl-auto": {
+									"enum": [
+										"validate",
+										"update",
+										"create",
+										"create-drop",
+										"none"
+									]
+								}
+							},
+							"required": [
+								"ddl-auto"
+							]
+						}
+					},
+					"required": [
+						"generate-ddl"
+					]
+				}
+			}
+		},
+		"discord": {
+			"type": "object",
+			"properties": {
+				"authToken": {
+					"const": "${DISCORD_AUTH_TOKEN}"
+				},
+				"guildId": {
+					"pattern": "\\$\\{DISCORD_GUILD_ID\\}"
+				},
+				"minimum-daily-reward": {
+					"minimum": 10,
+					"maximum": 1000
+				},
+				"maximum-daily-reward": {
+					"minimum": 11,
+					"maximum": 4000
+				},
+				"minimum-work-reward": {
+					"minimum": 10,
+					"maximum": 1000
+				},
+				"maximum-work-reward": {
+					"minimum": 11,
+					"maximum": 4000
+				},
+				"reward-multiplier": {
+					"type": "number",
+					"minimum": 1,
+					"maximum": 10
+				},
+				"streak-multiplier": {
+					"type": "number",
+					"minimum": 1.01,
+					"maximum": 2
+				},
+				"user-list-page-size": {
+					"type": "integer",
+					"minimum": 6,
+					"maximum": 20
+				},
+				"max-game-bet-amount": {
+					"type": "integer",
+					"minimum": 10,
+					"maximum": 100000
+				},
+				"command-definitions": {
+					"type": "object",
+					"properties": {
+						"balance": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"user": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"user"
+									],
+									"additionalProperties": false
+								}
+							},
+							"required": [
+								"options"
+							]
+						},
+						"daily": {
+							"type": "object",
+							"$ref": "#/$defs/command"
+						},
+						"richest": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"page": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"page"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"work": {
+							"type": "object",
+							"$ref": "#/$defs/command"
+						},
+						"dice": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"bet": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"bet"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"rps": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"bet": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"choice": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"bet",
+										"choice"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"roulette": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"bet": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"bet"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"buy": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"item": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"amount": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"item",
+										"amount"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"give-coins": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"user": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"amount": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"user",
+										"amount"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"gift": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"user": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"item": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"amount": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"user",
+										"item",
+										"amount"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"remove-item": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"user": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"item": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"amount": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"user",
+										"item",
+										"amount"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"give": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"user": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"item": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"amount": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"user",
+										"item",
+										"amount"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"inventory": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"user": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"user"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"use": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"item": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"amount": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"item",
+										"amount"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"shop": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"page": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"page"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"votecampaign": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"create": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"addchoice": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"removechoice": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"start": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"stop": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"list": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"name": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"description": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"campaign": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"choice": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"page": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"create",
+										"addchoice",
+										"removechoice",
+										"start",
+										"stop",
+										"list",
+										"name",
+										"description",
+										"campaign",
+										"choice",
+										"page"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"vote": {
+							"type": "object",
+							"$ref": "#/$defs/command"
+						},
+						"revealvote": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"campaign": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"campaign"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"clearpendinggames": {
+							"type": "object",
+							"$ref": "#/$defs/command"
+						},
+						"chatsummary": {
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"channel": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"hours": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"startmessageid": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"channel",
+										"hours",
+										"startmessageid"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"required": [
+						"balance",
+						"daily",
+						"richest"
+					]
+				}
+			},
+			"required": [
+				"command-definitions"
+			]
+		},
+		"messages": {
+			"type": "object",
+			"properties": {
+				"BALANCE_COMMAND_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"DAILY_COMMAND_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"DAILY_COMMAND_MESSAGE_STREAK": {
+					"$ref": "#/$defs/message"
+				},
+				"DAILY_COMMAND_ALREADY_CLAIMED_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"WORK_COMMAND_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"WORK_COMMAND_ALREADY_CLAIMED_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"SHOP_COMMAND_WRONG_PAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"SHOP_TITLE_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"SHOP_HEADER": {
+					"$ref": "#/$defs/message"
+				},
+				"SHOP_FOOTER": {
+					"$ref": "#/$defs/message"
+				},
+				"SHOP_ITEM_DESCRIPTION": {
+					"$ref": "#/$defs/message"
+				},
+				"ITEM_USE_ACTION_UNDEFINED": {
+					"$ref": "#/$defs/message"
+				},
+				"ITEM_NOT_EXISTS": {
+					"$ref": "#/$defs/message"
+				},
+				"ITEM_USE_NOT_OWNED": {
+					"$ref": "#/$defs/message"
+				},
+				"ITEM_USE_ONLY_SINGLE_ITEM": {
+					"$ref": "#/$defs/message"
+				},
+				"ITEM_GIVE_NOT_ENOUGH_OWNED": {
+					"$ref": "#/$defs/message"
+				},
+				"ITEM_GIVE_SUCCESS": {
+					"$ref": "#/$defs/message"
+				},
+				"BUY_ITEM_NO_SUPPLY": {
+					"$ref": "#/$defs/message"
+				},
+				"BUY_ITEM_NOT_ENOUGH_MONEY": {
+					"$ref": "#/$defs/message"
+				},
+				"BUY_ITEM_SUCCESS": {
+					"$ref": "#/$defs/message"
+				},
+				"INVENTORY_ITEM_DESCRIPTION": {
+					"$ref": "#/$defs/message"
+				},
+				"INVENTORY_ITEM_DESCRIPTION_WITH_USE": {
+					"$ref": "#/$defs/message"
+				},
+				"INVENTORY_DISPLAY": {
+					"$ref": "#/$defs/message"
+				},
+				"ERROR_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"ROLE_REWARD_ALREADY_CLAIMED": {
+					"$ref": "#/$defs/message"
+				},
+				"ROLE_REWARD_CLAIMED": {
+					"$ref": "#/$defs/message"
+				},
+				"RICHEST_COMMAND": {
+					"$ref": "#/$defs/message"
+				},
+				"RICHEST_COMMAND_ENTRY": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_CREATED": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_EXISTS_ALREADY": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_CHOICE_ADDED": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_NOT_FOUND": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_STARTED": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_STOPPED": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_CHOICE_REMOVED": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_CHOICE_NOT_FOUND": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_VOTE_DISPLAY_HEADER": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_VOTE_CHOICE_DISPLAY": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_COMMAND_ALREADY_VOTED": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_COMMAND_VOTED": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_LIST": {
+					"$ref": "#/$defs/message"
+				},
+				"VOTE_CAMPAIGN_LIST_DESCRIPTION": {
+					"$ref": "#/$defs/message"
+				},
+				"GAME_ON_COOLDOWN": {
+					"$ref": "#/$defs/message"
+				},
+				"ROCK_PAPER_SCISSORS_TIE": {
+					"$ref": "#/$defs/message"
+				},
+				"ROCK_PAPER_SCISSORS_WIN": {
+					"$ref": "#/$defs/message"
+				},
+				"ROCK_PAPER_SCISSORS_LOSS": {
+					"$ref": "#/$defs/message"
+				},
+				"GAME_BET_NOT_ENOUGH_MONEY": {
+					"$ref": "#/$defs/message"
+				},
+				"ROULETTE_GAME_RUNNING": {
+					"$ref": "#/$defs/message"
+				},
+				"ROULETTE_BET_AND_PULL": {
+					"$ref": "#/$defs/message"
+				},
+				"ROULETTE_WIN_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"ROULETTE_LOSE_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"ROULETTE_DISPLAY": {
+					"$ref": "#/$defs/message"
+				},
+				"DICE_GAME_LOSS": {
+					"$ref": "#/$defs/message"
+				},
+				"DICE_GAME_WIN": {
+					"$ref": "#/$defs/message"
+				},
+				"DICE_GAME_JACKPOT": {
+					"$ref": "#/$defs/message"
+				},
+				"GIVE_COINS_COMMAND": {
+					"$ref": "#/$defs/message"
+				},
+				"CHAT_SUMMARY_LIST": {
+					"$ref": "#/$defs/message"
+				},
+				"CHAT_SUMMARY_ENTRY": {
+					"$ref": "#/$defs/message"
+				},
+				"CHAT_SUMMARY_PENDING": {
+					"$ref": "#/$defs/message"
+				},
+				"ITEM_REMOVE_SUCCESS": {
+					"$ref": "#/$defs/message"
+				}
+			},
+			"required": [
+				"BALANCE_COMMAND_MESSAGE",
+				"DAILY_COMMAND_MESSAGE",
+				"DAILY_COMMAND_MESSAGE_STREAK",
+				"DAILY_COMMAND_ALREADY_CLAIMED_MESSAGE",
+				"WORK_COMMAND_MESSAGE",
+				"WORK_COMMAND_ALREADY_CLAIMED_MESSAGE",
+				"SHOP_COMMAND_WRONG_PAGE",
+				"SHOP_TITLE_MESSAGE",
+				"SHOP_HEADER",
+				"SHOP_FOOTER",
+				"SHOP_ITEM_DESCRIPTION",
+				"ITEM_USE_ACTION_UNDEFINED",
+				"ITEM_NOT_EXISTS",
+				"ITEM_USE_NOT_OWNED",
+				"ITEM_USE_ONLY_SINGLE_ITEM",
+				"ITEM_GIVE_NOT_ENOUGH_OWNED",
+				"ITEM_GIVE_SUCCESS",
+				"BUY_ITEM_NO_SUPPLY",
+				"BUY_ITEM_NOT_ENOUGH_MONEY",
+				"BUY_ITEM_SUCCESS",
+				"INVENTORY_ITEM_DESCRIPTION",
+				"INVENTORY_ITEM_DESCRIPTION_WITH_USE",
+				"INVENTORY_DISPLAY",
+				"ERROR_MESSAGE",
+				"ROLE_REWARD_ALREADY_CLAIMED",
+				"ROLE_REWARD_CLAIMED",
+				"RICHEST_COMMAND",
+				"RICHEST_COMMAND_ENTRY",
+				"VOTE_CAMPAIGN_CREATED",
+				"VOTE_CAMPAIGN_EXISTS_ALREADY",
+				"VOTE_CAMPAIGN_CHOICE_ADDED",
+				"VOTE_CAMPAIGN_NOT_FOUND",
+				"VOTE_CAMPAIGN_STARTED",
+				"VOTE_CAMPAIGN_STOPPED",
+				"VOTE_CAMPAIGN_CHOICE_REMOVED",
+				"VOTE_CAMPAIGN_CHOICE_NOT_FOUND",
+				"VOTE_CAMPAIGN_VOTE_DISPLAY_HEADER",
+				"VOTE_CAMPAIGN_VOTE_CHOICE_DISPLAY",
+				"VOTE_COMMAND_ALREADY_VOTED",
+				"VOTE_COMMAND_VOTED",
+				"VOTE_CAMPAIGN_LIST",
+				"VOTE_CAMPAIGN_LIST_DESCRIPTION",
+				"GAME_ON_COOLDOWN",
+				"ROCK_PAPER_SCISSORS_TIE",
+				"ROCK_PAPER_SCISSORS_WIN",
+				"ROCK_PAPER_SCISSORS_LOSS",
+				"GAME_BET_NOT_ENOUGH_MONEY",
+				"ROULETTE_GAME_RUNNING",
+				"ROULETTE_BET_AND_PULL",
+				"ROULETTE_WIN_MESSAGE",
+				"ROULETTE_LOSE_MESSAGE",
+				"ROULETTE_DISPLAY",
+				"DICE_GAME_LOSS",
+				"DICE_GAME_WIN",
+				"DICE_GAME_JACKPOT",
+				"GIVE_COINS_COMMAND",
+				"CHAT_SUMMARY_LIST",
+				"CHAT_SUMMARY_ENTRY",
+				"CHAT_SUMMARY_PENDING",
+				"ITEM_REMOVE_SUCCESS"
+			]
+		},
+		"items": {
+			"type": "object",
+			"properties": {
+				"definitions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/item"
+					}
+				}
+			}
+		},
+		"shop": {
+			"type": "object",
+			"properties": {
+				"itemsPerPage": {
+					"type": "number",
+					"minimum": 4,
+					"maximum": 20
+				},
+				"shopItems": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/shopEntry"
+					}
+				}
+			},
+			"required": [
+				"itemsPerPage",
+				"shopItems"
+			]
+		}
+	},
+	"$defs": {
+		"command": {
+			"properties": {
+				"description": {
+					"type": "string",
+					"minLength": 5
+				},
+				"hidden": {
+					"type": "boolean"
+				},
+				"roleRestricted": {
+					"type": "boolean",
+					"default": false
+				},
+				"allowedRoles": {
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				},
+				"options": {
+					"type": "object"
+				}
+			},
+			"if": {
+				"properties": {
+					"roleRestricted": {
+						"const": false
+					}
+				},
+				"required": "roleRestricted"
+			},
+			"else": {
+				"required": [
+					"allowedRoles"
+				]
+			},
+			"required": [
+				"description"
+			],
+			"unevaluatedProperties": false
+		},
+		"argument": {
+			"type": "string",
+			"description": "Description for Argument",
+			"minLength": 3
+		},
+		"message": {
+			"type": "string",
+			"pattern": "^([^\\%]|\\%\\([a-zA-Z]+\\)|\\%(?!\\w|\\())*$"
+		},
+		"item": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "number"
+				},
+				"name": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"useName": {
+					"type": "string",
+					"pattern": "^[a-zA-Z0-9]+$"
+				},
+				"action": {
+					"type": "string",
+					"enum": [
+						"ROLE_REWARD"
+					]
+				},
+				"actionArguments": {
+					"type": "object"
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"description"
+			],
+			"additionalProperties": false,
+			"allOf": [
+				{
+					"if": {
+						"required": [
+							"action"
+						]
+					},
+					"then": {
+						"required": [
+							"useName"
+						]
+					},
+					"else": {
+						"not": {
+							"required": ["actionArguments"]
+						}
+					}
+				},
+				{
+					"if": {
+						"required": [
+							"useName"
+						]
+					},
+					"then": {
+						"required": [
+							"action"
+						]
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"action": {
+								"const": "ROLE_REWARD"
+							}
+						},
+						"required":[
+							"action"
+						]
+					},
+					"then": {
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"roleId": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"roleId"
+								],
+								"additionalProperties": false
+							}
+						},
+						"required": [
+							"actionArguments"
+						]
+					}
+				}
+			]
+		},
+		"shopEntry": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "number",
+					"minimum": 1,
+					"description": "Unique *Shop* ID"
+				},
+				"itemId": {
+					"type": "number",
+					"minimum": 1,
+					"description": "ID for Item to be sold (see items.definitions)"
+				},
+				"buyName": {
+					"type": "string",
+					"pattern": "^[a-zA-Z0-9]+$",
+					"description": "Name used for buying this entry (/buy [buyName])"
+				},
+				"price":{
+					"type": "number"
+				},
+				"amountAvailable": {
+					"type": "number",
+					"minimum": -1,
+					"description": "Amount of times this shop entry can be bought (-1 for unlimited)"
+				}
+			},
+			"required": [
+				"id",
+				"itemId",
+				"buyName",
+				"price",
+				"amountAvailable"
+			],
+			"additionalProperties": false
+		}
+	}
+}
