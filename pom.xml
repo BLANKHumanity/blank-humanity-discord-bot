@@ -23,6 +23,7 @@
 	<modules>
 		<module>blankdiscordbot-core</module>
 		<module>discord-library</module>
+		<module>discord-wallet-connection</module>
 	</modules>
 
 	<dependencies>
