@@ -20,7 +20,8 @@ You need to make sure you have docker installed and running. You might also need
 
 ### How to deploy on Server
 
-This bot comes with a preconfigured [docker-compose.yml](docker-build/docker-compose.yml) that can be used to setup and update the bot easily on any machine.
-A [.env](docker-build/.env.example) file must also be created and configured. Afterwards the bot can be started by running `docker-compose up -d` in the folder containing the docker-compose.yml and .env
-The bot can then be stopped by running `docker-compose down`
-Updates can be pulled by running `docker-compose pull`, if you have selected a new version tag or use latest as your deployment tag.
+- This bot comes with a preconfigured [docker-compose.yml](dockerBuild/docker-compose.yml) that can be used to setup and update the bot easily on any machine.
+- A [.env](dockerBuild/.env.example) file must also be created and configured. 
+- Afterwards the bot can be started by running `docker-compose up -d` in the folder containing the docker-compose.yml and .env
+- The bot can then be stopped by running `docker-compose down`
+- Updates can be pulled by running `docker-compose pull`, if you have selected a new version tag or use latest as your deployment tag.
