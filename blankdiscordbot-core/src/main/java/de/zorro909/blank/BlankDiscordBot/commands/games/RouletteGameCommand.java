@@ -9,12 +9,13 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import de.zorro909.blank.BlankDiscordBot.commands.games.messages.GameFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.games.messages.GameMessageType;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.game.GameMetadata;
 import de.zorro909.blank.BlankDiscordBot.entities.game.GameType;
 import de.zorro909.blank.BlankDiscordBot.entities.game.RouletteMetadata;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import de.zorro909.blank.BlankDiscordBot.utils.menu.ReactionMenu;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -93,7 +94,8 @@ public class RouletteGameCommand extends AbstractGame {
 
     private FormattingData rejectNewCommand(BlankUser user) {
 	return getBlankUserService()
-		.createFormattingData(user, MessageType.ROULETTE_GAME_RUNNING)
+		.createFormattingData(user,
+			GameMessageType.ROULETTE_GAME_RUNNING)
 		.build();
     }
 
@@ -129,9 +131,9 @@ public class RouletteGameCommand extends AbstractGame {
 	    }
 	    return getBlankUserService()
 		    .createFormattingData(user,
-			    MessageType.GAME_BET_NOT_ENOUGH_MONEY)
-		    .dataPairing(FormatDataKey.BET_AMOUNT, betAmount)
-		    .dataPairing(FormatDataKey.GAME_NAME,
+			    GameMessageType.GAME_BET_NOT_ENOUGH_MONEY)
+		    .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
+		    .dataPairing(GameFormatDataKey.GAME_NAME,
 			    getGameType().getDisplayName())
 		    .build();
 	}
@@ -149,11 +151,11 @@ public class RouletteGameCommand extends AbstractGame {
 	    roulette.setRound(roulette.getRound() + 1);
 
 	    return buildRouletteMessage(metadata, roulette, user, betAmount,
-		    reward, MessageType.ROULETTE_WIN_MESSAGE);
+		    reward, GameMessageType.ROULETTE_WIN_MESSAGE);
 	} else {
 	    finish(metadata);
 	    return buildRouletteMessage(metadata, roulette, user, betAmount,
-		    reward, MessageType.ROULETTE_LOSE_MESSAGE);
+		    reward, GameMessageType.ROULETTE_LOSE_MESSAGE);
 	}
     }
 
@@ -170,8 +172,8 @@ public class RouletteGameCommand extends AbstractGame {
 		.stream()
 		.map((bet) -> format(getBlankUserService()
 			.createFormattingData(user,
-				MessageType.ROULETTE_BET_AND_PULL)
-			.dataPairing(FormatDataKey.BET_AMOUNT, bet)
+				GameMessageType.ROULETTE_BET_AND_PULL)
+			.dataPairing(GameFormatDataKey.BET_AMOUNT, bet)
 			.build()))
 		.collect(Collectors.joining("\n"));
 
@@ -186,14 +188,14 @@ public class RouletteGameCommand extends AbstractGame {
 
 	String rouletteResult = format(getBlankUserService()
 		.createFormattingData(user, resultMessage)
-		.dataPairing(FormatDataKey.REWARD_AMOUNT, reward)
-		.dataPairing(FormatDataKey.BET_AMOUNT, betAmount)
+		.dataPairing(GameFormatDataKey.REWARD_AMOUNT, reward)
+		.dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
 		.build());
 
 	return getBlankUserService()
-		.createFormattingData(user, MessageType.ROULETTE_DISPLAY)
-		.dataPairing(FormatDataKey.ROULETTE_HEADER, rouletteHeader)
-		.dataPairing(FormatDataKey.ROULETTE_RESULT, rouletteResult)
+		.createFormattingData(user, GameMessageType.ROULETTE_DISPLAY)
+		.dataPairing(GameFormatDataKey.ROULETTE_HEADER, rouletteHeader)
+		.dataPairing(GameFormatDataKey.ROULETTE_RESULT, rouletteResult)
 		.build();
     }
 

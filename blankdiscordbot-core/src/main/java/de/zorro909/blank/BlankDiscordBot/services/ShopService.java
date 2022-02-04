@@ -4,18 +4,20 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemShopConfig;
 import de.zorro909.blank.BlankDiscordBot.config.items.ShopItem;
 import de.zorro909.blank.BlankDiscordBot.database.BuyLogDao;
-import de.zorro909.blank.BlankDiscordBot.database.ItemDao;
 import de.zorro909.blank.BlankDiscordBot.entities.item.BuyLogEntry;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.services.item.ItemBuyStatus;
+import de.zorro909.blank.BlankDiscordBot.utils.item.ItemBuyStatus;
 
 @Service
 public class ShopService {
@@ -31,9 +33,6 @@ public class ShopService {
 
     @Autowired
     private BuyLogDao buyLogDao;
-
-    @Autowired
-    private ItemDao itemDao;
 
     public long amountShopPages() {
 	return (long) Math
@@ -71,7 +70,8 @@ public class ShopService {
 	    return ItemBuyStatus.NOT_ENOUGH_MONEY;
 	}
 
-	if (getAvailableItemAmount(item) != -1 && getAvailableItemAmount(item) < amount) {
+	if (getAvailableItemAmount(item) != -1
+		&& getAvailableItemAmount(item) < amount) {
 	    return ItemBuyStatus.NO_AVAILABLE_SUPPLY;
 	}
 

@@ -1,20 +1,20 @@
 package de.zorro909.blank.BlankDiscordBot.commands.items;
 
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
+import de.zorro909.blank.BlankDiscordBot.commands.economy.messages.EconomyFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.items.messages.ItemFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.items.messages.ItemMessageType;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemConfiguration;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
 import de.zorro909.blank.BlankDiscordBot.config.items.ShopItem;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.services.ShopService;
-import de.zorro909.blank.BlankDiscordBot.services.item.ItemBuyStatus;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
+import de.zorro909.blank.BlankDiscordBot.utils.item.ItemBuyStatus;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -62,8 +62,8 @@ public class BuyItemCommand extends AbstractCommand {
 
 	if (shopItem.isEmpty()) {
 	    FormattingData data = blankUserService
-		    .createFormattingData(user, MessageType.ITEM_NOT_EXISTS)
-		    .dataPairing(FormatDataKey.ITEM_NAME,
+		    .createFormattingData(user, ItemMessageType.ITEM_NOT_EXISTS)
+		    .dataPairing(ItemFormatDataKey.ITEM_NAME,
 			    event.getOption("item").getAsString())
 		    .build();
 	    reply(event, data);
@@ -74,22 +74,22 @@ public class BuyItemCommand extends AbstractCommand {
 	ItemBuyStatus status = shopService.buyItem(user, item, amount);
 
 	MessageType messageType = switch (status) {
-	case NO_AVAILABLE_SUPPLY -> MessageType.BUY_ITEM_NO_SUPPLY;
-	case NOT_ENOUGH_MONEY -> MessageType.BUY_ITEM_NOT_ENOUGH_MONEY;
-	case SUCCESS -> MessageType.BUY_ITEM_SUCCESS;
+	case NO_AVAILABLE_SUPPLY -> ItemMessageType.BUY_ITEM_NO_SUPPLY;
+	case NOT_ENOUGH_MONEY -> ItemMessageType.BUY_ITEM_NOT_ENOUGH_MONEY;
+	case SUCCESS -> ItemMessageType.BUY_ITEM_SUCCESS;
 	};
 
 	FormattingData data = blankUserService
 		.createFormattingData(user, messageType)
-		.dataPairing(FormatDataKey.SHOP_ITEM_BUY_NAME,
+		.dataPairing(ItemFormatDataKey.SHOP_ITEM_BUY_NAME,
 			item.getBuyName())
-		.dataPairing(FormatDataKey.SHOP_ITEM_ID, item.getItemId())
-		.dataPairing(FormatDataKey.SHOP_ITEM_PRICE, item.getPrice())
-		.dataPairing(FormatDataKey.SHOP_ITEM_AVAILABLE_AMOUNT,
+		.dataPairing(ItemFormatDataKey.SHOP_ITEM_ID, item.getItemId())
+		.dataPairing(ItemFormatDataKey.SHOP_ITEM_PRICE, item.getPrice())
+		.dataPairing(ItemFormatDataKey.SHOP_ITEM_AVAILABLE_AMOUNT,
 			shopService.getAvailableItemAmount(item))
-		.dataPairing(FormatDataKey.ITEM_AMOUNT, amount)
-		.dataPairing(FormatDataKey.BALANCE, user.getBalance())
-		.dataPairing(FormatDataKey.ITEM_NAME,
+		.dataPairing(ItemFormatDataKey.ITEM_AMOUNT, amount)
+		.dataPairing(EconomyFormatDataKey.BALANCE, user.getBalance())
+		.dataPairing(ItemFormatDataKey.ITEM_NAME,
 			itemConfiguration
 				.getItemDefinition(item.getItemId())
 				.map(ItemDefinition::getName)

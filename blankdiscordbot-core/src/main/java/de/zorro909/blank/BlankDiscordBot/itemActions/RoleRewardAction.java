@@ -4,20 +4,21 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import de.zorro909.blank.BlankDiscordBot.commands.items.messages.ItemFormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.config.messages.GenericMessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.item.Item;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
+import de.zorro909.blank.BlankDiscordBot.itemActions.messages.ItemActionFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.itemActions.messages.ItemActionMessageType;
 import de.zorro909.blank.BlankDiscordBot.services.BlankUserService;
 import de.zorro909.blank.BlankDiscordBot.services.InventoryService;
-import de.zorro909.blank.BlankDiscordBot.services.item.ExecutableItemAction;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
-import net.dv8tion.jda.api.EmbedBuilder;
+import de.zorro909.blank.BlankDiscordBot.utils.item.ExecutableItemAction;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 
 @Component
@@ -42,10 +43,10 @@ public class RoleRewardAction implements ExecutableItemAction {
 	    reply
 		    .accept(blankUserService
 			    .createFormattingData(user,
-				    MessageType.ITEM_USE_ONLY_SINGLE_ITEM)
-			    .dataPairing(FormatDataKey.ITEM_ID,
+				    ItemActionMessageType.ITEM_USE_ONLY_SINGLE_ITEM)
+			    .dataPairing(ItemFormatDataKey.ITEM_ID,
 				    item.getItemId())
-			    .dataPairing(FormatDataKey.ITEM_NAME,
+			    .dataPairing(ItemFormatDataKey.ITEM_NAME,
 				    definition.getName())
 			    .build());
 	    return ItemActionStatus.GENERIC_ERROR;
@@ -80,8 +81,8 @@ public class RoleRewardAction implements ExecutableItemAction {
 	    reply
 		    .accept(blankUserService
 			    .createFormattingData(user,
-				    MessageType.ROLE_REWARD_ALREADY_CLAIMED)
-			    .dataPairing(FormatDataKey.ROLE,
+				    ItemActionMessageType.ROLE_REWARD_ALREADY_CLAIMED)
+			    .dataPairing(ItemActionFormatDataKey.ROLE,
 				    role.get().getName())
 			    .build());
 	    return ItemActionStatus.GENERIC_ERROR;
@@ -90,8 +91,8 @@ public class RoleRewardAction implements ExecutableItemAction {
 	    reply
 		    .accept(blankUserService
 			    .createFormattingData(user,
-				    MessageType.ROLE_REWARD_CLAIMED)
-			    .dataPairing(FormatDataKey.ROLE,
+				    ItemActionMessageType.ROLE_REWARD_CLAIMED)
+			    .dataPairing(ItemActionFormatDataKey.ROLE,
 				    role.get().getName())
 			    .build());
 	    return ItemActionStatus.SUCCESS;
@@ -100,8 +101,9 @@ public class RoleRewardAction implements ExecutableItemAction {
 
     private FormattingData error(BlankUser user, String errorDescription) {
 	return blankUserService
-		.createFormattingData(user, MessageType.ERROR_MESSAGE)
-		.dataPairing(FormatDataKey.ERROR_MESSAGE, errorDescription)
+		.createFormattingData(user, GenericMessageType.ERROR_MESSAGE)
+		.dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
+			errorDescription)
 		.build();
     }
 

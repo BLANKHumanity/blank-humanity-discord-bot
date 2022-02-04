@@ -3,6 +3,8 @@ package de.zorro909.blank.BlankDiscordBot.commands.games;
 import java.util.Random;
 import java.util.function.Consumer;
 import org.springframework.stereotype.Component;
+import de.zorro909.blank.BlankDiscordBot.commands.games.messages.GameFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.games.messages.GameMessageType;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.game.GameMetadata;
 import de.zorro909.blank.BlankDiscordBot.entities.game.GameType;
@@ -45,12 +47,11 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
 	    GameMetadata metadata) {
 	int betAmount = (int) event.getOption("bet").getAsLong();
 	if (betAmount > user.getBalance()) {
-	    reply(event,
-		    getBlankUserService()
-			    .createFormattingData(user,
-				    MessageType.GAME_BET_NOT_ENOUGH_MONEY)
-			    .dataPairing(FormatDataKey.BET_AMOUNT, betAmount)
-			    .build());
+	    reply(event, getBlankUserService()
+		    .createFormattingData(user,
+			    GameMessageType.GAME_BET_NOT_ENOUGH_MONEY)
+		    .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
+		    .build());
 	    abort(metadata);
 	}
 
@@ -97,10 +98,11 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
 
 	FormattingData tie = getBlankUserService()
 		.createFormattingData(user,
-			MessageType.ROCK_PAPER_SCISSORS_LOSS)
-		.dataPairing(FormatDataKey.BET_AMOUNT, betAmount)
-		.dataPairing(FormatDataKey.RPS_USER, intToSelection(userSel))
-		.dataPairing(FormatDataKey.RPS_BOT, intToSelection(botSel))
+			GameMessageType.ROCK_PAPER_SCISSORS_LOSS)
+		.dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
+		.dataPairing(GameFormatDataKey.RPS_USER,
+			intToSelection(userSel))
+		.dataPairing(GameFormatDataKey.RPS_BOT, intToSelection(botSel))
 		.build();
 
 	reply(event, tie);
@@ -111,10 +113,12 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
 	getBlankUserService().increaseUserBalance(user, betAmount);
 
 	FormattingData tie = getBlankUserService()
-		.createFormattingData(user, MessageType.ROCK_PAPER_SCISSORS_WIN)
-		.dataPairing(FormatDataKey.BET_AMOUNT, betAmount)
-		.dataPairing(FormatDataKey.RPS_USER, intToSelection(userSel))
-		.dataPairing(FormatDataKey.RPS_BOT, intToSelection(botSel))
+		.createFormattingData(user,
+			GameMessageType.ROCK_PAPER_SCISSORS_WIN)
+		.dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
+		.dataPairing(GameFormatDataKey.RPS_USER,
+			intToSelection(userSel))
+		.dataPairing(GameFormatDataKey.RPS_BOT, intToSelection(botSel))
 		.build();
 
 	reply(event, tie);
@@ -123,10 +127,12 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
     private void tie(SlashCommandEvent event, BlankUser user, int betAmount,
 	    int userSel, int botSel) {
 	FormattingData tie = getBlankUserService()
-		.createFormattingData(user, MessageType.ROCK_PAPER_SCISSORS_TIE)
-		.dataPairing(FormatDataKey.BET_AMOUNT, betAmount)
-		.dataPairing(FormatDataKey.RPS_USER, intToSelection(userSel))
-		.dataPairing(FormatDataKey.RPS_BOT, intToSelection(botSel))
+		.createFormattingData(user,
+			GameMessageType.ROCK_PAPER_SCISSORS_TIE)
+		.dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
+		.dataPairing(GameFormatDataKey.RPS_USER,
+			intToSelection(userSel))
+		.dataPairing(GameFormatDataKey.RPS_BOT, intToSelection(botSel))
 		.build();
 
 	reply(event, tie);

@@ -1,9 +1,8 @@
 package de.zorro909.blank.BlankDiscordBot.commands.economy;
 
 import org.springframework.stereotype.Component;
-
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import de.zorro909.blank.BlankDiscordBot.commands.economy.messages.EconomyMessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.entities.user.ClaimDataType;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
@@ -32,11 +31,11 @@ public class WorkCommand extends AbstractCommand {
 
 	if (formattingData.success()) {
 	    reply(event, formattingData
-		    .messageType(MessageType.WORK_COMMAND_MESSAGE));
+		    .messageType(EconomyMessageType.WORK_COMMAND_MESSAGE));
 	} else {
 	    reply(event, formattingData
 		    .messageType(
-			    MessageType.WORK_COMMAND_ALREADY_CLAIMED_MESSAGE));
+			    EconomyMessageType.WORK_COMMAND_ALREADY_CLAIMED_MESSAGE));
 	}
     }
 }

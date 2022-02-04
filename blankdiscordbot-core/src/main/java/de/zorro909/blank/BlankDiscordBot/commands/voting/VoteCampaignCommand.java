@@ -5,17 +5,16 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractHiddenCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import de.zorro909.blank.BlankDiscordBot.commands.voting.messages.VotingFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.voting.messages.VotingMessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.entities.voting.VotingCampaign;
 import de.zorro909.blank.BlankDiscordBot.services.VotingService;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
 @Component
 public class VoteCampaignCommand extends AbstractHiddenCommand {
@@ -113,8 +112,9 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
 	if (votingService.votingCampaignExists(campaign)) {
 	    reply(event, getBlankUserService()
 		    .createFormattingData(user,
-			    MessageType.VOTE_CAMPAIGN_EXISTS_ALREADY)
-		    .dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
+			    VotingMessageType.VOTE_CAMPAIGN_EXISTS_ALREADY)
+		    .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+			    campaign)
 		    .build());
 	    return;
 	}
@@ -124,11 +124,13 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
 
 	voteCommand.updateCommandDefinition();
 
-	reply(event, getBlankUserService()
-		.createFormattingData(user, MessageType.VOTE_CAMPAIGN_CREATED)
-		.dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME,
-			votingCampaign.getName())
-		.build());
+	reply(event,
+		getBlankUserService()
+			.createFormattingData(user,
+				VotingMessageType.VOTE_CAMPAIGN_CREATED)
+			.dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+				votingCampaign.getName())
+			.build());
     }
 
     private void addChoice(SlashCommandEvent event) {
@@ -148,15 +150,17 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
 
 	    reply(event, getBlankUserService()
 		    .createFormattingData(getBlankUserService().getUser(event),
-			    MessageType.VOTE_CAMPAIGN_CHOICE_ADDED)
-		    .dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
-		    .dataPairing(FormatDataKey.VOTE_CHOICE, choice)
+			    VotingMessageType.VOTE_CAMPAIGN_CHOICE_ADDED)
+		    .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+			    campaign)
+		    .dataPairing(VotingFormatDataKey.VOTE_CHOICE, choice)
 		    .build());
 	} else {
 	    reply(event, getBlankUserService()
 		    .createFormattingData(getBlankUserService().getUser(event),
-			    MessageType.VOTE_CAMPAIGN_NOT_FOUND)
-		    .dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
+			    VotingMessageType.VOTE_CAMPAIGN_NOT_FOUND)
+		    .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+			    campaign)
 		    .build());
 	}
     }
@@ -176,9 +180,10 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
 		reply(event, getBlankUserService()
 			.createFormattingData(
 				getBlankUserService().getUser(event),
-				MessageType.VOTE_CAMPAIGN_CHOICE_NOT_FOUND)
-			.dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
-			.dataPairing(FormatDataKey.VOTE_CHOICE, choice)
+				VotingMessageType.VOTE_CAMPAIGN_CHOICE_NOT_FOUND)
+			.dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+				campaign)
+			.dataPairing(VotingFormatDataKey.VOTE_CHOICE, choice)
 			.build());
 		return;
 	    }
@@ -187,15 +192,17 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
 
 	    reply(event, getBlankUserService()
 		    .createFormattingData(getBlankUserService().getUser(event),
-			    MessageType.VOTE_CAMPAIGN_CHOICE_REMOVED)
-		    .dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
-		    .dataPairing(FormatDataKey.VOTE_CHOICE, choice)
+			    VotingMessageType.VOTE_CAMPAIGN_CHOICE_REMOVED)
+		    .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+			    campaign)
+		    .dataPairing(VotingFormatDataKey.VOTE_CHOICE, choice)
 		    .build());
 	} else {
 	    reply(event, getBlankUserService()
 		    .createFormattingData(getBlankUserService().getUser(event),
-			    MessageType.VOTE_CAMPAIGN_NOT_FOUND)
-		    .dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
+			    VotingMessageType.VOTE_CAMPAIGN_NOT_FOUND)
+		    .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+			    campaign)
 		    .build());
 	}
     }
@@ -211,14 +218,16 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
 	    voteCommand.updateCommandDefinition();
 	    reply(event, getBlankUserService()
 		    .createFormattingData(getBlankUserService().getUser(event),
-			    MessageType.VOTE_CAMPAIGN_STARTED)
-		    .dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
+			    VotingMessageType.VOTE_CAMPAIGN_STARTED)
+		    .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+			    campaign)
 		    .build());
 	} else {
 	    reply(event, getBlankUserService()
 		    .createFormattingData(getBlankUserService().getUser(event),
-			    MessageType.VOTE_CAMPAIGN_NOT_FOUND)
-		    .dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
+			    VotingMessageType.VOTE_CAMPAIGN_NOT_FOUND)
+		    .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+			    campaign)
 		    .build());
 	}
     }
@@ -234,14 +243,16 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
 	    voteCommand.updateCommandDefinition();
 	    reply(event, getBlankUserService()
 		    .createFormattingData(getBlankUserService().getUser(event),
-			    MessageType.VOTE_CAMPAIGN_STOPPED)
-		    .dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
+			    VotingMessageType.VOTE_CAMPAIGN_STOPPED)
+		    .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+			    campaign)
 		    .build());
 	} else {
 	    reply(event, getBlankUserService()
 		    .createFormattingData(getBlankUserService().getUser(event),
-			    MessageType.VOTE_CAMPAIGN_NOT_FOUND)
-		    .dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
+			    VotingMessageType.VOTE_CAMPAIGN_NOT_FOUND)
+		    .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+			    campaign)
 		    .build());
 	}
     }
@@ -255,16 +266,17 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
 		.collect(Collectors.joining("\n"));
 
 	reply(event, getBlankUserService()
-		.createFormattingData(user, MessageType.VOTE_CAMPAIGN_LIST)
-		.dataPairing(FormatDataKey.VOTE_CAMPAIGN_LIST_BODY, body)
+		.createFormattingData(user,
+			VotingMessageType.VOTE_CAMPAIGN_LIST)
+		.dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_LIST_BODY, body)
 		.build());
     }
 
     private String formatVotingCampaign(VotingCampaign campaign) {
 	return format(FormattingData
 		.builder()
-		.messageType(MessageType.VOTE_CAMPAIGN_LIST_DESCRIPTION)
-		.dataPairing(FormatDataKey.VOTE_CAMPAIGN_NAME,
+		.messageType(VotingMessageType.VOTE_CAMPAIGN_LIST_DESCRIPTION)
+		.dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
 			campaign.getName())
 		.build());
     }

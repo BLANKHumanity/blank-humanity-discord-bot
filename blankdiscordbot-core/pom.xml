@@ -7,12 +7,34 @@
 		<version>1.1.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<groupId>de.zorro909.blank</groupId>
 	<artifactId>blankdiscordbot-core</artifactId>
-	<version>1.1.0</version>
 	<packaging>jar</packaging>
 
 	<name>BlankDiscordBot-Core</name>
 	<description>Core for Blank Humanity's Discord Bot</description>
 
+	<dependencies>
+		<dependency>
+			<groupId>de.zorro909.blank</groupId>
+			<artifactId>discord-library</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

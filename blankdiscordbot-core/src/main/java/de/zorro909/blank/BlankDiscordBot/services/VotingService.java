@@ -75,9 +75,7 @@ public class VotingService {
 		.getChoices()
 		.stream()
 		.flatMap(choice -> choice.getVotes().stream())
-		.filter((Vote vote) -> vote.getUserId() == user.getId())
-		.findAny()
-		.isPresent();
+		.anyMatch((Vote vote) -> vote.getUserId() == user.getId());
     }
 
     @Transactional

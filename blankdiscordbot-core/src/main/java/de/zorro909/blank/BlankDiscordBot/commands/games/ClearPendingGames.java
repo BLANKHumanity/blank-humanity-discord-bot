@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractHiddenCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.config.messages.GenericMessageType;
 import de.zorro909.blank.BlankDiscordBot.database.GameMetadataDao;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -37,8 +37,8 @@ public class ClearPendingGames extends AbstractHiddenCommand {
 	reply(event,
 		FormattingData
 			.builder()
-			.messageType(MessageType.ERROR_MESSAGE)
-			.dataPairing(FormatDataKey.ERROR_MESSAGE,
+			.messageType(GenericMessageType.ERROR_MESSAGE)
+			.dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
 				"Cleared all pending games!")
 			.build());
     }

@@ -3,13 +3,14 @@ package de.zorro909.blank.BlankDiscordBot.commands.games;
 import java.util.Random;
 import java.util.function.Consumer;
 import org.springframework.stereotype.Component;
+import de.zorro909.blank.BlankDiscordBot.commands.games.messages.GameFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.games.messages.GameMessageType;
 import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.game.GameMetadata;
 import de.zorro909.blank.BlankDiscordBot.entities.game.GameType;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.entities.user.fake.FakeUser;
 import de.zorro909.blank.BlankDiscordBot.entities.user.fake.FakeUserType;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import de.zorro909.blank.BlankDiscordBot.utils.menu.ReactionMenu;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -39,12 +40,11 @@ public class DiceGameCommand extends AbstractGame {
 	    GameMetadata metadata) {
 	int betAmount = (int) event.getOption("bet").getAsLong();
 	if (betAmount > user.getBalance()) {
-	    reply(event,
-		    getBlankUserService()
-			    .createFormattingData(user,
-				    MessageType.GAME_BET_NOT_ENOUGH_MONEY)
-			    .dataPairing(FormatDataKey.BET_AMOUNT, betAmount)
-			    .build());
+	    reply(event, getBlankUserService()
+		    .createFormattingData(user,
+			    GameMessageType.GAME_BET_NOT_ENOUGH_MONEY)
+		    .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
+		    .build());
 	    abort(metadata);
 	}
 
@@ -63,27 +63,27 @@ public class DiceGameCommand extends AbstractGame {
 
 	if (playerRoll.sum() > opponentRoll.sum()) {
 	    if (playerRoll.isSnakeEyes()) {
-		messageType = MessageType.DICE_GAME_JACKPOT;
+		messageType = GameMessageType.DICE_GAME_JACKPOT;
 
 		reward = betAmount + diceJackpot.getBalance();
 		diceJackpot.decreaseBalance(diceJackpot.getBalance());
 	    } else {
-		messageType = MessageType.DICE_GAME_WIN;
+		messageType = GameMessageType.DICE_GAME_WIN;
 		reward = betAmount;
 	    }
 	    getBlankUserService().increaseUserBalance(user, betAmount + reward);
 	} else {
-	    messageType = MessageType.DICE_GAME_LOSS;
+	    messageType = GameMessageType.DICE_GAME_LOSS;
 	}
 
 	reply(event,
 		getBlankUserService()
 			.createFormattingData(user, messageType)
-			.dataPairing(FormatDataKey.BET_AMOUNT, betAmount)
-			.dataPairing(FormatDataKey.REWARD_AMOUNT, reward)
-			.dataPairing(FormatDataKey.DICE_ROLL_USER,
+			.dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
+			.dataPairing(GameFormatDataKey.REWARD_AMOUNT, reward)
+			.dataPairing(GameFormatDataKey.DICE_ROLL_USER,
 				playerRoll.toString())
-			.dataPairing(FormatDataKey.DICE_ROLL_OPPONENT,
+			.dataPairing(GameFormatDataKey.DICE_ROLL_OPPONENT,
 				opponentRoll.toString())
 			.build());
 	finish(metadata);

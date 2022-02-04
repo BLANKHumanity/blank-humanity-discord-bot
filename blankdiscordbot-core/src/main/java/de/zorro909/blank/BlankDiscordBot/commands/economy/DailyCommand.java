@@ -2,10 +2,10 @@ package de.zorro909.blank.BlankDiscordBot.commands.economy;
 
 import org.springframework.stereotype.Component;
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import de.zorro909.blank.BlankDiscordBot.commands.economy.messages.EconomyFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.economy.messages.EconomyMessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.entities.user.ClaimDataType;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -31,17 +31,18 @@ public class DailyCommand extends AbstractCommand {
 		.build();
 
 	if (formattingData.success()) {
-	    if (formattingData.containsKey(FormatDataKey.CLAIM_STREAK)) {
+	    if (formattingData.containsKey(EconomyFormatDataKey.CLAIM_STREAK)) {
 		reply(event, formattingData
-			.messageType(MessageType.DAILY_COMMAND_MESSAGE_STREAK));
+			.messageType(
+				EconomyMessageType.DAILY_COMMAND_MESSAGE_STREAK));
 	    } else {
 		reply(event, formattingData
-			.messageType(MessageType.DAILY_COMMAND_MESSAGE));
+			.messageType(EconomyMessageType.DAILY_COMMAND_MESSAGE));
 	    }
 	} else {
 	    reply(event, formattingData
 		    .messageType(
-			    MessageType.DAILY_COMMAND_ALREADY_CLAIMED_MESSAGE));
+			    EconomyMessageType.DAILY_COMMAND_ALREADY_CLAIMED_MESSAGE));
 	}
     }
 }

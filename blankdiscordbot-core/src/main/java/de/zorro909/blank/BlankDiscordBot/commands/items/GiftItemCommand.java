@@ -1,14 +1,17 @@
 package de.zorro909.blank.BlankDiscordBot.commands.items;
 
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
+import de.zorro909.blank.BlankDiscordBot.commands.items.messages.ItemFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.items.messages.ItemMessageType;
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.services.InventoryService;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -61,8 +64,8 @@ public class GiftItemCommand extends AbstractCommand {
 
 	if (item.isEmpty()) {
 	    reply(event, getBlankUserService()
-		    .createFormattingData(user, MessageType.ITEM_NOT_EXISTS)
-		    .dataPairing(FormatDataKey.ITEM_NAME, itemName)
+		    .createFormattingData(user, ItemMessageType.ITEM_NOT_EXISTS)
+		    .dataPairing(ItemFormatDataKey.ITEM_NAME, itemName)
 		    .build());
 	    return;
 	}
@@ -73,12 +76,12 @@ public class GiftItemCommand extends AbstractCommand {
 		.addUserDetailsFormattingData(
 			getBlankUserService()
 				.createFormattingData(user,
-					MessageType.ITEM_GIVE_SUCCESS),
-			mentioned, FormatDataKey.RECEIVING_USER,
-			FormatDataKey.RECEIVING_USER_MENTION)
-		.dataPairing(FormatDataKey.ITEM_ID, item.get().getId())
-		.dataPairing(FormatDataKey.ITEM_NAME, item.get().getName())
-		.dataPairing(FormatDataKey.ITEM_AMOUNT, amount)
+					ItemMessageType.ITEM_GIVE_SUCCESS),
+			mentioned, GenericFormatDataKey.RECEIVING_USER,
+			GenericFormatDataKey.RECEIVING_USER_MENTION)
+		.dataPairing(ItemFormatDataKey.ITEM_ID, item.get().getId())
+		.dataPairing(ItemFormatDataKey.ITEM_NAME, item.get().getName())
+		.dataPairing(ItemFormatDataKey.ITEM_AMOUNT, amount)
 		.build();
 
 	reply(event, data);

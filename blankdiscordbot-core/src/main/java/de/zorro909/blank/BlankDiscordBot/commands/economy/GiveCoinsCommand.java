@@ -3,9 +3,9 @@ package de.zorro909.blank.BlankDiscordBot.commands.economy;
 import org.springframework.stereotype.Component;
 
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import de.zorro909.blank.BlankDiscordBot.commands.economy.messages.EconomyFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.economy.messages.EconomyMessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -42,8 +42,8 @@ public class GiveCoinsCommand extends AbstractCommand {
 	reply(event,
 		getBlankUserService()
 			.createFormattingData(receivingUser,
-				MessageType.GIVE_COINS_COMMAND)
-			.dataPairing(FormatDataKey.REWARD_AMOUNT, amount)
+				EconomyMessageType.GIVE_COINS_COMMAND)
+			.dataPairing(EconomyFormatDataKey.REWARD_AMOUNT, amount)
 			.build());
     }
 
