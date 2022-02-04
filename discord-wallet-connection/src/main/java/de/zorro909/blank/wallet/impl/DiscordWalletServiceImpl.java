@@ -1,6 +1,6 @@
 package de.zorro909.blank.wallet.impl;
 
-import java.io.UnsupportedEncodingException;
+import java.awt.font.NumericShaper;
 import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.Optional;
@@ -47,8 +47,8 @@ public class DiscordWalletServiceImpl implements DiscordWalletService {
     }
 
     @Override
-    public Optional<DiscordWallet> registerWallet(SignatureData sigData,
-	    String salt) {
+    @Transactional
+    public Optional<DiscordWallet> registerWallet(String sigData, String salt) {
 	Optional<DiscordWalletSalt> walletSalt = discordWalletSaltDao
 		.findBySalt(salt);
 
@@ -56,30 +56,43 @@ public class DiscordWalletServiceImpl implements DiscordWalletService {
 	    return Optional.empty();
 	}
 
-	DiscordWalletSalt wallet = walletSalt.get();
+	DiscordWalletSalt saltWallet = walletSalt.get();
 	String message = MessageFormatter
-		.format(messageFormat, wallet.getUser().getDiscordId(),
-			wallet.getSalt())
+		.format(messageFormat, saltWallet.getUser().getDiscordId(),
+			saltWallet.getSalt())
 		.getMessage();
+
+	byte[] signature = Numeric.hexStringToByteArray(sigData);
+	byte[] messageData = message.getBytes();
+
+	byte[] r = new byte[32];
+	System.arraycopy(signature, 0, r, 0, 32);
+
+	byte[] s = new byte[32];
+	System.arraycopy(signature, 32, s, 0, 32);
+
+	SignatureData signatureData = new SignatureData(signature[64], r, s);
 
 	BigInteger pubKey;
 	try {
 	    pubKey = Sign
-		    .signedPrefixedMessageToKey(message.getBytes("UTF-8"),
-			    sigData);
-	} catch (SignatureException | UnsupportedEncodingException e) {
+		    .signedPrefixedMessageToKey(messageData, signatureData);
+	} catch (SignatureException e) {
 	    log.error("Invalid Signature for Wallet Registration!", e);
 	    return Optional.empty();
 	}
 
 	DiscordWallet discordWallet = discordWalletDao
-		.findByUser(wallet.getUser())
+		.findByUser(saltWallet.getUser())
 		.orElseGet(DiscordWallet::new);
 
-	discordWallet.setUser(wallet.getUser());
+	discordWallet.setUser(saltWallet.getUser());
 	discordWallet.setWalletAddress(Numeric.toHexStringWithPrefix(pubKey));
 
-	return Optional.of(discordWalletDao.save(discordWallet));
+	Optional<DiscordWallet> optDiscordWallet = Optional
+		.of(discordWalletDao.save(discordWallet));
+	discordWalletSaltDao.delete(saltWallet);
+	return optDiscordWallet;
     }
 
     @Override

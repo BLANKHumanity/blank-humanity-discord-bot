@@ -11,7 +11,7 @@ public interface DiscordWalletService {
 
     public String createWalletSalt(BlankUser user);
 
-    public Optional<DiscordWallet> registerWallet(SignatureData sigData,
+    public Optional<DiscordWallet> registerWallet(String sigData,
 	    String salt);
 
     public Optional<DiscordWallet> getWallet(BlankUser user);
