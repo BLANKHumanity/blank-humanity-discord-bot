@@ -7,10 +7,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.commands.AbstractHiddenCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import de.zorro909.blank.BlankDiscordBot.commands.economy.messages.EconomyFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.economy.messages.EconomyMessageType;
+import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.config.messages.GenericMessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -41,11 +42,13 @@ public class RichestCommand extends AbstractCommand {
 	BlankUser user = blankUserService.getUser(event);
 
 	if (page < 1) {
-	    reply(event, blankUserService
-		    .createFormattingData(user, MessageType.ERROR_MESSAGE)
-		    .dataPairing(FormatDataKey.ERROR_MESSAGE,
-			    "Page needs to be bigger than 0")
-		    .build());
+	    reply(event,
+		    blankUserService
+			    .createFormattingData(user,
+				    GenericMessageType.ERROR_MESSAGE)
+			    .dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
+				    "Page needs to be bigger than 0")
+			    .build());
 	    return;
 	}
 
@@ -58,17 +61,17 @@ public class RichestCommand extends AbstractCommand {
 	for (int i = 0; i < richestUsers.size(); i++) {
 	    body += format(blankUserService
 		    .createFormattingData(richestUsers.get(i),
-			    MessageType.RICHEST_COMMAND_ENTRY)
-		    .dataPairing(FormatDataKey.LEADERBOARD_PLACE,
+			    EconomyMessageType.RICHEST_COMMAND_ENTRY)
+		    .dataPairing(EconomyFormatDataKey.LEADERBOARD_PLACE,
 			    getLeaderboardRanking(page, i))
 		    .build());
 	    body += "\n";
 	}
 
 	FormattingData data = blankUserService
-		.createFormattingData(user, MessageType.RICHEST_COMMAND)
-		.dataPairing(FormatDataKey.RICHEST_LIST_PAGE, page)
-		.dataPairing(FormatDataKey.RICHEST_COMMAND_BODY, body)
+		.createFormattingData(user, EconomyMessageType.RICHEST_COMMAND)
+		.dataPairing(EconomyFormatDataKey.RICHEST_LIST_PAGE, page)
+		.dataPairing(EconomyFormatDataKey.RICHEST_COMMAND_BODY, body)
 		.build();
 
 	reply(event, data);

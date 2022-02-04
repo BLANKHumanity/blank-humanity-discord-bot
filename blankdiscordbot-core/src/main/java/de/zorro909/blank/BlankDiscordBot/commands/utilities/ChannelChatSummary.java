@@ -12,9 +12,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Component;
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import de.zorro909.blank.BlankDiscordBot.commands.utilities.messages.UtilityFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.utilities.messages.UtilityMessageType;
+import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;
@@ -83,7 +84,7 @@ public class ChannelChatSummary extends AbstractCommand {
 	    Long lastMessageID, Consumer<FormattingData[]> updateMessages) {
 	BlankUser user = getBlankUserService()
 		.getUser(userId, channel.getGuild().getIdLong());
-	LinkedHashMap<String, Integer> messageCounts = new LinkedHashMap<String, Integer>();
+	LinkedHashMap<String, Integer> messageCounts = new LinkedHashMap<>();
 
 	long lastUpdate = System.currentTimeMillis();
 
@@ -154,7 +155,8 @@ public class ChannelChatSummary extends AbstractCommand {
 		.iterator();
 
 	String pendingMarker = format(getBlankUserService()
-		.createFormattingData(sender, MessageType.CHAT_SUMMARY_PENDING)
+		.createFormattingData(sender,
+			UtilityMessageType.CHAT_SUMMARY_PENDING)
 		.build());
 
 	for (int i = 0; i < lists.length; i++) {
@@ -164,24 +166,27 @@ public class ChannelChatSummary extends AbstractCommand {
 				    : null)
 		    .limit(16)
 		    .filter(Objects::nonNull)
-		    .map((entry) -> getBlankUserService()
+		    .map(entry -> getBlankUserService()
 			    .createFormattingData(sender,
-				    MessageType.CHAT_SUMMARY_ENTRY)
-			    .dataPairing(FormatDataKey.USER, entry.getKey())
-			    .dataPairing(FormatDataKey.MESSAGE_COUNT,
+				    UtilityMessageType.CHAT_SUMMARY_ENTRY)
+			    .dataPairing(GenericFormatDataKey.USER,
+				    entry.getKey())
+			    .dataPairing(UtilityFormatDataKey.MESSAGE_COUNT,
 				    entry.getValue())
 			    .build())
 		    .map(this::format)
 		    .collect(Collectors.joining("\n"));
 
 	    lists[i] = getBlankUserService()
-		    .createFormattingData(sender, MessageType.CHAT_SUMMARY_LIST)
-		    .dataPairing(FormatDataKey.CHANNEL, channel.getName())
-		    .dataPairing(FormatDataKey.CHANNEL_MENTION,
+		    .createFormattingData(sender,
+			    UtilityMessageType.CHAT_SUMMARY_LIST)
+		    .dataPairing(UtilityFormatDataKey.CHANNEL,
+			    channel.getName())
+		    .dataPairing(UtilityFormatDataKey.CHANNEL_MENTION,
 			    channel.getAsMention())
-		    .dataPairing(FormatDataKey.PAGE, i + 1)
-		    .dataPairing(FormatDataKey.CHAT_SUMMARY_BODY, body)
-		    .dataPairing(FormatDataKey.PENDING_MARKER,
+		    .dataPairing(UtilityFormatDataKey.PAGE, i + 1)
+		    .dataPairing(UtilityFormatDataKey.CHAT_SUMMARY_BODY, body)
+		    .dataPairing(UtilityFormatDataKey.PENDING_MARKER,
 			    pending ? pendingMarker : "")
 		    .build();
 	}

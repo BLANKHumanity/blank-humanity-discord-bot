@@ -4,16 +4,16 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.database.GameMetadataDao;
+import de.zorro909.blank.BlankDiscordBot.commands.games.messages.GameFormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.commands.games.messages.GameMessageType;
 import de.zorro909.blank.BlankDiscordBot.entities.game.GameMetadata;
 import de.zorro909.blank.BlankDiscordBot.entities.game.GameType;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
+import de.zorro909.blank.BlankDiscordBot.services.GameService;
 import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import de.zorro909.blank.BlankDiscordBot.utils.menu.ReactionMenu;
 import lombok.Getter;
@@ -27,13 +27,13 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 public abstract class AbstractGame extends AbstractCommand {
 
     @Autowired
-    private GameMetadataDao gameMetadataDao;
+    private GameService gameService;
 
     private GameType gameType;
 
     private MessageEmbed cachedEdit;
 
-    public AbstractGame(GameType gameType) {
+    protected AbstractGame(GameType gameType) {
 	super(gameType.getCommandName());
 	this.gameType = gameType;
     }
@@ -42,8 +42,8 @@ public abstract class AbstractGame extends AbstractCommand {
     protected void onCommand(SlashCommandEvent event) {
 	BlankUser user = getBlankUserService().getUser(event);
 
-	Optional<GameMetadata> gameMetadata = gameMetadataDao
-		.findByUserAndGame(user, getGameType());
+	Optional<GameMetadata> gameMetadata = gameService
+		.getGameMetadata(user, getGameType());
 
 	GameMetadata metadata = new GameMetadata();
 
@@ -64,10 +64,10 @@ public abstract class AbstractGame extends AbstractCommand {
 
 		reply(event, getBlankUserService()
 			.createFormattingData(user,
-				MessageType.GAME_ON_COOLDOWN)
-			.dataPairing(FormatDataKey.COOLDOWN_MINUTES, minutes)
-			.dataPairing(FormatDataKey.COOLDOWN_SECONDS, seconds)
-			.dataPairing(FormatDataKey.GAME_NAME,
+				GameMessageType.GAME_ON_COOLDOWN)
+			.dataPairing(GameFormatDataKey.COOLDOWN_MINUTES, minutes)
+			.dataPairing(GameFormatDataKey.COOLDOWN_SECONDS, seconds)
+			.dataPairing(GameFormatDataKey.GAME_NAME,
 				getGameType().getDisplayName())
 			.build());
 		return;
@@ -82,7 +82,7 @@ public abstract class AbstractGame extends AbstractCommand {
 			.setMetadataClassname(
 				getGameType().getMetadataClass().getName());
 	    }
-	    metadata = gameMetadataDao.save(metadata);
+	    metadata = gameService.saveGameMetadata(metadata);
 	}
 
 	ReactionMenu menu = null;
@@ -94,7 +94,7 @@ public abstract class AbstractGame extends AbstractCommand {
 	    synchronized (this) {
 		cachedEdit = null;
 		menu = onGameContinue(user, metadata, event.getOptions(),
-			(formattingData) -> {
+			formattingData -> {
 			    EmbedBuilder builder = new EmbedBuilder();
 			    builder.setDescription(format(formattingData));
 
@@ -109,12 +109,12 @@ public abstract class AbstractGame extends AbstractCommand {
     }
 
     private boolean reactionInteractionWrapper(MessageReactionAddEvent event,
-	    ReactionMenu menu, Object argument) {	
+	    ReactionMenu menu, Object argument) {
 	BlankUser user = getBlankUserService()
 		.getUser(event.retrieveMember().complete());
 
-	Optional<GameMetadata> gameMetadata = gameMetadataDao
-		.findByUserAndGame(user, getGameType());
+	Optional<GameMetadata> gameMetadata = gameService
+		.getGameMetadata(user, getGameType());
 
 	if (gameMetadata.isEmpty()) {
 	    return false;
@@ -125,7 +125,7 @@ public abstract class AbstractGame extends AbstractCommand {
 	synchronized (this) {
 	    cachedEdit = null;
 	    newMenu = onGameContinue(user, gameMetadata.get(), argument,
-		    (formattingData) -> {
+		    formattingData -> {
 			EmbedBuilder builder = new EmbedBuilder();
 			builder.setDescription(format(formattingData));
 
@@ -161,9 +161,8 @@ public abstract class AbstractGame extends AbstractCommand {
     protected void createMenuEntry(ReactionMenu menu, String emoji,
 	    Object argument) {
 	menu
-		.addMenuAction(emoji,
-			(event) -> reactionInteractionWrapper(event, menu,
-				argument));
+		.addMenuAction(emoji, event -> reactionInteractionWrapper(event,
+			menu, argument));
     }
 
     protected abstract ReactionMenu onGameStart(SlashCommandEvent event,
@@ -185,7 +184,8 @@ public abstract class AbstractGame extends AbstractCommand {
     }
 
     protected void finish(long gameId) {
-	Optional<GameMetadata> metadata = gameMetadataDao.findById(gameId);
+	Optional<GameMetadata> metadata = gameService
+		.getGameMetadataById(gameId);
 	if (metadata.isEmpty()) {
 	    throw new RuntimeException(
 		    "No Game with ID '" + gameId + "' found!");
