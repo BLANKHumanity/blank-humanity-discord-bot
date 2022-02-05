@@ -1,4 +1,4 @@
-package de.zorro909.blank.wallet.config;
+package de.zorro909.blank.BlankDiscordBot.wallet.config;
 
 import javax.validation.constraints.NotNull;
 
@@ -9,10 +9,10 @@ import lombok.Data;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "web3.walletVerify")
+@ConfigurationProperties(prefix = "web3.wallet.verify")
 public class WalletVerifyConfig {
 
     @NotNull
-    private String verifyBaseUrl;
+    private String baseUrl;
     
 }

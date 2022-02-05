@@ -63,6 +63,36 @@
 				}
 			}
 		},
+		"web3": {
+			"type": "object",
+			"properties": {
+				"wallet": {
+					"type": "object",
+					"properties": {
+						"verify": {
+							"type": "object",
+							"properties": {
+								"baseUrl": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"baseUrl"
+							],
+							"additionalProperties": false
+						}
+					},
+					"required": [
+						"verify"
+					],
+					"additionalProperties": false
+				}
+			},
+			"required": [
+				"wallet"
+			],
+			"additionalProperties": false
+		},
 		"discord": {
 			"type": "object",
 			"properties": {
@@ -516,6 +546,7 @@
 							"$ref": "#/$defs/command"
 						},
 						"chatsummary": {
+							"$ref": "#/$defs/command",
 							"properties": {
 								"options": {
 									"type": "object",
@@ -541,18 +572,42 @@
 									"additionalProperties": false
 								}
 							}
+						},
+						"verify": {
+							"type": "object",
+							"$ref": "#/$defs/command"
 						}
 					},
 					"required": [
 						"balance",
 						"daily",
-						"richest"
-					]
+						"richest",
+						"work",
+						"dice",
+						"rps",
+						"roulette",
+						"buy",
+						"give-coins",
+						"gift",
+						"remove-item",
+						"give",
+						"inventory",
+						"use",
+						"shop",
+						"votecampaign",
+						"vote",
+						"revealvote",
+						"clearpendinggames",
+						"chatsummary",
+						"verify"
+					],
+					"additionalProperties": false
 				}
 			},
 			"required": [
 				"command-definitions"
-			]
+			],
+			"additionalProperties": false
 		},
 		"messages": {
 			"type": "object",
@@ -736,6 +791,9 @@
 				},
 				"ITEM_REMOVE_SUCCESS": {
 					"$ref": "#/$defs/message"
+				},
+				"WALLET_VERIFY_DISPLAY_LINK": {
+					"$ref": "#/$defs/message"
 				}
 			},
 			"required": [
@@ -798,8 +856,10 @@
 				"CHAT_SUMMARY_LIST",
 				"CHAT_SUMMARY_ENTRY",
 				"CHAT_SUMMARY_PENDING",
-				"ITEM_REMOVE_SUCCESS"
-			]
+				"ITEM_REMOVE_SUCCESS",
+				"WALLET_VERIFY_DISPLAY_LINK"
+			],
+			"additionalProperties": false
 		},
 		"items": {
 			"type": "object",

@@ -1,4 +1,4 @@
-package de.zorro909.blank.wallet.impl;
+package de.zorro909.blank.BlankDiscordBot.wallet.impl;
 
 import java.awt.font.NumericShaper;
 import java.math.BigInteger;
@@ -8,18 +8,20 @@ import java.util.UUID;
 import javax.transaction.Transactional;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.utils.Numeric;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.wallet.DiscordWalletService;
-import de.zorro909.blank.wallet.entities.DiscordWallet;
-import de.zorro909.blank.wallet.entities.DiscordWalletSalt;
-import de.zorro909.blank.wallet.persistence.DiscordWalletDao;
-import de.zorro909.blank.wallet.persistence.DiscordWalletSaltDao;
+import de.zorro909.blank.BlankDiscordBot.wallet.DiscordWalletService;
+import de.zorro909.blank.BlankDiscordBot.wallet.entities.DiscordWallet;
+import de.zorro909.blank.BlankDiscordBot.wallet.entities.DiscordWalletSalt;
+import de.zorro909.blank.BlankDiscordBot.wallet.persistence.DiscordWalletDao;
+import de.zorro909.blank.BlankDiscordBot.wallet.persistence.DiscordWalletSaltDao;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Service
 public class DiscordWalletServiceImpl implements DiscordWalletService {
 
     @Autowired

@@ -1,4 +1,4 @@
-package de.zorro909.blank.wallet.rest;
+package de.zorro909.blank.BlankDiscordBot.wallet.rest;
 
 import java.util.Optional;
 import javax.ws.rs.POST;
@@ -7,8 +7,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import de.zorro909.blank.wallet.DiscordWalletService;
-import de.zorro909.blank.wallet.entities.DiscordWallet;
+
+import de.zorro909.blank.BlankDiscordBot.wallet.DiscordWalletService;
+import de.zorro909.blank.BlankDiscordBot.wallet.entities.DiscordWallet;
 import lombok.NonNull;
 
 @Controller

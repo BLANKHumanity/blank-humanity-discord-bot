@@ -1,4 +1,4 @@
-package de.zorro909.blank.wallet.messages;
+package de.zorro909.blank.BlankDiscordBot.wallet.messages;
 
 import java.util.Optional;
 import org.springframework.core.env.Environment;

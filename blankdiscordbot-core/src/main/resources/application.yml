@@ -7,6 +7,10 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: update
+web3:
+  wallet:
+    verify:
+      baseUrl:  "https://testbot.test/verify"
 discord:
   authToken: ${DISCORD_AUTH_TOKEN}
   guildId: ${DISCORD_GUILD_ID}
@@ -134,6 +138,8 @@ discord:
         channel: "Which channel should be summarised?"
         hours: "How many hours back should be summarised?"
         startmessageid: "Id of last message to count"
+    verify:
+      description: "Verify your Wallet"
 messages:
   BALANCE_COMMAND_MESSAGE: "%(user) has %(balance)"
   DAILY_COMMAND_MESSAGE: "%(userMention) got %(claimReward) as a daily reward!"
@@ -210,6 +216,7 @@ messages:
   CHAT_SUMMARY_ENTRY: "%(user): %(messageCount) messages"
   CHAT_SUMMARY_PENDING: "Messages are still counted, please wait!"
   ITEM_REMOVE_SUCCESS: "You have removed %(itemAmount) x %(itemName) from %(user)'s inventory"
+  WALLET_VERIFY_DISPLAY_LINK: "Please connect your web3 wallet [here](%(walletVerifyLink))"
 items:
   definitions:
     -

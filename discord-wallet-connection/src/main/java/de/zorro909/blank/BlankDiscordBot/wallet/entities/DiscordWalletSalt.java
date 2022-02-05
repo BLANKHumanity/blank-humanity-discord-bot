@@ -1,4 +1,4 @@
-package de.zorro909.blank.wallet.entities;
+package de.zorro909.blank.BlankDiscordBot.wallet.entities;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

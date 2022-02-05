@@ -1,4 +1,4 @@
-package de.zorro909.blank.wallet.rest;
+package de.zorro909.blank.BlankDiscordBot.wallet.rest;
 
 import lombok.Builder;
 import lombok.Data;
