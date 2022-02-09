@@ -100,6 +100,8 @@ public abstract class AbstractCommand extends ListenerAdapter {
 	updateCommandDefinition();
 
 	jda.addEventListener(this);
+	
+	log.info("Registered Command '" + getCommandName() + "'");
     }
 
     public void updateCommandDefinition() {

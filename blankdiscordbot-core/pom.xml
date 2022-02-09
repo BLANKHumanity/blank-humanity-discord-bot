@@ -4,8 +4,7 @@
 	<parent>
 		<groupId>com.blank.humanity</groupId>
 		<artifactId>blankdiscordbot-parent</artifactId>
-		<version>1.1.0</version>
-		<relativePath>../pom.xml</relativePath>
+		<version>1.2.0</version>
 	</parent>
 	<artifactId>blankdiscordbot-core</artifactId>
 	<packaging>jar</packaging>
@@ -18,6 +17,11 @@
 			<groupId>com.blank.humanity</groupId>
 			<artifactId>discord-library</artifactId>
 			<version>1.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.blank.humanity</groupId>
+			<artifactId>funplace</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

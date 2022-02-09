@@ -4,7 +4,9 @@
 	"required": [
 		"spring",
 		"discord",
-		"messages"
+		"messages",
+		"shop",
+		"funshop"
 	],
 	"additionalProperties": false,
 	"properties": {
@@ -246,6 +248,30 @@
 								}
 							}
 						},
+						"funbuy": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"item": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"amount": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"item",
+										"amount"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
 						"give-coins": {
 							"type": "object",
 							"$ref": "#/$defs/command",
@@ -419,6 +445,25 @@
 								}
 							}
 						},
+						"funshop": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"page": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"page"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
 						"votecampaign": {
 							"type": "object",
 							"$ref": "#/$defs/command",
@@ -546,7 +591,9 @@
 					"required": [
 						"balance",
 						"daily",
-						"richest"
+						"richest",
+						"funbuy",
+						"funshop"
 					]
 				}
 			},
@@ -811,7 +858,7 @@
 				"CHAT_SUMMARY_ENTRY",
 				"CHAT_SUMMARY_PENDING",
 				"ITEM_REMOVE_SUCCESS",
-				"FUN_PLACE_SHOP_TITLE_MESSGE",
+				"FUN_PLACE_SHOP_TITLE_MESSAGE",
 				"FUN_PLACE_SHOP_HEADER",
 				"FUN_PLACE_SHOP_FOOTER"
 			]
@@ -828,6 +875,26 @@
 			}
 		},
 		"shop": {
+			"type": "object",
+			"properties": {
+				"itemsPerPage": {
+					"type": "number",
+					"minimum": 4,
+					"maximum": 20
+				},
+				"shopItems": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/shopEntry"
+					}
+				}
+			},
+			"required": [
+				"itemsPerPage",
+				"shopItems"
+			]
+		},
+		"funshop": {
 			"type": "object",
 			"properties": {
 				"itemsPerPage": {
