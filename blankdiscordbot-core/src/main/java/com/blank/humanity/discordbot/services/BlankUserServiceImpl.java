@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+
 import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,18 +14,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
+import com.blank.humanity.discordbot.config.commands.CommandConfig;
+import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
+import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.database.BlankUserDao;
 import com.blank.humanity.discordbot.database.UserClaimDataDao;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.entities.user.ClaimDataType;
+import com.blank.humanity.discordbot.entities.user.UserClaimData;
+import com.blank.humanity.discordbot.utils.FormatDataKey;
+import com.blank.humanity.discordbot.utils.FormattingData;
 
-import de.zorro909.blank.BlankDiscordBot.config.commands.CommandConfig;
-import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.entities.user.ClaimDataType;
-import de.zorro909.blank.BlankDiscordBot.entities.user.UserClaimData;
-import de.zorro909.blank.BlankDiscordBot.services.BlankUserService;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;

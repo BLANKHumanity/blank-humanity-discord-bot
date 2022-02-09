@@ -2,11 +2,11 @@ package com.blank.humanity.discordbot.commands.economy;
 
 import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyMessageType;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
 
-import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;

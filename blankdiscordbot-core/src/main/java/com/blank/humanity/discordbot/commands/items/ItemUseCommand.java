@@ -1,11 +1,14 @@
 package com.blank.humanity.discordbot.commands.items;
 
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.services.InventoryService;
+
+import com.blank.humanity.discordbot.commands.AbstractCommand;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.services.InventoryService;
+
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;

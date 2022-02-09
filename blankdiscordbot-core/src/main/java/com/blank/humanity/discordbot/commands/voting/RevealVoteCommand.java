@@ -2,18 +2,19 @@ package com.blank.humanity.discordbot.commands.voting;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingFormatDataKey;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingMessageType;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.voting.VoteChoice;
 import com.blank.humanity.discordbot.entities.voting.VotingCampaign;
 import com.blank.humanity.discordbot.services.VotingService;
+import com.blank.humanity.discordbot.utils.FormattingData;
 
-import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;

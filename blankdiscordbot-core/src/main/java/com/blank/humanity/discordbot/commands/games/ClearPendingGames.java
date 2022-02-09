@@ -3,12 +3,12 @@ package com.blank.humanity.discordbot.commands.games;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.commands.AbstractHiddenCommand;
+import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
+import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.database.GameMetadataDao;
+import com.blank.humanity.discordbot.utils.FormattingData;
 
-import de.zorro909.blank.BlankDiscordBot.commands.AbstractHiddenCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
-import de.zorro909.blank.BlankDiscordBot.config.messages.GenericMessageType;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 

@@ -1,6 +1,7 @@
 package com.blank.humanity.discordbot.commands.utilities.messages;
 
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
+import com.blank.humanity.discordbot.utils.FormatDataKey;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;

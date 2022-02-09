@@ -4,7 +4,8 @@ import java.util.Optional;
 
 import org.springframework.core.env.Environment;
 
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
+import com.blank.humanity.discordbot.config.messages.MessageType;
+
 import lombok.Getter;
 
 @Getter

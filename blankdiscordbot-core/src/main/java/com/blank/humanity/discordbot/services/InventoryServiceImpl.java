@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.services;
 
 import java.util.Optional;
 import java.util.function.Consumer;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -9,19 +10,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
+import com.blank.humanity.discordbot.config.items.ItemConfiguration;
+import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.database.ItemDao;
+import com.blank.humanity.discordbot.entities.item.Item;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.itemActions.ItemAction;
 import com.blank.humanity.discordbot.itemActions.ItemActionImpl;
-
-import de.zorro909.blank.BlankDiscordBot.config.items.ItemConfiguration;
-import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
-import de.zorro909.blank.BlankDiscordBot.entities.item.Item;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.itemActions.ItemAction;
-import de.zorro909.blank.BlankDiscordBot.itemActions.ItemActionStatus;
-import de.zorro909.blank.BlankDiscordBot.services.BlankUserService;
-import de.zorro909.blank.BlankDiscordBot.services.InventoryService;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
-import de.zorro909.blank.BlankDiscordBot.utils.item.ExecutableItemAction;
+import com.blank.humanity.discordbot.itemActions.ItemActionStatus;
+import com.blank.humanity.discordbot.utils.FormattingData;
+import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;
 
 @Service
 public class InventoryServiceImpl implements InventoryService {

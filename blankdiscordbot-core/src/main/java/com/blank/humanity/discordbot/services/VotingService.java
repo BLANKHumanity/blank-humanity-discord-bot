@@ -9,11 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.blank.humanity.discordbot.database.VotingCampaignDao;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.voting.Vote;
 import com.blank.humanity.discordbot.entities.voting.VoteChoice;
 import com.blank.humanity.discordbot.entities.voting.VotingCampaign;
 
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;

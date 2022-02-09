@@ -1,12 +1,13 @@
 package com.blank.humanity.discordbot.itemActions.messages;
 
 import java.util.Optional;
+
 import org.springframework.core.env.Environment;
 
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
+import com.blank.humanity.discordbot.config.messages.MessageType;
+import com.blank.humanity.discordbot.utils.FormatDataKey;
 
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import lombok.Getter;
 import lombok.ToString;
 

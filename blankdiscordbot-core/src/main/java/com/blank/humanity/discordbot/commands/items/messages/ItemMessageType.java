@@ -1,13 +1,14 @@
 package com.blank.humanity.discordbot.commands.items.messages;
 
 import java.util.Optional;
+
 import org.springframework.core.env.Environment;
 
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
+import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
+import com.blank.humanity.discordbot.config.messages.MessageType;
+import com.blank.humanity.discordbot.utils.FormatDataKey;
 
-import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -48,10 +49,7 @@ public enum ItemMessageType implements MessageType {
 	    GenericFormatDataKey.RECEIVING_USER_MENTION),
     ITEM_REMOVE_SUCCESS(ItemFormatDataKey.ITEM_NAME, ItemFormatDataKey.ITEM_ID,
 	    ItemFormatDataKey.ITEM_AMOUNT, GenericFormatDataKey.RECEIVING_USER,
-	    GenericFormatDataKey.RECEIVING_USER_MENTION),
-    FUN_PLACE_SHOP_TITLE_MESSAGE(ItemFormatDataKey.SHOP_PAGE),
-    FUN_PLACE_SHOP_HEADER(ItemFormatDataKey.SHOP_PAGE),
-    FUN_PLACE_SHOP_FOOTER(ItemFormatDataKey.SHOP_PAGE);
+	    GenericFormatDataKey.RECEIVING_USER_MENTION);
 
     private ItemMessageType(FormatDataKey... keys) {
 	this.availableDataKeys = keys;

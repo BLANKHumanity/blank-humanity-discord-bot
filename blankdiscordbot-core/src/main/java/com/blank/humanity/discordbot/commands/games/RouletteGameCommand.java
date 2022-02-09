@@ -7,19 +7,20 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 import com.blank.humanity.discordbot.commands.games.messages.GameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GameMessageType;
+import com.blank.humanity.discordbot.config.messages.MessageType;
+import com.blank.humanity.discordbot.entities.game.GameMetadata;
+import com.blank.humanity.discordbot.entities.game.GameType;
+import com.blank.humanity.discordbot.entities.game.RouletteMetadata;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.utils.FormattingData;
+import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.game.GameMetadata;
-import de.zorro909.blank.BlankDiscordBot.entities.game.GameType;
-import de.zorro909.blank.BlankDiscordBot.entities.game.RouletteMetadata;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
-import de.zorro909.blank.BlankDiscordBot.utils.menu.ReactionMenu;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;

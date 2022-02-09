@@ -2,19 +2,20 @@ package com.blank.humanity.discordbot.commands.items;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
+import com.blank.humanity.discordbot.config.items.ItemConfiguration;
+import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.items.ShopItem;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.ShopService;
+import com.blank.humanity.discordbot.utils.FormattingData;
 
-import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.config.items.ItemConfiguration;
-import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData.FormattingDataBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -62,7 +63,7 @@ public class ShopCommand extends AbstractCommand {
 	}
 	BlankUser blankUser = blankUserService.getUser(event);
 
-	FormattingDataBuilder formatBuilder = blankUserService
+	FormattingData.FormattingDataBuilder formatBuilder = blankUserService
 		.createFormattingData(blankUser, null);
 	formatBuilder.dataPairing(ItemFormatDataKey.SHOP_PAGE, page);
 
@@ -93,7 +94,7 @@ public class ShopCommand extends AbstractCommand {
     }
 
     private String generateShopItemDescription(ShopItem item,
-	    FormattingDataBuilder formatBuilder) {
+	    FormattingData.FormattingDataBuilder formatBuilder) {
 	formatBuilder
 		.dataPairing(ItemFormatDataKey.SHOP_ITEM_ID, item.getId())
 		.dataPairing(ItemFormatDataKey.SHOP_ITEM_BUY_NAME,

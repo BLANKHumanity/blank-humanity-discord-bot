@@ -10,15 +10,16 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.utilities.messages.UtilityFormatDataKey;
 import com.blank.humanity.discordbot.commands.utilities.messages.UtilityMessageType;
+import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.utils.FormattingData;
 
-import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.TextChannel;

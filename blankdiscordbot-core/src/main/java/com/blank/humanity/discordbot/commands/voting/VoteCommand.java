@@ -3,13 +3,13 @@ package com.blank.humanity.discordbot.commands.voting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.commands.AbstractHiddenCommand;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingFormatDataKey;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingMessageType;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.voting.VotingCampaign;
 import com.blank.humanity.discordbot.services.VotingService;
 
-import de.zorro909.blank.BlankDiscordBot.commands.AbstractHiddenCommand;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 

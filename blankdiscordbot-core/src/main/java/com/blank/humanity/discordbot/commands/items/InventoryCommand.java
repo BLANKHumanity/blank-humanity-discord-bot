@@ -2,20 +2,16 @@ package com.blank.humanity.discordbot.commands.items;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
+import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
-
-import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
-import de.zorro909.blank.BlankDiscordBot.entities.item.Item;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.services.InventoryService;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData.FormattingDataBuilder;
+import com.blank.humanity.discordbot.config.items.ItemDefinition;
+import com.blank.humanity.discordbot.entities.item.Item;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.services.InventoryService;
+import com.blank.humanity.discordbot.utils.FormattingData;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -48,7 +44,7 @@ public class InventoryCommand extends AbstractCommand {
 		.orElse(event.getMember());
 	BlankUser user = getBlankUserService().getUser(discordUser);
 
-	FormattingDataBuilder builder = blankUserService
+	FormattingData.FormattingDataBuilder builder = blankUserService
 		.createFormattingData(user, null);
 
 	String inventoryDisplay = user
@@ -66,7 +62,7 @@ public class InventoryCommand extends AbstractCommand {
     }
 
     private String generateItemDescription(Item item,
-	    FormattingDataBuilder formatBuilder) {
+	    FormattingData.FormattingDataBuilder formatBuilder) {
 	Optional<ItemDefinition> itemDefinition = inventoryService
 		.getItemDefinition(item.getItemId());
 

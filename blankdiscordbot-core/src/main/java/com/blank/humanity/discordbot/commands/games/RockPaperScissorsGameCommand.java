@@ -2,18 +2,17 @@ package com.blank.humanity.discordbot.commands.games;
 
 import java.util.Random;
 import java.util.function.Consumer;
+
 import org.springframework.stereotype.Component;
 
 import com.blank.humanity.discordbot.commands.games.messages.GameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GameMessageType;
+import com.blank.humanity.discordbot.entities.game.GameMetadata;
+import com.blank.humanity.discordbot.entities.game.GameType;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.utils.FormattingData;
+import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
 
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.game.GameMetadata;
-import de.zorro909.blank.BlankDiscordBot.entities.game.GameType;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
-import de.zorro909.blank.BlankDiscordBot.utils.menu.ReactionMenu;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;

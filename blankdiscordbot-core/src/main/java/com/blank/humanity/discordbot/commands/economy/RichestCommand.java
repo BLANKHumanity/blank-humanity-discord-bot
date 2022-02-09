@@ -2,19 +2,21 @@ package com.blank.humanity.discordbot.commands.economy;
 
 import java.util.List;
 import java.util.Optional;
+
 import javax.validation.constraints.Min;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyMessageType;
+import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
+import com.blank.humanity.discordbot.config.messages.GenericMessageType;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.utils.FormattingData;
 
-import de.zorro909.blank.BlankDiscordBot.commands.AbstractCommand;
-import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
-import de.zorro909.blank.BlankDiscordBot.config.messages.GenericMessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
