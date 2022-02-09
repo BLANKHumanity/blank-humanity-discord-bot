@@ -2,10 +2,12 @@ package com.blank.humanity.discordbot.services;
 
 import java.util.Optional;
 import java.util.function.Consumer;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
 import com.blank.humanity.discordbot.config.items.ItemConfiguration;
