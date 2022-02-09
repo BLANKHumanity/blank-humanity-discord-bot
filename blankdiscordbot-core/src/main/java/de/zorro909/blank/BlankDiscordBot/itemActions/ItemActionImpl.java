@@ -9,7 +9,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum ItemActionImpl implements ItemAction {
-    ROLE_REWARD(RoleRewardAction.class);
+    ROLE_REWARD(RoleRewardAction.class),
+    MESSAGE_ACTION(MessageAction.class);
     
     @NotNull
     private Class<? extends ExecutableItemAction> executableItemAction;

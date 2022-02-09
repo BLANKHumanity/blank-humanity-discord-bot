@@ -8,7 +8,6 @@ import de.zorro909.blank.BlankDiscordBot.commands.items.messages.ItemFormatDataK
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemDefinition;
 import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.config.messages.GenericMessageType;
-import de.zorro909.blank.BlankDiscordBot.entities.item.Item;
 import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
 import de.zorro909.blank.BlankDiscordBot.itemActions.messages.ItemActionFormatDataKey;
 import de.zorro909.blank.BlankDiscordBot.itemActions.messages.ItemActionMessageType;
@@ -28,26 +27,20 @@ public class RoleRewardAction implements ExecutableItemAction {
     private BlankUserService blankUserService;
 
     @Autowired
-    private InventoryService inventoryService;
-
-    @Autowired
     private JDA jda;
 
     @Override
-    public ItemActionStatus executeAction(BlankUser user, Item item, int amount,
-	    Consumer<FormattingData> reply) {
+    public ItemActionStatus executeAction(BlankUser user, ItemDefinition item,
+	    int amount, Consumer<FormattingData> reply) {
 	if (amount > 1) {
-	    ItemDefinition definition = inventoryService
-		    .getItemDefinition(item.getItemId())
-		    .get();
 	    reply
 		    .accept(blankUserService
 			    .createFormattingData(user,
 				    ItemActionMessageType.ITEM_USE_ONLY_SINGLE_ITEM)
 			    .dataPairing(ItemFormatDataKey.ITEM_ID,
-				    item.getItemId())
+				    item.getId())
 			    .dataPairing(ItemFormatDataKey.ITEM_NAME,
-				    definition.getName())
+				    item.getName())
 			    .build());
 	    return ItemActionStatus.GENERIC_ERROR;
 	}
@@ -57,16 +50,17 @@ public class RoleRewardAction implements ExecutableItemAction {
 		.retrieveMemberById(user.getDiscordId())
 		.complete();
 
-	Optional<Long> roleId = inventoryService
-		.getItemDefinition(item.getItemId())
-		.map(ItemDefinition::getActionArguments)
-		.map(map -> Long.valueOf(String.valueOf(map.get("roleId"))));
+	Optional<Long> roleId = Optional
+		.of(item.getActionArguments())
+		.map(map -> map.get("roleId"))
+		.map(String::valueOf)
+		.map(Long::parseLong);
 
-	Optional<Role> role = roleId.map((id) -> guild.getRoleById(id));
+	Optional<Role> role = roleId.map(guild::getRoleById);
 
 	if (roleId.isEmpty()) {
 	    reply
-		    .accept(error(user, "Item '" + item.getItemId()
+		    .accept(error(user, "Item '" + item.getId()
 			    + "' has no associated roleId to reward!"));
 	    return ItemActionStatus.ITEM_CONFIGURATION_ERROR;
 	}

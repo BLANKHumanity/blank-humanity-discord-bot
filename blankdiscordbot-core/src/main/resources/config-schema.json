@@ -602,6 +602,9 @@
 				"ITEM_USE_ONLY_SINGLE_ITEM": {
 					"$ref": "#/$defs/message"
 				},
+				"ITEM_USE_ONLY_REQUIRED_AMOUNT": {
+					"$ref": "#/$defs/message"
+				},
 				"ITEM_GIVE_NOT_ENOUGH_OWNED": {
 					"$ref": "#/$defs/message"
 				},
@@ -906,7 +909,8 @@
 				"action": {
 					"type": "string",
 					"enum": [
-						"ROLE_REWARD"
+						"ROLE_REWARD",
+						"MESSAGE_ACTION"
 					]
 				},
 				"actionArguments": {
@@ -920,6 +924,18 @@
 			],
 			"additionalProperties": false,
 			"allOf": [
+				{
+					"if": {
+						"required": [
+							"actionArguments"
+						]
+					},
+					"then": {
+						"required": [
+							"action"
+						]
+					}
+				},
 				{
 					"if": {
 						"required": [
@@ -980,6 +996,76 @@
 							"actionArguments"
 						]
 					}
+				},
+				{
+					"if": {
+						"properties": {
+							"action": {
+								"const": "MESSAGE_ACTION"
+							}
+						},
+						"required": [
+							"action"
+						]
+					},
+					"then": {
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"requiredAmount": {
+										"type": "number",
+										"min": 1,
+										"default": 1,
+										"description": "What amount of Items need to be used at once?"
+									},
+									"replyMessage": {
+										"type": "string",
+										"description": "Reply to the users command"
+									},
+									"messageSend": {
+										"type": "string",
+										"description": "Message that should be sent to a different channel (for example notifying game moderators etc.)"
+									},
+									"messageSendChannel": {
+										"type": "number",
+										"description": "Channel Id where a message should be sent to"
+									}
+								},
+								"required": [
+									"replyMessage"
+								],
+								"allOf": [
+									{
+										"if": {
+											"required": [
+												"messageSend"
+											]
+										},
+										"then": {
+											"required": [
+												"messageSendChannel"
+											]
+										}
+									},
+									{
+										"if": {
+											"required": [
+												"messageSendChannel"
+											]
+										},
+										"then": {
+											"required": [
+												"messageSend"
+											]
+										}
+									}
+								]
+							}
+						},
+						"required": [
+							"actionArguments"
+						]
+					}
 				}
 			]
 		},
@@ -1008,6 +1094,10 @@
 					"type": "number",
 					"minimum": -1,
 					"description": "Amount of times this shop entry can be bought (-1 for unlimited)"
+				},
+				"displayed": {
+					"type": "boolean",
+					"description": "Determines if the Shop Entry is actually displayed"
 				}
 			},
 			"required": [

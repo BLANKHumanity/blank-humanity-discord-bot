@@ -104,7 +104,11 @@ public class InventoryServiceImpl implements InventoryService {
 		.map(ItemAction::getExecutableItemAction)
 		.map(applicationContext::getBean);
 
-	if (item.isEmpty()) {
+	Optional<ItemDefinition> itemDefinition = item
+		.map(Item::getItemId)
+		.flatMap(this::getItemDefinition);
+
+	if (item.isEmpty() || itemDefinition.isEmpty()) {
 	    FormattingData data = blankUserService
 		    .createFormattingData(user, ItemMessageType.ITEM_NOT_EXISTS)
 		    .dataPairing(ItemFormatDataKey.ITEM_NAME, useName)
@@ -140,7 +144,7 @@ public class InventoryServiceImpl implements InventoryService {
 
 	ItemActionStatus status = action
 		.get()
-		.executeAction(user, item.get(), amount, reply);
+		.executeAction(user, itemDefinition.get(), amount, reply);
 
 	if (status != ItemActionStatus.SUCCESS) {
 	    // On Error give Item back

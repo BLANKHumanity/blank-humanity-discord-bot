@@ -4,14 +4,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import de.zorro909.blank.BlankDiscordBot.config.items.ItemShopConfig;
 import de.zorro909.blank.BlankDiscordBot.config.items.ShopItem;
 import de.zorro909.blank.BlankDiscordBot.database.BuyLogDao;
@@ -45,9 +42,10 @@ public class ShopService {
 		.getShopItems()
 		.stream()
 		.sorted(Comparator.comparing(ShopItem::getId))
-		.skip(itemShopConfig.getItemsPerPage() * (page - 1))
+		.filter(ShopItem::isDisplayed)
+		.skip((long) itemShopConfig.getItemsPerPage() * (page - 1))
 		.limit(itemShopConfig.getItemsPerPage())
-		.collect(Collectors.toList());
+		.toList();
     }
 
     public Optional<ShopItem> getShopItem(String buyName) {

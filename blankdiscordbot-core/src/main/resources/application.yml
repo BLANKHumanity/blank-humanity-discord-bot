@@ -150,6 +150,7 @@ messages:
   ITEM_NOT_EXISTS: "%(userMention), the item '%(itemName)' does not exist"
   ITEM_USE_NOT_OWNED: "%(userMention), you don't have %(itemAmount) of this item"
   ITEM_USE_ONLY_SINGLE_ITEM: "%(userMention), the item '%(itemName)' can only be used seperately" 
+  ITEM_USE_ONLY_REQUIRED_AMOUNT: "%(userMention), the item '%(itemName)' requires the use of exactly '%(itemAmount)'x"
   ITEM_GIVE_NOT_ENOUGH_OWNED: "%(userMention), you don't have %(itemAmount) of %(itemName) to give away"
   ITEM_GIVE_SUCCESS: "%(userMention), you gave %(receivingUserMention) %(itemAmount) x %(itemName)"
   BUY_ITEM_NO_SUPPLY: "%(userMention), this item has no supply left"
@@ -236,6 +237,13 @@ items:
       id: 4
       name: ".1 ETH"
       description: "Redeemable for 0.1 ETH after Bitizen Mint"
+      useName: "dotOneEth"
+      action: MESSAGE_ACTION
+      actionArguments:
+        requiredAmount: 1
+        replyMessage: "Hello World"
+        messageSend: "Ping Moderator that %(user) redeemed .1 ETH Item"
+        messageSendChannel: 912421040662151279
     - 
       id: 5
       name: ".2 ETH"

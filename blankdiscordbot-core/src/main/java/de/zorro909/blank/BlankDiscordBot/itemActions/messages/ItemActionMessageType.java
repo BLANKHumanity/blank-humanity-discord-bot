@@ -14,7 +14,9 @@ public enum ItemActionMessageType implements MessageType {
     ROLE_REWARD_ALREADY_CLAIMED(ItemActionFormatDataKey.ROLE),
     ROLE_REWARD_CLAIMED(ItemActionFormatDataKey.ROLE),
     ITEM_USE_ONLY_SINGLE_ITEM(ItemFormatDataKey.ITEM_ID,
-	    ItemFormatDataKey.ITEM_NAME);
+	    ItemFormatDataKey.ITEM_NAME),
+    ITEM_USE_ONLY_REQUIRED_AMOUNT(ItemFormatDataKey.ITEM_ID,
+	    ItemFormatDataKey.ITEM_NAME, ItemFormatDataKey.ITEM_AMOUNT);
 
     private ItemActionMessageType(FormatDataKey... keys) {
 	this.availableDataKeys = keys;
