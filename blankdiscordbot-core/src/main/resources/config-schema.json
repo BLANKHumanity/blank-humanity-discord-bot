@@ -739,6 +739,15 @@
 				},
 				"ITEM_REMOVE_SUCCESS": {
 					"$ref": "#/$defs/message"
+				},
+				"FUN_PLACE_SHOP_TITLE_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"FUN_PLACE_SHOP_HEADER": {
+					"$ref": "#/$defs/message"
+				},
+				"FUN_PLACE_SHOP_FOOTER": {
+					"$ref": "#/$defs/message"
 				}
 			},
 			"required": [
@@ -801,7 +810,10 @@
 				"CHAT_SUMMARY_LIST",
 				"CHAT_SUMMARY_ENTRY",
 				"CHAT_SUMMARY_PENDING",
-				"ITEM_REMOVE_SUCCESS"
+				"ITEM_REMOVE_SUCCESS",
+				"FUN_PLACE_SHOP_TITLE_MESSGE",
+				"FUN_PLACE_SHOP_HEADER",
+				"FUN_PLACE_SHOP_FOOTER"
 			]
 		},
 		"items": {
