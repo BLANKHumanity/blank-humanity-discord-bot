@@ -2,8 +2,10 @@ package de.zorro909.blank.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+@EqualsAndHashCode(callSuper = true)
 public abstract class BlankRpcEvent<R> extends BlankEvent {
 
     @JsonIgnore

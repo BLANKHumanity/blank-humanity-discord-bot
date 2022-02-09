@@ -40,9 +40,9 @@ class KafkaEventService implements BatchMessageListener<String, String> {
     private ObjectMapper mapper;
 
     @Autowired
-    KafkaListenerContainerFactory<GenericMessageListenerContainer<String, String>> containerFactory;
+    private KafkaListenerContainerFactory<GenericMessageListenerContainer<String, String>> containerFactory;
 
-    private HashMap<String, GenericMessageListenerContainer<String, String>> eventListeners;
+    private HashMap<String, GenericMessageListenerContainer<String, String>> eventListeners = new HashMap<>();
 
     @PostConstruct
     private void registerEvents() {
@@ -105,8 +105,9 @@ class KafkaEventService implements BatchMessageListener<String, String> {
 		    }
 		}
 	    } catch (ClassNotFoundException notFound) {
+		notFound.printStackTrace();
 	    } catch (JsonProcessingException processingException) {
-
+		processingException.printStackTrace();
 	    }
 	}
     }

@@ -1,16 +1,26 @@
 package de.zorro909.blank.event.config;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
-import org.springframework.kafka.config.KafkaListenerContainerFactory;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.GenericMessageListenerContainer;
-import de.zorro909.blank.event.BlankEvent;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 
 @Data
@@ -34,9 +44,51 @@ public class EventServiceConfiguration {
     }
 
     @Bean
-    public GenericMessageListenerContainer<String, BlankEvent> messageListenerContainer(
-	    KafkaListenerContainerFactory<GenericMessageListenerContainer<String, BlankEvent>> containerFactory) {
+    public ConsumerFactory<String, String> consumerFactory() {
+	Map<String, Object> props = new HashMap<>();
+	props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:29092");
+	props.put(ConsumerConfig.GROUP_ID_CONFIG, "testBot");
+	props
+		.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+			StringDeserializer.class);
+	props
+		.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+			StringDeserializer.class);
+	return new DefaultKafkaConsumerFactory<>(props);
+    }
+
+    @Bean
+    public GenericMessageListenerContainer<String, String> messageListenerContainer(
+	    ConcurrentKafkaListenerContainerFactory<String, String> containerFactory,
+	    ConsumerFactory<String, String> consumerFactory) {
+	containerFactory.setConsumerFactory(consumerFactory);
 	return containerFactory.createContainer(getReplyTopic());
+    }
+
+    @Bean
+    public ProducerFactory<String, String> producerFactory() {
+	Map<String, Object> configProps = new HashMap<>();
+	configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:29092");
+	configProps
+		.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+			StringSerializer.class);
+	configProps
+		.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+			StringSerializer.class);
+	return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    public ReplyingKafkaTemplate<String, String, String> kafkaTemplate(
+	    ProducerFactory<String, String> producerFactory,
+	    GenericMessageListenerContainer<String, String> listenerContainer) {
+	return new ReplyingKafkaTemplate<>(producerFactory(),
+		listenerContainer);
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+	return new ObjectMapper();
     }
 
 }
