@@ -5,6 +5,15 @@
 		<artifactId>blankdiscordbot-parent</artifactId>
 		<version>1.1.1</version>
 	</parent>
-	<artifactId>discord-library</artifactId>
-	<version>1.1.0</version>
+	<artifactId>funplace</artifactId>
+
+	<version>1.0.0</version>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.blank.humanity</groupId>
+			<artifactId>discord-library</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+	</dependencies>
 </project>

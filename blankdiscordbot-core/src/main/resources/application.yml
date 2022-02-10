@@ -49,6 +49,11 @@ discord:
       options:
         item: "The name of the Shop Item to buy"
         amount: "The amount of items you want to buy (default: 1)"
+    funbuy:
+      description: "Buys an Item from the Fun Place Shop"
+      options:
+        item: "The name of the Shop Item to buy"
+        amount: "The amount of items you want to buy (default: 1)"
     give-coins:
       description: "Create coins from the void and give them to someone"
       options:
@@ -92,6 +97,10 @@ discord:
         amount: "The amount of items to use (default: 1)"
     shop:
       description: "Displays all buyable Items from the Shop"
+      options:
+        page: "Shop-Page"
+    funshop:
+      description: "Displays all buyable Items from the Fun Place Shop"
       options:
         page: "Shop-Page"
     votecampaign:
@@ -146,10 +155,14 @@ messages:
   SHOP_HEADER: "Use /buy <item name> to buy an item"
   SHOP_FOOTER: ""
   SHOP_ITEM_DESCRIPTION: "%(shopItemId) - %(itemName) - %(shopItemPrice) - Available: %(shopItemAvailableAmount)\n----%(itemDescription) : /buy %(shopItemBuyName)"
+  FUN_PLACE_SHOP_TITLE_MESSAGE: "Fun Place Shop Page %(shopPage)"
+  FUN_PLACE_SHOP_HEADER: "Use /buy <item name> to buy an item"
+  FUN_PLACE_SHOP_FOOTER: ""
   ITEM_USE_ACTION_UNDEFINED: "%(userMention), this item has no usage action defined. This is likely a configuration error. Please contact an administrator!"
   ITEM_NOT_EXISTS: "%(userMention), the item '%(itemName)' does not exist"
   ITEM_USE_NOT_OWNED: "%(userMention), you don't have %(itemAmount) of this item"
   ITEM_USE_ONLY_SINGLE_ITEM: "%(userMention), the item '%(itemName)' can only be used seperately" 
+  ITEM_USE_ONLY_REQUIRED_AMOUNT: "%(userMention), the item '%(itemName)' requires the use of exactly '%(itemAmount)'x"
   ITEM_GIVE_NOT_ENOUGH_OWNED: "%(userMention), you don't have %(itemAmount) of %(itemName) to give away"
   ITEM_GIVE_SUCCESS: "%(userMention), you gave %(receivingUserMention) %(itemAmount) x %(itemName)"
   BUY_ITEM_NO_SUPPLY: "%(userMention), this item has no supply left"
@@ -236,6 +249,13 @@ items:
       id: 4
       name: ".1 ETH"
       description: "Redeemable for 0.1 ETH after Bitizen Mint"
+      useName: "dotOneEth"
+      action: MESSAGE_ACTION
+      actionArguments:
+        requiredAmount: 1
+        replyMessage: "Hello World"
+        messageSend: "Ping Moderator that %(user) redeemed .1 ETH Item"
+        messageSendChannel: 797928031229444116
     - 
       id: 5
       name: ".2 ETH"
@@ -273,3 +293,12 @@ shop:
      buyName: "pointTwoEth"
      price: 2000
      amountAvailable: 1
+funshop:  # Different Shop, uses different IDs
+  itemsPerPage: 8
+  shopItems:
+    -
+     id: 1
+     itemId: 1
+     buyName: "firstClassTicket"
+     price: 10
+     amountAvailable: 5

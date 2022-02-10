@@ -4,7 +4,9 @@
 	"required": [
 		"spring",
 		"discord",
-		"messages"
+		"messages",
+		"shop",
+		"funshop"
 	],
 	"additionalProperties": false,
 	"properties": {
@@ -246,6 +248,30 @@
 								}
 							}
 						},
+						"funbuy": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"item": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"amount": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"item",
+										"amount"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
 						"give-coins": {
 							"type": "object",
 							"$ref": "#/$defs/command",
@@ -419,6 +445,25 @@
 								}
 							}
 						},
+						"funshop": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"page": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									},
+									"required": [
+										"page"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
 						"votecampaign": {
 							"type": "object",
 							"$ref": "#/$defs/command",
@@ -546,7 +591,9 @@
 					"required": [
 						"balance",
 						"daily",
-						"richest"
+						"richest",
+						"funbuy",
+						"funshop"
 					]
 				}
 			},
@@ -600,6 +647,9 @@
 					"$ref": "#/$defs/message"
 				},
 				"ITEM_USE_ONLY_SINGLE_ITEM": {
+					"$ref": "#/$defs/message"
+				},
+				"ITEM_USE_ONLY_REQUIRED_AMOUNT": {
 					"$ref": "#/$defs/message"
 				},
 				"ITEM_GIVE_NOT_ENOUGH_OWNED": {
@@ -736,6 +786,15 @@
 				},
 				"ITEM_REMOVE_SUCCESS": {
 					"$ref": "#/$defs/message"
+				},
+				"FUN_PLACE_SHOP_TITLE_MESSAGE": {
+					"$ref": "#/$defs/message"
+				},
+				"FUN_PLACE_SHOP_HEADER": {
+					"$ref": "#/$defs/message"
+				},
+				"FUN_PLACE_SHOP_FOOTER": {
+					"$ref": "#/$defs/message"
 				}
 			},
 			"required": [
@@ -798,7 +857,10 @@
 				"CHAT_SUMMARY_LIST",
 				"CHAT_SUMMARY_ENTRY",
 				"CHAT_SUMMARY_PENDING",
-				"ITEM_REMOVE_SUCCESS"
+				"ITEM_REMOVE_SUCCESS",
+				"FUN_PLACE_SHOP_TITLE_MESSAGE",
+				"FUN_PLACE_SHOP_HEADER",
+				"FUN_PLACE_SHOP_FOOTER"
 			]
 		},
 		"items": {
@@ -813,6 +875,26 @@
 			}
 		},
 		"shop": {
+			"type": "object",
+			"properties": {
+				"itemsPerPage": {
+					"type": "number",
+					"minimum": 4,
+					"maximum": 20
+				},
+				"shopItems": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/shopEntry"
+					}
+				}
+			},
+			"required": [
+				"itemsPerPage",
+				"shopItems"
+			]
+		},
+		"funshop": {
 			"type": "object",
 			"properties": {
 				"itemsPerPage": {
@@ -906,7 +988,8 @@
 				"action": {
 					"type": "string",
 					"enum": [
-						"ROLE_REWARD"
+						"ROLE_REWARD",
+						"MESSAGE_ACTION"
 					]
 				},
 				"actionArguments": {
@@ -920,6 +1003,18 @@
 			],
 			"additionalProperties": false,
 			"allOf": [
+				{
+					"if": {
+						"required": [
+							"actionArguments"
+						]
+					},
+					"then": {
+						"required": [
+							"action"
+						]
+					}
+				},
 				{
 					"if": {
 						"required": [
@@ -980,6 +1075,76 @@
 							"actionArguments"
 						]
 					}
+				},
+				{
+					"if": {
+						"properties": {
+							"action": {
+								"const": "MESSAGE_ACTION"
+							}
+						},
+						"required": [
+							"action"
+						]
+					},
+					"then": {
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"requiredAmount": {
+										"type": "number",
+										"min": 1,
+										"default": 1,
+										"description": "What amount of Items need to be used at once?"
+									},
+									"replyMessage": {
+										"type": "string",
+										"description": "Reply to the users command"
+									},
+									"messageSend": {
+										"type": "string",
+										"description": "Message that should be sent to a different channel (for example notifying game moderators etc.)"
+									},
+									"messageSendChannel": {
+										"type": "number",
+										"description": "Channel Id where a message should be sent to"
+									}
+								},
+								"required": [
+									"replyMessage"
+								],
+								"allOf": [
+									{
+										"if": {
+											"required": [
+												"messageSend"
+											]
+										},
+										"then": {
+											"required": [
+												"messageSendChannel"
+											]
+										}
+									},
+									{
+										"if": {
+											"required": [
+												"messageSendChannel"
+											]
+										},
+										"then": {
+											"required": [
+												"messageSend"
+											]
+										}
+									}
+								]
+							}
+						},
+						"required": [
+							"actionArguments"
+						]
+					}
 				}
 			]
 		},
@@ -1008,6 +1173,10 @@
 					"type": "number",
 					"minimum": -1,
 					"description": "Amount of times this shop entry can be bought (-1 for unlimited)"
+				},
+				"displayed": {
+					"type": "boolean",
+					"description": "Determines if the Shop Entry is actually displayed"
 				}
 			},
 			"required": [
