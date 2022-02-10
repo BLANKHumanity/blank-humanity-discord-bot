@@ -54,6 +54,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
 		    .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
 		    .build());
 	    abort(metadata);
+	    return null;
 	}
 
 	int opponentRoll = new Random().nextInt(3);

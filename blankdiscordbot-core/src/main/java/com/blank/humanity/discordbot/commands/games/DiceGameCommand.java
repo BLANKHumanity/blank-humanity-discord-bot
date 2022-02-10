@@ -50,6 +50,7 @@ public class DiceGameCommand extends AbstractGame {
 		    .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
 		    .build());
 	    abort(metadata);
+	    return null;
 	}
 
 	getBlankUserService().decreaseUserBalance(user, betAmount);

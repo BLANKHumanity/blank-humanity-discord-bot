@@ -4,15 +4,12 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-
 import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
 import com.blank.humanity.discordbot.config.commands.CommandConfig;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
@@ -22,15 +19,17 @@ import com.blank.humanity.discordbot.database.UserClaimDataDao;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.user.ClaimDataType;
 import com.blank.humanity.discordbot.entities.user.UserClaimData;
+import com.blank.humanity.discordbot.entities.user.fake.FakeUserType;
 import com.blank.humanity.discordbot.utils.FormatDataKey;
 import com.blank.humanity.discordbot.utils.FormattingData;
-
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
+@Slf4j
 @Service
 public class BlankUserServiceImpl implements BlankUserService {
 
@@ -47,7 +46,7 @@ public class BlankUserServiceImpl implements BlankUserService {
     private JDA jda;
 
     public BlankUser getUser(long discordId, long guildId) {
-	System.out.println("Requesting User: " + discordId);
+	log.debug("Requesting User: " + discordId);
 	return blankUserDao
 		.findByDiscordId(discordId)
 		.orElseGet(() -> registerUser(discordId, guildId));
@@ -133,6 +132,13 @@ public class BlankUserServiceImpl implements BlankUserService {
     public FormattingData.FormattingDataBuilder addUserDetailsFormattingData(
 	    FormattingData.FormattingDataBuilder builder, BlankUser user,
 	    FormatDataKey userName, FormatDataKey userMention) {
+	if (user.getDiscordId().equals(user.getGuildId())) {
+	    FakeUserType fakeUserType = FakeUserType
+		    .values()[user.getDiscordId().intValue()];
+	    return builder
+		    .dataPairing(userName, fakeUserType.getDisplayName())
+		    .dataPairing(userMention, fakeUserType.getDisplayName());
+	}
 	User discordUser = jda.retrieveUserById(user.getDiscordId()).complete();
 	return builder
 		.dataPairing(userName, discordUser.getName())
