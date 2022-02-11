@@ -1180,6 +1180,11 @@
 				"displayed": {
 					"type": "boolean",
 					"description": "Determines if the Shop Entry is actually displayed"
+				},
+				"order": {
+					"type": "number",
+					"description": "Orders the different Shop Items (lowest is displayed first)",
+					"minimum": 1
 				}
 			},
 			"required": [
@@ -1187,7 +1192,8 @@
 				"itemId",
 				"buyName",
 				"price",
-				"amountAvailable"
+				"amountAvailable",
+				"order"
 			],
 			"additionalProperties": false
 		}

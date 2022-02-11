@@ -37,7 +37,7 @@ public class FunPlaceShopService {
 	return funPlaceItemShopConfig
 		.getShopItems()
 		.stream()
-		.sorted(Comparator.comparing(ShopItem::getId))
+		.sorted(Comparator.comparing(ShopItem::getOrder))
 		.filter(ShopItem::isDisplayed)
 		.skip((long) funPlaceItemShopConfig.getItemsPerPage()
 			* (page - 1))

@@ -3,14 +3,11 @@ package com.blank.humanity.discordbot.services;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.blank.humanity.discordbot.config.items.ItemShopConfig;
 import com.blank.humanity.discordbot.config.items.ShopItem;
 import com.blank.humanity.discordbot.database.BuyLogDao;
@@ -43,7 +40,7 @@ public class ShopService {
 	return itemShopConfig
 		.getShopItems()
 		.stream()
-		.sorted(Comparator.comparing(ShopItem::getId))
+		.sorted(Comparator.comparing(ShopItem::getOrder))
 		.filter(ShopItem::isDisplayed)
 		.skip((long) itemShopConfig.getItemsPerPage() * (page - 1))
 		.limit(itemShopConfig.getItemsPerPage())
