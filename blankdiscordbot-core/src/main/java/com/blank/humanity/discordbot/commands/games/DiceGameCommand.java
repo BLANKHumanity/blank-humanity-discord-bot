@@ -3,9 +3,7 @@ package com.blank.humanity.discordbot.commands.games;
 
 import java.util.Random;
 import java.util.function.Consumer;
-
 import org.springframework.stereotype.Component;
-
 import com.blank.humanity.discordbot.commands.games.messages.GameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GameMessageType;
 import com.blank.humanity.discordbot.config.messages.MessageType;
@@ -16,7 +14,6 @@ import com.blank.humanity.discordbot.entities.user.fake.FakeUser;
 import com.blank.humanity.discordbot.entities.user.fake.FakeUserType;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
-
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -118,7 +115,7 @@ public class DiceGameCommand extends AbstractGame {
 	}
 
 	public boolean isSnakeEyes() {
-	    return roll1 == roll2;
+	    return sum() == 2;
 	}
 
 	private String intToEmoji(int number) {
