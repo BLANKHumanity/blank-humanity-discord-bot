@@ -917,28 +917,37 @@
 	},
 	"$defs": {
 		"command": {
-			"properties": {
-				"description": {
-					"type": "string",
-					"minLength": 5
-				},
-				"hidden": {
-					"type": "boolean"
-				},
-				"roleRestricted": {
-					"type": "boolean",
-					"default": false
-				},
-				"allowedRoles": {
-					"type": "array",
-					"items": {
-						"type": "number"
-					}
-				},
-				"options": {
-					"type": "object"
+			"allOf": [
+				{
+					"properties": {
+						"description": {
+							"type": "string",
+							"description": "A Description for this command",
+							"minLength": 5,
+							"maxLength": 100
+						},
+						"hidden": {
+							"type": "boolean"
+						},
+						"roleRestricted": {
+							"type": "boolean",
+							"default": false
+						},
+						"allowedRoles": {
+							"type": "array",
+							"items": {
+								"type": "number"
+							}
+						},
+						"options": {
+							"type": "object"
+						}
+					},
+					"required": [
+						"description"
+					]
 				}
-			},
+			],
 			"if": {
 				"properties": {
 					"roleRestricted": {
@@ -951,19 +960,13 @@
 				"required": [
 					"allowedRoles"
 				]
-			},
-			"allOf": [
-				{
-					"required": [
-						"description"
-					]
-				}
-			]
+			}
 		},
 		"argument": {
 			"type": "string",
 			"description": "Description for Argument",
-			"minLength": 3
+			"minLength": 3,
+			"maxLength": 100
 		},
 		"message": {
 			"type": "string",
