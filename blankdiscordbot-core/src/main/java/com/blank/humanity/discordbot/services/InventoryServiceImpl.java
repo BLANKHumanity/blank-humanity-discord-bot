@@ -41,7 +41,7 @@ public class InventoryServiceImpl implements InventoryService {
 	return user
 		.getItems()
 		.stream()
-		.filter((item) -> item.getItemId() == itemId)
+		.filter(item -> item.getItemId() == itemId)
 		.findAny();
     }
 
@@ -53,7 +53,7 @@ public class InventoryServiceImpl implements InventoryService {
 	    existingItem.setAmount(existingItem.getAmount() + amount);
 	} else {
 	    Item newItem = new Item(itemId, amount, user);
-	    newItem = itemDao.save(newItem);
+	    itemDao.save(newItem);
 	}
     }
 
@@ -67,7 +67,7 @@ public class InventoryServiceImpl implements InventoryService {
 	Optional<Item> item = getItem(user, itemId);
 	Optional<Integer> oldAmount = item.map(Item::getAmount);
 
-	if (oldAmount.orElse(0) < amount) {
+	if (oldAmount.orElse(0) < amount || item.isEmpty()) {
 	    return false;
 	}
 	Item inventoryItem = item.get();

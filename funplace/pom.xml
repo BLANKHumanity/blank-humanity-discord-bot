@@ -3,11 +3,11 @@
 	<parent>
 		<groupId>com.blank.humanity</groupId>
 		<artifactId>blankdiscordbot-parent</artifactId>
-		<version>1.1.1</version>
+		<version>1.1.2</version>
 	</parent>
 	<artifactId>funplace</artifactId>
 
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 
 	<dependencies>
 		<dependency>

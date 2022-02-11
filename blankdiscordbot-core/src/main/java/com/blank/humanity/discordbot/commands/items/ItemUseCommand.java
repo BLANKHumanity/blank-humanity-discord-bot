@@ -1,14 +1,11 @@
 package com.blank.humanity.discordbot.commands.items;
 
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.InventoryService;
-
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -22,17 +19,20 @@ public class ItemUseCommand extends AbstractCommand {
 	super("use");
     }
 
+    private static final String ITEM = "item";
+    private static final String AMOUNT = "amount";
+
     @Autowired
     private InventoryService inventoryService;
 
     @Override
     protected CommandData createCommandData(CommandData commandData) {
 	commandData
-		.addOption(OptionType.STRING, "item",
-			getCommandDefinition().getOptionDescription("item"),
+		.addOption(OptionType.STRING, ITEM,
+			getCommandDefinition().getOptionDescription(ITEM),
 			true);
-	OptionData amount = new OptionData(OptionType.INTEGER, "amount",
-		getCommandDefinition().getOptionDescription("amount"));
+	OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
+		getCommandDefinition().getOptionDescription(AMOUNT));
 	amount.setMinValue(1);
 	commandData.addOptions(amount);
 	return commandData;
@@ -42,10 +42,10 @@ public class ItemUseCommand extends AbstractCommand {
     protected void onCommand(SlashCommandEvent event) {
 	BlankUser user = blankUserService.getUser(event);
 
-	OptionMapping item = event.getOption("item");
+	OptionMapping item = event.getOption(ITEM);
 
 	int amount = Optional
-		.ofNullable(event.getOption("amount"))
+		.ofNullable(event.getOption(AMOUNT))
 		.map(OptionMapping::getAsLong)
 		.orElse(1l)
 		.intValue();
