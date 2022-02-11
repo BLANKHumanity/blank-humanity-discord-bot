@@ -93,19 +93,22 @@ public class ChannelChatSummary extends AbstractCommand {
 
 	MessageHistory history;
 	List<Message> historyList;
+	long epochSecond = System.currentTimeMillis() / 1000;
 	if (lastMessageID > 0) {
 	    history = MessageHistory
 		    .getHistoryBefore(channel, String.valueOf(lastMessageID))
 		    .limit(50)
 		    .complete();
 	    historyList = history.getRetrievedHistory();
+	    epochSecond = TimeUtil
+		    .getTimeCreated(lastMessageID)
+		    .toEpochSecond();
 	} else {
 	    history = channel.getHistory();
 	    historyList = history.retrievePast(50).complete();
 	}
 
-	long cutoffTime = TimeUtil.getTimeCreated(lastMessageID).toEpochSecond()
-		- (hours * 60 * 60);
+	long cutoffTime = epochSecond - (hours * 60 * 60);
 
 	historyList = filterMessages(historyList, cutoffTime);
 
