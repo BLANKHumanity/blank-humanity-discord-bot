@@ -1,8 +1,9 @@
 
 package com.blank.humanity.discordbot.commands.games;
 
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.function.Consumer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.blank.humanity.discordbot.commands.games.messages.GameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GameMessageType;
@@ -21,6 +22,9 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 @Component
 public class DiceGameCommand extends AbstractGame {
+
+    @Autowired
+    private SecureRandom random;
 
     public DiceGameCommand() {
 	super(GameType.DICE);
@@ -47,54 +51,53 @@ public class DiceGameCommand extends AbstractGame {
 		    .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
 		    .build());
 	    abort(metadata);
-	    return null;
-	}
-
-	getBlankUserService().decreaseUserBalance(user, betAmount);
-
-	FakeUser diceJackpot = FakeUserType.DICE_JACKPOT
-		.getFakeUser(getBlankUserService());
-
-	diceJackpot.increaseBalance((int) Math.round(betAmount / 20d));
-
-	DiceRoll playerRoll = diceRoll();
-	DiceRoll opponentRoll = diceRoll();
-
-	MessageType messageType;
-	int reward = 0;
-
-	if (playerRoll.sum() > opponentRoll.sum()) {
-	    if (playerRoll.isSnakeEyes()) {
-		messageType = GameMessageType.DICE_GAME_JACKPOT;
-
-		reward = betAmount + diceJackpot.getBalance();
-		diceJackpot.decreaseBalance(diceJackpot.getBalance());
-	    } else {
-		messageType = GameMessageType.DICE_GAME_WIN;
-		reward = betAmount;
-	    }
-	    getBlankUserService().increaseUserBalance(user, betAmount + reward);
 	} else {
-	    messageType = GameMessageType.DICE_GAME_LOSS;
-	}
 
-	reply(event,
+	    getBlankUserService().decreaseUserBalance(user, betAmount);
+
+	    FakeUser diceJackpot = FakeUserType.DICE_JACKPOT
+		    .getFakeUser(getBlankUserService());
+
+	    diceJackpot.increaseBalance((int) Math.round(betAmount / 20d));
+
+	    DiceRoll playerRoll = diceRoll();
+	    DiceRoll opponentRoll = diceRoll();
+
+	    MessageType messageType;
+	    int reward = 0;
+
+	    if (playerRoll.sum() > opponentRoll.sum()) {
+		if (playerRoll.isSnakeEyes()) {
+		    messageType = GameMessageType.DICE_GAME_JACKPOT;
+
+		    reward = betAmount + diceJackpot.getBalance();
+		    diceJackpot.decreaseBalance(diceJackpot.getBalance());
+		} else {
+		    messageType = GameMessageType.DICE_GAME_WIN;
+		    reward = betAmount;
+		}
 		getBlankUserService()
-			.createFormattingData(user, messageType)
-			.dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
-			.dataPairing(GameFormatDataKey.REWARD_AMOUNT, reward)
-			.dataPairing(GameFormatDataKey.DICE_ROLL_USER,
-				playerRoll.toString())
-			.dataPairing(GameFormatDataKey.DICE_ROLL_OPPONENT,
-				opponentRoll.toString())
-			.build());
-	finish(metadata);
+			.increaseUserBalance(user, betAmount + reward);
+	    } else {
+		messageType = GameMessageType.DICE_GAME_LOSS;
+	    }
+
+	    reply(event, getBlankUserService()
+		    .createFormattingData(user, messageType)
+		    .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
+		    .dataPairing(GameFormatDataKey.REWARD_AMOUNT, reward)
+		    .dataPairing(GameFormatDataKey.DICE_ROLL_USER,
+			    playerRoll.toString())
+		    .dataPairing(GameFormatDataKey.DICE_ROLL_OPPONENT,
+			    opponentRoll.toString())
+		    .build());
+	    finish(metadata);
+	}
 	return null;
     }
 
     private DiceRoll diceRoll() {
-	Random rand = new Random();
-	return new DiceRoll(rand.nextInt(6), rand.nextInt(6));
+	return new DiceRoll(random.nextInt(6) + 1, random.nextInt(6) + 1);
     }
 
     @Override
