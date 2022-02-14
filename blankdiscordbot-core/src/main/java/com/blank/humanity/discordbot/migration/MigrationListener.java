@@ -2,17 +2,14 @@ package com.blank.humanity.discordbot.migration;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.BlankUserService;
-
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -26,7 +23,7 @@ public class MigrationListener extends ListenerAdapter {
     private BlankUserService blankUserService;
 
     private final Pattern coinPattern = Pattern
-	    .compile("^(.{3,32})#([0-9]{4}) has ([0-9]{1,10}) [:a-zA-Z]+$");
+	    .compile("(.{2,32})#([0-9]{4}) has ([0-9,]{1,10}) [<>:a-zA-Z0-9]+");
 
     @PostConstruct
     void setupCommand() {
@@ -34,13 +31,30 @@ public class MigrationListener extends ListenerAdapter {
     }
 
     @Override
+    public void onMessageReceived(MessageReceivedEvent mre) {
+	if (mre.isFromGuild() && mre.getAuthor().isBot()) {
+	    mre.getMessage().getEmbeds().forEach(embed -> {
+		String description = embed.getDescription();
+		System.out.println(description);
+		if (description != null) {
+		    Matcher matcher = coinPattern.matcher(description);
+		    if (matcher.find()) {
+			checkEmbed(mre.getTextChannel(), matcher);
+		    }
+		}
+	    });
+	}
+    }
+
+    @Override
     public void onMessageUpdate(MessageUpdateEvent mre) {
 	if (mre.isFromGuild() && mre.getAuthor().isBot()) {
 	    mre.getMessage().getEmbeds().forEach(embed -> {
 		String description = embed.getDescription();
+		System.out.println(description);
 		if (description != null) {
 		    Matcher matcher = coinPattern.matcher(description);
-		    if (matcher.matches()) {
+		    if (matcher.find()) {
 			checkEmbed(mre.getTextChannel(), matcher);
 		    }
 		}
@@ -55,12 +69,12 @@ public class MigrationListener extends ListenerAdapter {
 	if (user == null) {
 	    textChannel
 		    .sendMessage(matcher.group(1) + "#" + matcher.group(2)
-			    + " please write a Message in the normal chat first before trying to migrate :D")
+			    + " please use !coins to migrate :D")
 		    .queue();
 	    return;
 	}
 
-	int mee6Balance = Integer.valueOf(matcher.group(3));
+	int mee6Balance = Integer.valueOf(matcher.group(3).replace(",", ""));
 	if (!user.isMigrated()) {
 	    blankUserService
 		    .migrateUser(user.getDiscordId(), user.getGuildId(),

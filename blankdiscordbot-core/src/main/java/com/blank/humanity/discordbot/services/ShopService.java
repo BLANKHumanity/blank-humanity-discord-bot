@@ -57,6 +57,9 @@ public class ShopService {
     }
 
     public int getAvailableItemAmount(ShopItem item) {
+	if(item.getAmountAvailable() == -1) {
+	    return -1;
+	}
 	return item.getAmountAvailable()
 		- buyLogDao.sumOfBoughtItems(item.getId());
     }
