@@ -2,6 +2,8 @@ package com.blank.humanity.discordbot.services;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import javax.transaction.Transactional;
@@ -62,6 +64,7 @@ public class BlankUserServiceImpl implements BlankUserService {
 	BlankUser blankUser = new BlankUser();
 	blankUser.setDiscordId(discordId);
 	blankUser.setGuildId(guildId);
+	blankUser.setItems(new ArrayList<>());
 	return blankUserDao.save(blankUser);
     }
 
