@@ -15,8 +15,9 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 @Component
 public class DailyCommand extends AbstractCommand {
 
-    public DailyCommand() {
-	super("daily");
+    @Override
+    protected String getCommandName() {
+        return "daily";
     }
 
     @Override

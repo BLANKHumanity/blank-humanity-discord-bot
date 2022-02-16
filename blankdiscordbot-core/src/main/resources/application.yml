@@ -14,8 +14,8 @@ discord:
   maximum-daily-reward: 100
   minimum-work-reward: 25
   maximum-work-reward: 100
-  reward-multiplier: 1
-  streak-multiplier: 1.1
+  claim-multiplier: 1
+  streak-log-base: 2.5
   user-list-page-size: 8
   max-game-bet-amount: 300
   command-definitions:
@@ -143,6 +143,25 @@ discord:
         channel: "Which channel should be summarised?"
         hours: "How many hours back should be summarised?"
         startmessageid: "Id of last message to count"
+games:
+  dice:
+    displayName: Dice
+    cooldownAmount: 2
+    cooldownTimeUnit: SECONDS
+    metadataClass: null
+    winningsMultiplier: 2
+  rps:
+    displayName: Rock paper scissors
+    cooldownAmount: 2
+    cooldownTimeUnit: SECONDS
+    metadataClass: null
+    winningsMultiplier: 2
+  roulette:
+    displayName: Roulette
+    cooldownAmount: 2
+    cooldownTimeUnit: SECONDS
+    metadataClass: com.blank.humanity.discordbot.entities.game.RouletteMetadata
+    winningsMultiplier: 1.2 # 1.2 is Fair = 0% House Edge
 messages:
   BALANCE_COMMAND_MESSAGE: "%(user) has %(balance)"
   DAILY_COMMAND_MESSAGE: "%(userMention) got %(claimReward) as a daily reward!"

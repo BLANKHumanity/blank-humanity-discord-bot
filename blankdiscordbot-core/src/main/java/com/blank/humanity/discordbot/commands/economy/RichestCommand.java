@@ -25,8 +25,9 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 @Component
 public class RichestCommand extends AbstractCommand {
 
-    public RichestCommand() {
-	super("richest");
+    @Override
+    protected String getCommandName() {
+        return "richest";
     }
 
     @Override

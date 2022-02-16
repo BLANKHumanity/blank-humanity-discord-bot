@@ -1,22 +1,22 @@
 package com.blank.humanity.discordbot.entities.game;
 
 import java.io.IOException;
-import java.sql.Clob;
 import java.time.LocalDateTime;
+
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
+
 import org.hibernate.validator.internal.util.stereotypes.Lazy;
 
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.game.GameMetadataIOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.Data;
@@ -35,13 +35,10 @@ public class GameMetadata {
     private BlankUser user;
 
     @NotNull
-    private GameType game;
+    private String game;
 
     @NotNull
     private LocalDateTime lastPlayed;
-
-    @Nullable
-    private String metadataClassname;
 
     @Nullable
     @Column(name = "metadata", length = 4096)
@@ -50,25 +47,30 @@ public class GameMetadata {
     @NotNull
     boolean gameFinished = false;
 
-    public <T> T getMetadata(Class<T> clazz) throws IOException {
-	if (!clazz.getName().equalsIgnoreCase(metadataClassname)) {
-	    throw new RuntimeException("Wrong metadata Class requested!");
-	}
-	return new ObjectMapper().readValue(getMetadata(), clazz);
+    public <T> T getMetadata(Class<T> clazz) {
+        try {
+            return new ObjectMapper().readValue(getMetadata(), clazz);
+        } catch (IOException exception) {
+            throw new GameMetadataIOException(
+                "Reading GameMetadata for Game '" + game
+                    + "' with ID '" + id + "' has failed",
+                exception);
+        }
     }
 
     public void clearMetadata() {
-	this.metadata = null;
+        this.metadata = null;
     }
 
-    public <T> void setMetadata(T gameMetadata) throws JsonProcessingException {
-	if (!gameMetadata
-		.getClass()
-		.getName()
-		.equalsIgnoreCase(metadataClassname)) {
-	    throw new RuntimeException("Wrong metadata Class provided!");
-	}
-	this.metadata = new ObjectMapper().writeValueAsString(gameMetadata);
+    public <T> void setMetadata(T gameMetadata) {
+        try {
+            this.metadata = new ObjectMapper().writeValueAsString(gameMetadata);
+        } catch (JsonProcessingException exception) {
+            throw new GameMetadataIOException(
+                "Writing GameMetadata for Game '" + game
+                    + "' with ID '" + id + "' has failed",
+                exception);
+        }
     }
 
 }

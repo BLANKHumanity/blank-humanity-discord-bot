@@ -15,8 +15,9 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 @Component
 public class ItemUseCommand extends AbstractCommand {
 
-    public ItemUseCommand() {
-	super("use");
+    @Override
+    protected String getCommandName() {
+        return "use";
     }
 
     private static final String ITEM = "item";
@@ -27,32 +28,32 @@ public class ItemUseCommand extends AbstractCommand {
 
     @Override
     protected CommandData createCommandData(CommandData commandData) {
-	commandData
-		.addOption(OptionType.STRING, ITEM,
-			getCommandDefinition().getOptionDescription(ITEM),
-			true);
-	OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
-		getCommandDefinition().getOptionDescription(AMOUNT));
-	amount.setMinValue(1);
-	commandData.addOptions(amount);
-	return commandData;
+        commandData
+            .addOption(OptionType.STRING, ITEM,
+                getCommandDefinition().getOptionDescription(ITEM),
+                true);
+        OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
+            getCommandDefinition().getOptionDescription(AMOUNT));
+        amount.setMinValue(1);
+        commandData.addOptions(amount);
+        return commandData;
     }
 
     @Override
     protected void onCommand(SlashCommandEvent event) {
-	BlankUser user = blankUserService.getUser(event);
+        BlankUser user = blankUserService.getUser(event);
 
-	OptionMapping item = event.getOption(ITEM);
+        OptionMapping item = event.getOption(ITEM);
 
-	int amount = Optional
-		.ofNullable(event.getOption(AMOUNT))
-		.map(OptionMapping::getAsLong)
-		.orElse(1l)
-		.intValue();
+        int amount = Optional
+            .ofNullable(event.getOption(AMOUNT))
+            .map(OptionMapping::getAsLong)
+            .orElse(1l)
+            .intValue();
 
-	inventoryService
-		.useItem(user, item.getAsString(), amount,
-			embeds -> reply(event, embeds));
+        inventoryService
+            .useItem(user, item.getAsString(), amount,
+                embeds -> reply(event, embeds));
     }
 
 }

@@ -7,13 +7,13 @@
 	</parent>
 	<artifactId>funplace</artifactId>
 
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.blank.humanity</groupId>
 			<artifactId>discord-library</artifactId>
-			<version>1.1.0</version>
+			<version>1.2.0</version>
 		</dependency>
 	</dependencies>
 </project>

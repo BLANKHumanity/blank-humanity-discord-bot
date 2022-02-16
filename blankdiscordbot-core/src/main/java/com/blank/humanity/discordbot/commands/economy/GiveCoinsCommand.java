@@ -15,8 +15,9 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 @Component
 public class GiveCoinsCommand extends AbstractCommand {
 
-    public GiveCoinsCommand() {
-	super("give-coins");
+    @Override
+    protected String getCommandName() {
+        return "give-coins";
     }
 
     @Override

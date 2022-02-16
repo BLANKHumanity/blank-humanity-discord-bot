@@ -9,11 +9,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 @AllArgsConstructor
-public enum GameFormatDataKey implements FormatDataKey {
-    BET_AMOUNT("betAmount"), RPS_USER("rpsUser"), RPS_BOT("rpsBot"),
-    ROULETTE_HEADER("rouletteHeader"), ROULETTE_RESULT("rouletteResult"),
-    DICE_ROLL_USER("diceRollUser"), DICE_ROLL_OPPONENT("diceRollOpponent"),
-    REWARD_AMOUNT("rewardAmount");
+public enum GenericGameFormatDataKey implements FormatDataKey {
+    GAME_NAME("gameName"), COOLDOWN_MINUTES("cooldownMinutes"),
+    COOLDOWN_SECONDS("cooldownSeconds");
 
     @NonNull
     private String key;

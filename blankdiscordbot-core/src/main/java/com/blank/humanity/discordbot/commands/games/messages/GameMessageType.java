@@ -1,18 +1,16 @@
 package com.blank.humanity.discordbot.commands.games.messages;
 
 import java.util.Optional;
-
 import org.springframework.core.env.Environment;
-
 import com.blank.humanity.discordbot.config.messages.MessageType;
-
+import com.blank.humanity.discordbot.utils.FormatDataKey;
 import lombok.Getter;
 
 @Getter
 public enum GameMessageType implements MessageType {
-    GAME_ON_COOLDOWN(GameFormatDataKey.GAME_NAME,
-	    GameFormatDataKey.COOLDOWN_MINUTES,
-	    GameFormatDataKey.COOLDOWN_SECONDS),
+    GAME_ON_COOLDOWN(GenericGameFormatDataKey.GAME_NAME,
+	    GenericGameFormatDataKey.COOLDOWN_MINUTES,
+	    GenericGameFormatDataKey.COOLDOWN_SECONDS),
     ROCK_PAPER_SCISSORS_TIE(GameFormatDataKey.BET_AMOUNT,
 	    GameFormatDataKey.RPS_USER, GameFormatDataKey.RPS_BOT),
     ROCK_PAPER_SCISSORS_LOSS(GameFormatDataKey.BET_AMOUNT,
@@ -36,11 +34,11 @@ public enum GameMessageType implements MessageType {
 	    GameFormatDataKey.REWARD_AMOUNT, GameFormatDataKey.DICE_ROLL_USER,
 	    GameFormatDataKey.DICE_ROLL_OPPONENT);
 
-    private GameMessageType(GameFormatDataKey... keys) {
+    private GameMessageType(FormatDataKey... keys) {
 	this.availableDataKeys = keys;
     }
 
-    private GameFormatDataKey[] availableDataKeys;
+    private FormatDataKey[] availableDataKeys;
 
     public String getMessageFormat(Environment env) {
 	return Optional

@@ -20,8 +20,9 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 @Component
 public class GiftItemCommand extends AbstractCommand {
 
-    public GiftItemCommand() {
-	super("gift");
+    @Override
+    protected String getCommandName() {
+        return "gift";
     }
 
     private static final String USER = "user";
@@ -33,60 +34,60 @@ public class GiftItemCommand extends AbstractCommand {
 
     @Override
     protected CommandData createCommandData(CommandData commandData) {
-	commandData
-		.addOption(OptionType.USER, USER,
-			getCommandDefinition().getOptionDescription(USER),
-			true);
-	commandData
-		.addOption(OptionType.STRING, ITEM,
-			getCommandDefinition().getOptionDescription(ITEM),
-			true);
-	OptionData data = new OptionData(OptionType.INTEGER, AMOUNT,
-		getCommandDefinition().getOptionDescription(AMOUNT), false);
-	data.setMinValue(1);
-	commandData.addOptions(data);
+        commandData
+            .addOption(OptionType.USER, USER,
+                getCommandDefinition().getOptionDescription(USER),
+                true);
+        commandData
+            .addOption(OptionType.STRING, ITEM,
+                getCommandDefinition().getOptionDescription(ITEM),
+                true);
+        OptionData data = new OptionData(OptionType.INTEGER, AMOUNT,
+            getCommandDefinition().getOptionDescription(AMOUNT), false);
+        data.setMinValue(1);
+        commandData.addOptions(data);
 
-	return commandData;
+        return commandData;
     }
 
     @Override
     protected void onCommand(SlashCommandEvent event) {
-	BlankUser user = getBlankUserService().getUser(event);
-	BlankUser mentioned = getBlankUserService()
-		.getUser(event.getOption(USER));
-	String itemName = event.getOption(ITEM).getAsString();
-	int amount = Optional
-		.ofNullable(event.getOption(AMOUNT))
-		.map(OptionMapping::getAsLong)
-		.orElse(1L)
-		.intValue();
+        BlankUser user = getBlankUserService().getUser(event);
+        BlankUser mentioned = getBlankUserService()
+            .getUser(event.getOption(USER));
+        String itemName = event.getOption(ITEM).getAsString();
+        int amount = Optional
+            .ofNullable(event.getOption(AMOUNT))
+            .map(OptionMapping::getAsLong)
+            .orElse(1L)
+            .intValue();
 
-	Optional<ItemDefinition> item = inventoryService
-		.getItemDefinition(itemName);
+        Optional<ItemDefinition> item = inventoryService
+            .getItemDefinition(itemName);
 
-	if (item.isEmpty()) {
-	    reply(event, getBlankUserService()
-		    .createFormattingData(user, ItemMessageType.ITEM_NOT_EXISTS)
-		    .dataPairing(ItemFormatDataKey.ITEM_NAME, itemName)
-		    .build());
-	    return;
-	}
+        if (item.isEmpty()) {
+            reply(event, getBlankUserService()
+                .createFormattingData(user, ItemMessageType.ITEM_NOT_EXISTS)
+                .dataPairing(ItemFormatDataKey.ITEM_NAME, itemName)
+                .build());
+            return;
+        }
 
-	inventoryService.giveItem(mentioned, item.get().getId(), amount);
+        inventoryService.giveItem(mentioned, item.get().getId(), amount);
 
-	FormattingData data = getBlankUserService()
-		.addUserDetailsFormattingData(
-			getBlankUserService()
-				.createFormattingData(user,
-					ItemMessageType.ITEM_GIVE_SUCCESS),
-			mentioned, GenericFormatDataKey.RECEIVING_USER,
-			GenericFormatDataKey.RECEIVING_USER_MENTION)
-		.dataPairing(ItemFormatDataKey.ITEM_ID, item.get().getId())
-		.dataPairing(ItemFormatDataKey.ITEM_NAME, item.get().getName())
-		.dataPairing(ItemFormatDataKey.ITEM_AMOUNT, amount)
-		.build();
+        FormattingData data = getBlankUserService()
+            .addUserDetailsFormattingData(
+                getBlankUserService()
+                    .createFormattingData(user,
+                        ItemMessageType.ITEM_GIVE_SUCCESS),
+                mentioned, GenericFormatDataKey.RECEIVING_USER,
+                GenericFormatDataKey.RECEIVING_USER_MENTION)
+            .dataPairing(ItemFormatDataKey.ITEM_ID, item.get().getId())
+            .dataPairing(ItemFormatDataKey.ITEM_NAME, item.get().getName())
+            .dataPairing(ItemFormatDataKey.ITEM_AMOUNT, amount)
+            .build();
 
-	reply(event, data);
+        reply(event, data);
     }
 
 }

@@ -14,8 +14,9 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 @Component
 public class WorkCommand extends AbstractCommand {
 
-    public WorkCommand() {
-	super("work");
+    @Override
+    protected String getCommandName() {
+        return "work";
     }
 
     @Override

@@ -15,8 +15,9 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 @Component
 public class ClearPendingGames extends AbstractHiddenCommand {
 
-    public ClearPendingGames() {
-	super("clearpendinggames");
+    @Override
+    protected String getCommandName() {
+        return "clearpendinggames";
     }
 
     @Autowired
