@@ -1,10 +1,9 @@
 package com.blank.humanity.discordbot.services;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +46,9 @@ public class BlankUserServiceImpl implements BlankUserService {
     @Autowired
     private JDA jda;
 
+    @Autowired
+    private SecureRandom random;
+
     public BlankUser getUser(long discordId, long guildId) {
         log.debug("Requesting User: " + discordId);
         return blankUserDao
@@ -60,7 +62,7 @@ public class BlankUserServiceImpl implements BlankUserService {
     }
 
     private BlankUser registerUser(long discordId, long guildId) {
-        System.out.println("Registering New User: " + discordId);
+        log.info("Registering New User: " + discordId);
         BlankUser blankUser = new BlankUser();
         blankUser.setDiscordId(discordId);
         blankUser.setGuildId(guildId);
@@ -156,7 +158,7 @@ public class BlankUserServiceImpl implements BlankUserService {
         long milliSecondsSinceLastClaim = claimData
             .getMilliSecondsSinceLastClaim();
 
-        LocalDateTime claimTimestamp = LocalDateTime.of(2000, 1, 1, 0, 0);
+        LocalDateTime claimTimestamp;
 
         if (milliSecondsSinceLastClaim >= claimType.getMillisBetweenClaims()) {
             claimTimestamp = LocalDateTime.now();
@@ -170,11 +172,11 @@ public class BlankUserServiceImpl implements BlankUserService {
                 .plus(claimData.getMilliSecondsSinceLastClaim(),
                     ChronoUnit.MILLIS);
         } else {
-            return _claimWaitMessage(blankUser, claimType,
+            return claimWaitMessage(blankUser, claimType,
                 milliSecondsSinceLastClaim);
         }
 
-        int reward = new Random()
+        int reward = random
             .nextInt(commandConfig.getMinimumReward(claimType),
                 commandConfig.getMaximumReward(claimType) + 1);
         reward *= commandConfig.getClaimMultiplier();
@@ -185,14 +187,17 @@ public class BlankUserServiceImpl implements BlankUserService {
         if (claimType.isStreaksEnabled()) {
             if (milliSecondsSinceLastClaim < claimType.getMillisStreakDelay()) {
                 if (claimData.getClaimStreak() > 0) {
-                    double customLogResult = Math
-                        .log(claimData.getClaimStreak())
-                        / Math.log(commandConfig.getStreakLogBase());
+                    int days = claimData.getClaimStreak();
+                    double logBase = commandConfig.getStreakLogBase();
 
-                    reward *= Math.max(1, customLogResult);
+                    // log_10(x) / log_10(b) = log_b(x)
+                    double logResult = Math
+                        .log(logBase + days) / Math.log(logBase);
+
+                    reward *= logResult;
                     builder
                         .dataPairing(EconomyFormatDataKey.CLAIM_STREAK,
-                            claimData.getClaimStreak());
+                            claimData.getClaimStreak() + 1);
                 }
                 claimData.setClaimStreak(claimData.getClaimStreak() + 1);
             } else {
@@ -207,7 +212,7 @@ public class BlankUserServiceImpl implements BlankUserService {
             .success(true);
     }
 
-    private FormattingData.FormattingDataBuilder _claimWaitMessage(
+    private FormattingData.FormattingDataBuilder claimWaitMessage(
         BlankUser blankUser, ClaimDataType claimType,
         long milliSecondsSinceLastClaim) {
         long needWait = claimType.getMillisBetweenClaims()

@@ -1,23 +1,24 @@
 package com.blank.humanity.discordbot.commands;
 
-import static com.blank.humanity.discordbot.utils.Wrapper.supplyOut;
 import static com.blank.humanity.discordbot.utils.Wrapper.transactionCallback;
-import static com.blank.humanity.discordbot.utils.Wrapper.wrap;
+
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javax.annotation.PostConstruct;
-import javax.naming.NameAlreadyBoundException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validator;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionCallback;
+
 import com.blank.humanity.discordbot.config.DiscordBotConfig;
 import com.blank.humanity.discordbot.config.commands.CommandConfig;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
@@ -30,8 +31,8 @@ import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.NamedFormatter;
 import com.blank.humanity.discordbot.utils.Wrapper;
 import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
+
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -80,11 +81,11 @@ public abstract class AbstractCommand extends ListenerAdapter {
 
     private CommandDefinition commandDefinition;
 
-    private static HashMap<SlashCommandEvent, MessageEmbed[]> cachedEmbeds = new HashMap<>();
+    private static Map<SlashCommandEvent, MessageEmbed[]> cachedEmbeds = new HashMap<>();
 
-    private static HashMap<SlashCommandEvent, ReactionMenu> cachedMenus = new HashMap<>();
+    private static Map<SlashCommandEvent, ReactionMenu> cachedMenus = new HashMap<>();
 
-    private static HashMap<SlashCommandEvent, Runnable> cachedTasks = new HashMap<>();
+    private static Map<SlashCommandEvent, Runnable> cachedTasks = new HashMap<>();
 
     @PostConstruct
     void setupCommand() throws InterruptedException {
@@ -167,7 +168,7 @@ public abstract class AbstractCommand extends ListenerAdapter {
 
     private void transactionExceptionHandler(SlashCommandEvent event,
         Exception e) {
-        e.printStackTrace();
+        log.error("Transaction threw Exception", e);
         sendErrorMessage(event,
             "This Command threw this error '" + e.getMessage() + "'");
     }

@@ -15,7 +15,7 @@ discord:
   minimum-work-reward: 25
   maximum-work-reward: 100
   claim-multiplier: 1
-  streak-log-base: 2.5
+  streak-log-base: 4
   user-list-page-size: 8
   max-game-bet-amount: 300
   command-definitions:
