@@ -69,6 +69,10 @@ public class DiceGameCommand extends AbstractGame {
             if (playerRoll.sum() > opponentRoll.sum()) {
                 messageType = GameMessageType.DICE_GAME_WIN;
                 reward = calculateWinnings(betAmount);
+
+                if (playerRoll.isDouble()) {
+                    reward *= 1.5;
+                }
             } else if (playerRoll.isSnakeEyes()) {
                 messageType = GameMessageType.DICE_GAME_JACKPOT;
 
@@ -83,7 +87,7 @@ public class DiceGameCommand extends AbstractGame {
 
             if (reward != 0) {
                 getBlankUserService()
-                    .increaseUserBalance(user, betAmount + reward);
+                    .increaseUserBalance(user, reward);
             }
 
             reply(event, getBlankUserService()
@@ -124,6 +128,10 @@ public class DiceGameCommand extends AbstractGame {
 
         public boolean isSnakeEyes() {
             return sum() == 2;
+        }
+
+        public boolean isDouble() {
+            return roll1 == roll2;
         }
 
         private String intToEmoji(int number) {
