@@ -21,8 +21,9 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 @Component
 public class InventoryCommand extends AbstractCommand {
 
-    public InventoryCommand() {
-	super("inventory");
+    @Override
+    protected String getCommandName() {
+        return "inventory";
     }
 
     @Autowired
@@ -30,65 +31,65 @@ public class InventoryCommand extends AbstractCommand {
 
     @Override
     protected CommandData createCommandData(CommandData commandData) {
-	commandData
-		.addOption(OptionType.USER, "user",
-			getCommandDefinition().getOptionDescription("user"));
-	return commandData;
+        commandData
+            .addOption(OptionType.USER, "user",
+                getCommandDefinition().getOptionDescription("user"));
+        return commandData;
     }
 
     @Override
     protected void onCommand(SlashCommandEvent event) {
-	Member discordUser = Optional
-		.ofNullable(event.getOption("user"))
-		.map(OptionMapping::getAsMember)
-		.orElse(event.getMember());
-	BlankUser user = getBlankUserService().getUser(discordUser);
+        Member discordUser = Optional
+            .ofNullable(event.getOption("user"))
+            .map(OptionMapping::getAsMember)
+            .orElse(event.getMember());
+        BlankUser user = getBlankUserService().getUser(discordUser);
 
-	FormattingData.FormattingDataBuilder builder = blankUserService
-		.createFormattingData(user, null);
+        FormattingData.FormattingDataBuilder builder = blankUserService
+            .createFormattingData(user, null);
 
-	String inventoryDisplay = user
-		.getItems()
-		.stream()
-		.map(item -> generateItemDescription(item, builder))
-		.collect(Collectors.joining("\n"));
+        String inventoryDisplay = user
+            .getItems()
+            .stream()
+            .map(item -> generateItemDescription(item, builder))
+            .collect(Collectors.joining("\n"));
 
-	FormattingData inventoryViewer = blankUserService
-		.createFormattingData(user, ItemMessageType.INVENTORY_DISPLAY)
-		.dataPairing(ItemFormatDataKey.INVENTORY_BODY, inventoryDisplay)
-		.build();
+        FormattingData inventoryViewer = blankUserService
+            .createFormattingData(user, ItemMessageType.INVENTORY_DISPLAY)
+            .dataPairing(ItemFormatDataKey.INVENTORY_BODY, inventoryDisplay)
+            .build();
 
-	reply(event, inventoryViewer);
+        reply(event, inventoryViewer);
     }
 
     private String generateItemDescription(Item item,
-	    FormattingData.FormattingDataBuilder formatBuilder) {
-	Optional<ItemDefinition> itemDefinition = inventoryService
-		.getItemDefinition(item.getItemId());
+        FormattingData.FormattingDataBuilder formatBuilder) {
+        Optional<ItemDefinition> itemDefinition = inventoryService
+            .getItemDefinition(item.getItemId());
 
-	if (itemDefinition.isEmpty()) {
-	    return "ERROR - Item ID " + item.getItemId()
-		    + " has not been found! Please contact an Administrator!";
-	}
+        if (itemDefinition.isEmpty()) {
+            return "ERROR - Item ID " + item.getItemId()
+                + " has not been found! Please contact an Administrator!";
+        }
 
-	ItemDefinition definition = itemDefinition.get();
-	formatBuilder
-		.dataPairing(ItemFormatDataKey.ITEM_ID, definition.getId())
-		.dataPairing(ItemFormatDataKey.ITEM_AMOUNT, item.getAmount())
-		.dataPairing(ItemFormatDataKey.ITEM_NAME, definition.getName())
-		.dataPairing(ItemFormatDataKey.ITEM_DESCRIPTION,
-			definition.getDescription());
-	if (definition.getUseName() == null) {
-	    return format(formatBuilder
-		    .messageType(ItemMessageType.INVENTORY_ITEM_DESCRIPTION)
-		    .build());
-	} else {
-	    return format(formatBuilder
-		    .dataPairing(ItemFormatDataKey.ITEM_USE_NAME,
-			    definition.getUseName())
-		    .messageType(
-			    ItemMessageType.INVENTORY_ITEM_DESCRIPTION_WITH_USE)
-		    .build());
-	}
+        ItemDefinition definition = itemDefinition.get();
+        formatBuilder
+            .dataPairing(ItemFormatDataKey.ITEM_ID, definition.getId())
+            .dataPairing(ItemFormatDataKey.ITEM_AMOUNT, item.getAmount())
+            .dataPairing(ItemFormatDataKey.ITEM_NAME, definition.getName())
+            .dataPairing(ItemFormatDataKey.ITEM_DESCRIPTION,
+                definition.getDescription());
+        if (definition.getUseName() == null) {
+            return format(formatBuilder
+                .messageType(ItemMessageType.INVENTORY_ITEM_DESCRIPTION)
+                .build());
+        } else {
+            return format(formatBuilder
+                .dataPairing(ItemFormatDataKey.ITEM_USE_NAME,
+                    definition.getUseName())
+                .messageType(
+                    ItemMessageType.INVENTORY_ITEM_DESCRIPTION_WITH_USE)
+                .build());
+        }
     }
 }

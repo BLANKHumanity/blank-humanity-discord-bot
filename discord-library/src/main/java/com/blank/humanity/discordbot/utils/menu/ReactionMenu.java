@@ -6,11 +6,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import org.springframework.scheduling.TaskScheduler;
-
 import com.blank.humanity.discordbot.services.TransactionExecutor;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -33,7 +32,7 @@ public class ReactionMenu extends ListenerAdapter {
     private Runnable timeoutTask;
 
     @Getter
-    private LinkedHashMap<String, Function<MessageReactionAddEvent, Boolean>> menuActions = new LinkedHashMap<>();
+    private LinkedHashMap<String, Predicate<MessageReactionAddEvent>> menuActions = new LinkedHashMap<>();
 
     @Getter
     @Setter
@@ -52,7 +51,7 @@ public class ReactionMenu extends ListenerAdapter {
     private TransactionExecutor transactionExecutor;
 
     public ReactionMenu(TemporalAmount timeout) {
-	this.timeout = timeout;
+        this.timeout = timeout;
     }
 
     /**
@@ -60,73 +59,73 @@ public class ReactionMenu extends ListenerAdapter {
      *              the pattern <:name:id>
      */
     public void addMenuAction(String emoji,
-	    Function<MessageReactionAddEvent, Boolean> action) {
-	this.menuActions.put(emoji, action);
+        Predicate<MessageReactionAddEvent> action) {
+        this.menuActions.put(emoji, action);
     }
 
     public void buildMenu(JDA jda, Message message, TaskScheduler scheduler,
-	    TransactionExecutor transactionExecutor) {
-	this.jda = jda;
-	this.messageId = message.getIdLong();
-	this.transactionExecutor = transactionExecutor;
+        TransactionExecutor transactionExecutor) {
+        this.jda = jda;
+        this.messageId = message.getIdLong();
+        this.transactionExecutor = transactionExecutor;
 
-	for (String emoji : menuActions.keySet()) {
-	    message.addReaction(emoji).complete();
-	}
+        for (String emoji : menuActions.keySet()) {
+            message.addReaction(emoji).complete();
+        }
 
-	this.jda.addEventListener(this);
+        this.jda.addEventListener(this);
 
-	futureRemoval = scheduler
-		.schedule(this::timeout,
-			OffsetDateTime.now().plus(timeout).toInstant());
+        futureRemoval = scheduler
+            .schedule(this::timeout,
+                OffsetDateTime.now().plus(timeout).toInstant());
     }
 
     public void timeout() {
-	discard();
-	timeoutTask.run();
+        discard();
+        timeoutTask.run();
     }
 
     public void discard() {
-	futureRemoval.cancel(false);
-	this.jda.removeEventListener(this);
+        futureRemoval.cancel(false);
+        this.jda.removeEventListener(this);
     }
 
+    @Override
     public void onMessageReactionAdd(@Nonnull MessageReactionAddEvent event) {
-	if (messageId == event.getMessageIdLong() && !event.getUser().isBot()) {
-	    String reactionCode = event.getReactionEmote().getAsReactionCode();
-	    if (!menuActions.containsKey(reactionCode)) {
-		event.getReaction().removeReaction().queue();
-		return;
-	    }
+        if (messageId == event.getMessageIdLong() && !event.getUser().isBot()) {
+            String reactionCode = event.getReactionEmote().getAsReactionCode();
+            if (!menuActions.containsKey(reactionCode)) {
+                event.getReaction().removeReaction().queue();
+                return;
+            }
 
-	    Member member = event.retrieveMember().complete();
-	    if (restricted) {
-		if (!allowedDiscordIds.contains(member.getUser().getIdLong())) {
-		    event.getReaction().removeReaction().queue();
-		    return;
-		}
-	    }
+            Member member = event.retrieveMember().complete();
+            if (restricted
+                && !allowedDiscordIds.contains(member.getUser().getIdLong())) {
+                event.getReaction().removeReaction().queue();
+                return;
+            }
 
-	    Function<MessageReactionAddEvent, Boolean> action = menuActions
-		    .get(reactionCode);
-	    transactionExecutor
-		    .executeAsTransaction((status) -> action.apply(event),
-			    (e) -> {
-				e.printStackTrace();
-				event.getReaction().removeReaction().queue();
-			    }, (success) -> {
-				if (success != null && success == false) {
-				    event
-					    .getReaction()
-					    .removeReaction()
-					    .queue();
-				    return;
-				}
-				if (singleUse) {
-				    discard();
-				}
-			    });
-	}
+            Predicate<MessageReactionAddEvent> action = menuActions
+                .get(reactionCode);
+            transactionExecutor
+                .executeAsTransaction(status -> action.test(event),
+                    e -> {
+                        e.printStackTrace();
+                        event.getReaction().removeReaction().queue();
+                    }, success -> {
+                        if (success != null && !success) {
+                            event
+                                .getReaction()
+                                .removeReaction()
+                                .queue();
+                            return;
+                        }
+                        if (singleUse) {
+                            discard();
+                        }
+                    });
+        }
     }
 
 }

@@ -35,7 +35,6 @@ public class MigrationListener extends ListenerAdapter {
 	if (mre.isFromGuild() && mre.getAuthor().isBot()) {
 	    mre.getMessage().getEmbeds().forEach(embed -> {
 		String description = embed.getDescription();
-		System.out.println(description);
 		if (description != null) {
 		    Matcher matcher = coinPattern.matcher(description);
 		    if (matcher.find()) {
@@ -51,7 +50,6 @@ public class MigrationListener extends ListenerAdapter {
 	if (mre.isFromGuild() && mre.getAuthor().isBot()) {
 	    mre.getMessage().getEmbeds().forEach(embed -> {
 		String description = embed.getDescription();
-		System.out.println(description);
 		if (description != null) {
 		    Matcher matcher = coinPattern.matcher(description);
 		    if (matcher.find()) {

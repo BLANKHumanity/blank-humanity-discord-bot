@@ -42,11 +42,11 @@ public class CommandConfig {
 
     @NotNull
     @Min(1)
-    private double rewardMultiplier;
+    private double claimMultiplier;
 
     @NotNull
     @Min(1)
-    private double streakMultiplier;
+    private double streakLogBase;
 
     @NotNull
     @Min(1)

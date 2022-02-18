@@ -4,6 +4,7 @@
 	"required": [
 		"spring",
 		"discord",
+		"games",
 		"messages",
 		"shop",
 		"funshop"
@@ -90,7 +91,7 @@
 					"minimum": 11,
 					"maximum": 4000
 				},
-				"reward-multiplier": {
+				"claim-multiplier": {
 					"type": "number",
 					"minimum": 1,
 					"maximum": 10
@@ -598,8 +599,23 @@
 				}
 			},
 			"required": [
-				"command-definitions"
+				"command-definitions",
+				"claim-multiplier"
 			]
+		},
+		"games": {
+			"type": "object",
+			"properties": {
+				"dice": {
+					"$ref": "#/$defs/game"
+				},
+				"rps": {
+					"$ref": "#/$defs/game"
+				},
+				"roulette": {
+					"$ref": "#/$defs/game"
+				}
+			}
 		},
 		"messages": {
 			"type": "object",
@@ -766,6 +782,9 @@
 				"DICE_GAME_LOSS": {
 					"$ref": "#/$defs/message"
 				},
+				"DICE_GAME_DRAW": {
+					"$ref": "#/$defs/message"
+				},
 				"DICE_GAME_WIN": {
 					"$ref": "#/$defs/message"
 				},
@@ -851,6 +870,7 @@
 				"ROULETTE_LOSE_MESSAGE",
 				"ROULETTE_DISPLAY",
 				"DICE_GAME_LOSS",
+				"DICE_GAME_DRAW",
 				"DICE_GAME_WIN",
 				"DICE_GAME_JACKPOT",
 				"GIVE_COINS_COMMAND",
@@ -1196,6 +1216,41 @@
 				"order"
 			],
 			"additionalProperties": false
+		},
+		"game": {
+			"type": "object",
+			"allOf": [
+				{
+					"properties": {
+						"displayName": {
+							"type": "string"
+						},
+						"cooldownAmount": {
+							"type": "integer",
+							"minimum": 1
+						},
+						"cooldownTimeUnit": {
+							"type": "string",
+							"enum": [
+								"DAYS",
+								"HOURS",
+								"MINUTES",
+								"SECONDS"
+							]
+						},
+						"metadataClass": {
+							"enum": [
+								null,
+								"com.blank.humanity.discordbot.entities.game.RouletteMetadata"
+							]
+						},
+						"winningsMultiplier": {
+							"type": "number",
+							"minimum": 1
+						}
+					}
+				}
+			]
 		}
 	}
 }

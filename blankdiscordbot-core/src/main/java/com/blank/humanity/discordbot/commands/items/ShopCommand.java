@@ -23,8 +23,9 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 @Component
 public class ShopCommand extends AbstractCommand {
 
-    public ShopCommand() {
-	super("shop");
+    @Override
+    protected String getCommandName() {
+        return "shop";
     }
 
     @Autowired
@@ -35,92 +36,92 @@ public class ShopCommand extends AbstractCommand {
 
     @Override
     protected CommandData createCommandData(CommandData shopCommand) {
-	OptionData page = new OptionData(OptionType.INTEGER, "page",
-		getCommandDefinition().getOptionDescription("page"));
-	page.setMinValue(1);
-	page.setMaxValue(shopService.amountShopPages());
-	shopCommand.addOptions(page);
-	return shopCommand;
+        OptionData page = new OptionData(OptionType.INTEGER, "page",
+            getCommandDefinition().getOptionDescription("page"));
+        page.setMinValue(1);
+        page.setMaxValue(shopService.amountShopPages());
+        shopCommand.addOptions(page);
+        return shopCommand;
     }
 
     @Override
     protected void onCommand(SlashCommandEvent event) {
-	int page = Optional
-		.ofNullable(event.getOption("page"))
-		.map(OptionMapping::getAsLong)
-		.orElse(1L)
-		.intValue();
+        int page = Optional
+            .ofNullable(event.getOption("page"))
+            .map(OptionMapping::getAsLong)
+            .orElse(1L)
+            .intValue();
 
-	if (page < 1 || page > shopService.amountShopPages()) {
-	    reply(event,
-		    blankUserService
-			    .createSimpleFormattingData(event,
-				    ItemMessageType.SHOP_COMMAND_WRONG_PAGE));
-	    return;
-	}
-	BlankUser blankUser = blankUserService.getUser(event);
+        if (page < 1 || page > shopService.amountShopPages()) {
+            reply(event,
+                blankUserService
+                    .createSimpleFormattingData(event,
+                        ItemMessageType.SHOP_COMMAND_WRONG_PAGE));
+            return;
+        }
+        BlankUser blankUser = blankUserService.getUser(event);
 
-	FormattingData.FormattingDataBuilder formatBuilder = blankUserService
-		.createFormattingData(blankUser, null);
-	formatBuilder.dataPairing(ItemFormatDataKey.SHOP_PAGE, page);
+        FormattingData.FormattingDataBuilder formatBuilder = blankUserService
+            .createFormattingData(blankUser, null);
+        formatBuilder.dataPairing(ItemFormatDataKey.SHOP_PAGE, page);
 
-	EmbedBuilder embedBuilder = new EmbedBuilder();
+        EmbedBuilder embedBuilder = new EmbedBuilder();
 
-	embedBuilder
-		.setTitle(format(formatBuilder
-			.messageType(ItemMessageType.SHOP_TITLE_MESSAGE)
-			.build()));
+        embedBuilder
+            .setTitle(format(formatBuilder
+                .messageType(ItemMessageType.SHOP_TITLE_MESSAGE)
+                .build()));
 
-	String shopDescription = format(
-		formatBuilder.messageType(ItemMessageType.SHOP_HEADER).build())
-		+ "\n";
+        String shopDescription = format(
+            formatBuilder.messageType(ItemMessageType.SHOP_HEADER).build())
+            + "\n";
 
-	shopDescription += shopService
-		.getShopPage(page)
-		.stream()
-		.sequential()
-		.map(item -> generateShopItemDescription(item, formatBuilder))
-		.collect(Collectors.joining("\n"));
+        shopDescription += shopService
+            .getShopPage(page)
+            .stream()
+            .sequential()
+            .map(item -> generateShopItemDescription(item, formatBuilder))
+            .collect(Collectors.joining("\n"));
 
-	shopDescription += "\n" + format(
-		formatBuilder.messageType(ItemMessageType.SHOP_FOOTER).build());
+        shopDescription += "\n" + format(
+            formatBuilder.messageType(ItemMessageType.SHOP_FOOTER).build());
 
-	embedBuilder.setDescription(shopDescription);
+        embedBuilder.setDescription(shopDescription);
 
-	reply(event, embedBuilder.build());
+        reply(event, embedBuilder.build());
     }
 
     private String generateShopItemDescription(ShopItem item,
-	    FormattingData.FormattingDataBuilder formatBuilder) {
-	formatBuilder
-		.dataPairing(ItemFormatDataKey.SHOP_ITEM_ID, item.getId())
-		.dataPairing(ItemFormatDataKey.SHOP_ITEM_BUY_NAME,
-			item.getBuyName())
-		.dataPairing(ItemFormatDataKey.SHOP_ITEM_AVAILABLE_AMOUNT,
-			shopService.getAvailableItemAmount(item))
-		.dataPairing(ItemFormatDataKey.SHOP_ITEM_PRICE,
-			item.getPrice());
+        FormattingData.FormattingDataBuilder formatBuilder) {
+        formatBuilder
+            .dataPairing(ItemFormatDataKey.SHOP_ITEM_ID, item.getId())
+            .dataPairing(ItemFormatDataKey.SHOP_ITEM_BUY_NAME,
+                item.getBuyName())
+            .dataPairing(ItemFormatDataKey.SHOP_ITEM_AVAILABLE_AMOUNT,
+                shopService.getAvailableItemAmount(item))
+            .dataPairing(ItemFormatDataKey.SHOP_ITEM_PRICE,
+                item.getPrice());
 
-	Optional<ItemDefinition> itemDefinition = itemConfiguration
-		.getItemDefinition(item.getItemId());
+        Optional<ItemDefinition> itemDefinition = itemConfiguration
+            .getItemDefinition(item.getItemId());
 
-	if (itemDefinition.isEmpty()) {
-	    return "ERROR - Item ID " + item.getItemId()
-		    + " has not been found! Please contact an Administrator!";
-	}
+        if (itemDefinition.isEmpty()) {
+            return "ERROR - Item ID " + item.getItemId()
+                + " has not been found! Please contact an Administrator!";
+        }
 
-	ItemDefinition definition = itemDefinition.get();
-	formatBuilder
-		.dataPairing(ItemFormatDataKey.ITEM_ID, definition.getId());
-	formatBuilder
-		.dataPairing(ItemFormatDataKey.ITEM_NAME, definition.getName());
-	formatBuilder
-		.dataPairing(ItemFormatDataKey.ITEM_DESCRIPTION,
-			definition.getDescription());
+        ItemDefinition definition = itemDefinition.get();
+        formatBuilder
+            .dataPairing(ItemFormatDataKey.ITEM_ID, definition.getId());
+        formatBuilder
+            .dataPairing(ItemFormatDataKey.ITEM_NAME, definition.getName());
+        formatBuilder
+            .dataPairing(ItemFormatDataKey.ITEM_DESCRIPTION,
+                definition.getDescription());
 
-	return format(formatBuilder
-		.messageType(ItemMessageType.SHOP_ITEM_DESCRIPTION)
-		.build());
+        return format(formatBuilder
+            .messageType(ItemMessageType.SHOP_ITEM_DESCRIPTION)
+            .build());
     }
 
 }

@@ -20,8 +20,9 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 @Component
 public class GiveItemCommand extends AbstractCommand {
 
-    public GiveItemCommand() {
-	super("give");
+    @Override
+    protected String getCommandName() {
+        return "give";
     }
 
     private static final String USER = "user";
