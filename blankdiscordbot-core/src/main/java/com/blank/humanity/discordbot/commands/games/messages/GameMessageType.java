@@ -32,7 +32,10 @@ public enum GameMessageType implements MessageType {
 	    GameFormatDataKey.DICE_ROLL_OPPONENT),
     DICE_GAME_JACKPOT(GameFormatDataKey.BET_AMOUNT,
 	    GameFormatDataKey.REWARD_AMOUNT, GameFormatDataKey.DICE_ROLL_USER,
-	    GameFormatDataKey.DICE_ROLL_OPPONENT);
+	    GameFormatDataKey.DICE_ROLL_OPPONENT),
+	    DICE_GAME_DRAW(GameFormatDataKey.BET_AMOUNT,
+	        GameFormatDataKey.DICE_ROLL_USER,
+	        GameFormatDataKey.DICE_ROLL_OPPONENT);
 
     private GameMessageType(FormatDataKey... keys) {
 	this.availableDataKeys = keys;

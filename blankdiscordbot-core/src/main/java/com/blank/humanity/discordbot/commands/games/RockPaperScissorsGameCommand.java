@@ -102,7 +102,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
         int userSel, int botSel) {
         getBlankUserService().decreaseUserBalance(user, betAmount);
 
-        FormattingData tie = getBlankUserService()
+        FormattingData result = getBlankUserService()
             .createFormattingData(user,
                 GameMessageType.ROCK_PAPER_SCISSORS_LOSS)
             .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
@@ -111,7 +111,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
             .dataPairing(GameFormatDataKey.RPS_BOT, intToSelection(botSel))
             .build();
 
-        reply(event, tie);
+        reply(event, result);
     }
 
     private void win(SlashCommandEvent event, BlankUser user, int betAmount,
@@ -120,7 +120,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
             .increaseUserBalance(user,
                 calculateWinnings(betAmount) - betAmount);
 
-        FormattingData tie = getBlankUserService()
+        FormattingData result = getBlankUserService()
             .createFormattingData(user,
                 GameMessageType.ROCK_PAPER_SCISSORS_WIN)
             .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
@@ -129,12 +129,12 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
             .dataPairing(GameFormatDataKey.RPS_BOT, intToSelection(botSel))
             .build();
 
-        reply(event, tie);
+        reply(event, result);
     }
 
     private void tie(SlashCommandEvent event, BlankUser user, int betAmount,
         int userSel, int botSel) {
-        FormattingData tie = getBlankUserService()
+        FormattingData result = getBlankUserService()
             .createFormattingData(user,
                 GameMessageType.ROCK_PAPER_SCISSORS_TIE)
             .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
@@ -144,7 +144,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
                 intToSelection(botSel))
             .build();
 
-        reply(event, tie);
+        reply(event, result);
     }
 
     @Override

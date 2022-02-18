@@ -148,7 +148,7 @@ public abstract class AbstractCommand extends ListenerAdapter {
 
     private void transactionFinishHandler(SlashCommandEvent event) {
         if (!cachedEmbeds.containsKey(event)) {
-            sendErrorMessage(event, "This Command somehow didn't respond!");
+            sendErrorMessage(event, "This command somehow didn't respond!");
         }
 
         Message message = event
@@ -170,7 +170,7 @@ public abstract class AbstractCommand extends ListenerAdapter {
         Exception e) {
         log.error("Transaction threw Exception", e);
         sendErrorMessage(event,
-            "This Command threw this error '" + e.getMessage() + "'");
+            "This command threw this error '" + e.getMessage() + "'");
     }
 
     protected void sendErrorMessage(SlashCommandEvent event, String message) {
