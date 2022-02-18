@@ -82,8 +82,8 @@ public class DiceGameCommand extends AbstractGame {
                 reward = calculateWinnings(betAmount) + jackpot;
                 diceJackpot.decreaseBalance(jackpot);
             } else if (playerRoll.sum() == opponentRoll.sum()) {
-                        messageType = GameMessageType.DICE_GAME_DRAW;
-                        reward = betAmount;
+                messageType = GameMessageType.DICE_GAME_DRAW;
+                reward = betAmount;
             } else {
                 messageType = GameMessageType.DICE_GAME_LOSS;
             }
