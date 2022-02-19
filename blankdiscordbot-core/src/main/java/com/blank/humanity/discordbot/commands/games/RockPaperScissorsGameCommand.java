@@ -116,14 +116,16 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
 
     private void win(SlashCommandEvent event, BlankUser user, int betAmount,
         int userSel, int botSel) {
+            int reward = calculateWinnings(betAmount);
         getBlankUserService()
             .increaseUserBalance(user,
-                calculateWinnings(betAmount) - betAmount);
+                reward - betAmount);
 
         FormattingData result = getBlankUserService()
             .createFormattingData(user,
                 GameMessageType.ROCK_PAPER_SCISSORS_WIN)
             .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
+            .dataPairing(GameFormatDataKey.REWARD_AMOUNT, reward)
             .dataPairing(GameFormatDataKey.RPS_USER,
                 intToSelection(userSel))
             .dataPairing(GameFormatDataKey.RPS_BOT, intToSelection(botSel))
