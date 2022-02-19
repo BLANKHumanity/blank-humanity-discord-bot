@@ -15,7 +15,7 @@ public enum GameMessageType implements MessageType {
 	    GameFormatDataKey.RPS_USER, GameFormatDataKey.RPS_BOT),
     ROCK_PAPER_SCISSORS_LOSS(GameFormatDataKey.BET_AMOUNT,
 	    GameFormatDataKey.RPS_USER, GameFormatDataKey.RPS_BOT),
-    ROCK_PAPER_SCISSORS_WIN(GameFormatDataKey.BET_AMOUNT,
+    ROCK_PAPER_SCISSORS_WIN(GameFormatDataKey.BET_AMOUNT, GameFormatDataKey.REWARD_AMOUNT,
 	    GameFormatDataKey.RPS_USER, GameFormatDataKey.RPS_BOT),
     GAME_BET_NOT_ENOUGH_MONEY(GameFormatDataKey.BET_AMOUNT),
     ROULETTE_GAME_RUNNING(),
