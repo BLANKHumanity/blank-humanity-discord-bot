@@ -1,17 +1,24 @@
 package com.blank.humanity.discordbot.utils.menu;
 
+import static com.blank.humanity.discordbot.utils.Wrapper.wrap;
+
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.Predicate;
+
 import javax.annotation.Nonnull;
+
 import org.springframework.scheduling.TaskScheduler;
+
 import com.blank.humanity.discordbot.services.TransactionExecutor;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -19,6 +26,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 
+@Slf4j
 @Accessors(chain = true, fluent = true)
 public class ReactionMenu extends ListenerAdapter {
 
@@ -120,21 +128,31 @@ public class ReactionMenu extends ListenerAdapter {
                 .get(reactionCode);
             transactionExecutor
                 .executeAsTransaction(status -> action.test(event),
-                    e -> {
-                        e.printStackTrace();
-                        event.getReaction().removeReaction().queue();
-                    }, success -> {
-                        if (success != null && !success) {
-                            event
-                                .getReaction()
-                                .removeReaction()
-                                .queue();
-                            return;
-                        }
-                        if (singleUse) {
-                            discard();
-                        }
-                    });
+                    wrap(this::reactionMenuInteractionErrorHandler, event),
+                    wrap(this::finishReactionMenuInteraction, event));
+        }
+    }
+
+    private void reactionMenuInteractionErrorHandler(
+        MessageReactionAddEvent event, Throwable exception) {
+        log
+            .error(
+                "An exception was thrown during a ReactionMenu Interaction",
+                exception);
+        event.getReaction().removeReaction().queue();
+    }
+
+    private void finishReactionMenuInteraction(MessageReactionAddEvent event,
+        Boolean success) {
+        if (success != null && !success) {
+            event
+                .getReaction()
+                .removeReaction()
+                .queue();
+            return;
+        }
+        if (singleUse) {
+            discard();
         }
     }
 
