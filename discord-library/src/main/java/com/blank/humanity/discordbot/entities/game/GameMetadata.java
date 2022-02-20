@@ -16,9 +16,11 @@ import com.blank.humanity.discordbot.exceptions.game.GameMetadataIOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Entity
 @Data
+@Accessors(chain = true)
 public class GameMetadata {
 
     @Id
