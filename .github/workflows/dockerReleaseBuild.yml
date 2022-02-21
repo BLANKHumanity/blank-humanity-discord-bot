@@ -1,0 +1,23 @@
+on:
+  push:
+    tags:
+      - '*'
+    branches:
+      - 'main'
+
+jobs:
+  deploy:
+    name: Release Docker Container
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+    - name: Build and publish new Docker Container Release
+      run: cd dockerBuild && ./releaseDockerVersion.sh
+      env:
+        DOCKER_USER: ${{ secrets.DOCKER_HUB_USERNAME }}
