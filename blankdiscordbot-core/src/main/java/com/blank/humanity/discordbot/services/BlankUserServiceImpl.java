@@ -169,8 +169,7 @@ public class BlankUserServiceImpl implements BlankUserService {
             // Claim Timestamp set to when user would actually be able to claim
             claimTimestamp = claimData
                 .getLastClaimTime()
-                .plus(claimData.getMilliSecondsSinceLastClaim(),
-                    ChronoUnit.MILLIS);
+                .plus(claimType.getMillisBetweenClaims(), ChronoUnit.MILLIS);
         } else {
             return claimWaitMessage(blankUser, claimType,
                 milliSecondsSinceLastClaim);

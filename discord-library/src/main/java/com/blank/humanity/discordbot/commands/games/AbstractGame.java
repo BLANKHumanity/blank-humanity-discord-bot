@@ -194,13 +194,15 @@ public abstract class AbstractGame extends AbstractCommand {
     }
 
     protected void finish(long gameId) {
-        Optional<GameMetadata> metadata = gameService
+        Optional<GameMetadata> metadataGetter = gameService
             .getGameMetadataById(gameId);
-        if (metadata.isEmpty()) {
+        if (metadataGetter.isEmpty()) {
             throw new RuntimeException(
                 "No Game with ID '" + gameId + "' found!");
         }
-        finish(metadata.get());
+        GameMetadata metadata = metadataGetter.get();
+        finish(metadata);
+        gameService.saveGameMetadata(metadata);
     }
 
     /**

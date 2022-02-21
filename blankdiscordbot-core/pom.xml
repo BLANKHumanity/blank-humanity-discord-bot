@@ -11,6 +11,7 @@
 
 	<name>BlankDiscordBot-Core</name>
 	<description>Core for Blank Humanity's Discord Bot</description>
+	<version>1.2.1</version>
 
 	<dependencies>
 		<dependency>
