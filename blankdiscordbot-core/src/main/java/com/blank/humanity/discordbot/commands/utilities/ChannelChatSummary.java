@@ -1,5 +1,6 @@
 package com.blank.humanity.discordbot.commands.utilities;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,7 +11,11 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.collections4.ComparatorUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.comparator.Comparators;
+
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.utilities.messages.UtilityFormatDataKey;
 import com.blank.humanity.discordbot.commands.utilities.messages.UtilityMessageType;
@@ -152,10 +157,14 @@ public class ChannelChatSummary extends AbstractCommand {
         LinkedHashMap<String, Integer> messageCounts, boolean pending,
         TextChannel channel, BlankUser sender) {
         FormattingData[] lists = new FormattingData[(int) Math
-            .max(1, Math.nextUp(messageCounts.size() / 16d))];
+            .max(1, Math.ceil(messageCounts.size() / 16d))];
 
         Iterator<Entry<String, Integer>> entryIterator = messageCounts
             .entrySet()
+            .stream()
+            .sorted(Comparator
+                .comparing(Entry<String, Integer>::getValue)
+                .reversed())
             .iterator();
 
         String pendingMarker = format(getBlankUserService()
