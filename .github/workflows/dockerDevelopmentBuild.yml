@@ -5,6 +5,11 @@ jobs:
     name: Development Docker Container
     runs-on: ubuntu-latest
     steps:
+    - name: Set up JDK 17
+      uses: actions/setup-java@v2
+      with:
+        java-version: '17'
+        distribution: 'temurin'
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Login to Docker Hub
