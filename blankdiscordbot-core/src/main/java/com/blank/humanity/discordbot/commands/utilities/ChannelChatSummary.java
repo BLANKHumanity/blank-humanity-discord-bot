@@ -12,9 +12,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.collections4.ComparatorUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.comparator.Comparators;
 
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.utilities.messages.UtilityFormatDataKey;
@@ -22,6 +20,7 @@ import com.blank.humanity.discordbot.commands.utilities.messages.UtilityMessageT
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
+
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.TextChannel;
