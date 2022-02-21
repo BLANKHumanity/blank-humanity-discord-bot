@@ -2,13 +2,12 @@ on:
   push:
     tags:
       - '*'
-    branches:
-      - 'main'
 
 jobs:
   deploy:
     name: Release Docker Container
     runs-on: ubuntu-latest
+    if: {{ github.ref == 'ref/head/main' }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
