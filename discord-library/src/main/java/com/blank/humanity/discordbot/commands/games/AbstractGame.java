@@ -148,11 +148,6 @@ public abstract class AbstractGame extends AbstractCommand {
         }
         if (newMenu != null || metadata.isGameFinished()) {
             menu.discard();
-            Message message = event
-                .getChannel()
-                .retrieveMessageById(event.getMessageIdLong())
-                .complete();
-            message.clearReactions().complete();
             if (newMenu != null) {
                 newMenu
                     .buildMenu(getJda(),

@@ -15,6 +15,7 @@ import org.springframework.scheduling.TaskScheduler;
 
 import com.blank.humanity.discordbot.services.TransactionExecutor;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -60,6 +61,10 @@ public class ReactionMenu extends ListenerAdapter {
 
     private TransactionExecutor transactionExecutor;
 
+    @Getter
+    @Setter(value = AccessLevel.PRIVATE)
+    private boolean isDiscarded = false;
+
     public ReactionMenu(TemporalAmount timeout) {
         this.timeout = timeout;
     }
@@ -100,12 +105,15 @@ public class ReactionMenu extends ListenerAdapter {
     }
 
     public void discard() {
-        futureRemoval.cancel(false);
-        this.jda.removeEventListener(this);
-        this.jda
-            .getTextChannelById(guildChannelId)
-            .clearReactionsById(messageId)
-            .complete();
+        if (!isDiscarded()) {
+            futureRemoval.cancel(false);
+            this.jda.removeEventListener(this);
+            this.jda
+                .getTextChannelById(guildChannelId)
+                .clearReactionsById(messageId)
+                .complete();
+            isDiscarded(true);
+        }
     }
 
     @Override
