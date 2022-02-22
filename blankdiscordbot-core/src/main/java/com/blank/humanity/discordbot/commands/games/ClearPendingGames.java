@@ -9,8 +9,8 @@ import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.database.GameMetadataDao;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class ClearPendingGames extends AbstractHiddenCommand {
@@ -24,12 +24,12 @@ public class ClearPendingGames extends AbstractHiddenCommand {
     private GameMetadataDao gameMetadataDao;
 
     @Override
-    protected CommandData createCommandData(CommandData commandData) {
+    protected SlashCommandData createCommandData(SlashCommandData commandData) {
 	return commandData;
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
+    protected void onCommand(SlashCommandInteraction event) {
 	gameMetadataDao
 		.findAll()
 		.stream()

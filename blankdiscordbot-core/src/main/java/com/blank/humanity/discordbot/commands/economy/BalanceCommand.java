@@ -1,15 +1,17 @@
 package com.blank.humanity.discordbot.commands.economy;
 
 import org.springframework.stereotype.Component;
+
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyMessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class BalanceCommand extends AbstractCommand {
@@ -20,7 +22,7 @@ public class BalanceCommand extends AbstractCommand {
     }
 
     @Override
-    protected CommandData createCommandData(CommandData commandData) {
+    protected SlashCommandData createCommandData(SlashCommandData commandData) {
         commandData
             .addOption(OptionType.USER, "user",
                 getCommandDefinition().getOptionDescription("user"),
@@ -29,7 +31,7 @@ public class BalanceCommand extends AbstractCommand {
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
+    protected void onCommand(SlashCommandInteraction event) {
         OptionMapping option = event.getOption("user");
         Member member;
         if (option == null) {

@@ -2,8 +2,10 @@ package com.blank.humanity.discordbot.commands.voting;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingFormatDataKey;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingMessageType;
@@ -12,9 +14,10 @@ import com.blank.humanity.discordbot.entities.voting.VoteChoice;
 import com.blank.humanity.discordbot.entities.voting.VotingCampaign;
 import com.blank.humanity.discordbot.services.VotingService;
 import com.blank.humanity.discordbot.utils.FormattingData;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class RevealVoteCommand extends AbstractCommand {
@@ -28,7 +31,7 @@ public class RevealVoteCommand extends AbstractCommand {
     private VotingService votingService;
 
     @Override
-    protected CommandData createCommandData(CommandData commandData) {
+    protected SlashCommandData createCommandData(SlashCommandData commandData) {
         commandData
             .addOption(OptionType.STRING, "campaign", "The VoteCampaign",
                 true);
@@ -36,7 +39,7 @@ public class RevealVoteCommand extends AbstractCommand {
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
+    protected void onCommand(SlashCommandInteraction event) {
         BlankUser user = getBlankUserService().getUser(event);
 
         String campaign = event.getOption("campaign").getAsString();

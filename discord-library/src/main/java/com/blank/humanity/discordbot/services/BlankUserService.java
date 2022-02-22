@@ -12,14 +12,14 @@ import com.blank.humanity.discordbot.utils.FormatDataKey;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 
 public interface BlankUserService {
 
     public BlankUser getUser(long discordId, long guildId);
 
-    public BlankUser getUser(SlashCommandEvent event);
+    public BlankUser getUser(SlashCommandInteraction event);
 
     public BlankUser getUser(OptionMapping option);
 
@@ -41,24 +41,25 @@ public interface BlankUserService {
     public boolean decreaseUserBalance(BlankUser user, int money);
 
     public UserClaimData fetchClaimData(BlankUser blankUser,
-	    ClaimDataType claimDataType);
+        ClaimDataType claimDataType);
 
-    public FormattingData createSimpleFormattingData(SlashCommandEvent event,
-	    MessageType messageType);
+    public FormattingData createSimpleFormattingData(
+        SlashCommandInteraction event,
+        MessageType messageType);
 
     public FormattingData.FormattingDataBuilder createFormattingData(
-	    BlankUser user, MessageType messageType);
+        BlankUser user, MessageType messageType);
 
     public FormattingData.FormattingDataBuilder addUserDetailsFormattingData(
-	    FormattingData.FormattingDataBuilder builder, BlankUser user,
-	    FormatDataKey userName, FormatDataKey userMention);
+        FormattingData.FormattingDataBuilder builder, BlankUser user,
+        FormatDataKey userName, FormatDataKey userMention);
 
     @Transactional
     public FormattingData.FormattingDataBuilder claimReward(BlankUser blankUser,
-	    ClaimDataType claimType);
+        ClaimDataType claimType);
 
     public BlankUser getUser(long guildId, String username,
-	    String discriminator);
+        String discriminator);
 
     @Transactional
     public void deleteUser(BlankUser user);

@@ -17,10 +17,10 @@ import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class RichestCommand extends AbstractCommand {
@@ -31,7 +31,7 @@ public class RichestCommand extends AbstractCommand {
     }
 
     @Override
-    protected CommandData createCommandData(CommandData commandData) {
+    protected SlashCommandData createCommandData(SlashCommandData commandData) {
 	commandData
 		.addOption(OptionType.INTEGER, "page",
 			getCommandDefinition().getOptionDescription("page"));
@@ -39,7 +39,7 @@ public class RichestCommand extends AbstractCommand {
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
+    protected void onCommand(SlashCommandInteraction event) {
 	long page = Optional
 		.ofNullable(event.getOption("page"))
 		.map(OptionMapping::getAsLong)

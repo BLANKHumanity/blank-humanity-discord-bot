@@ -5,9 +5,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+
 import javax.annotation.PostConstruct;
-import org.hibernate.service.spi.InjectService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.games.messages.GenericGameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GenericGameMessageType;
@@ -18,12 +20,12 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.GameService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
+
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 
 @Getter
 public abstract class AbstractGame extends AbstractCommand {
@@ -47,7 +49,7 @@ public abstract class AbstractGame extends AbstractCommand {
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
+    protected void onCommand(SlashCommandInteraction event) {
         BlankUser user = getBlankUserService().getUser(event);
 
         Optional<GameMetadata> gameMetadata = gameService
@@ -170,7 +172,7 @@ public abstract class AbstractGame extends AbstractCommand {
                 menu, argument));
     }
 
-    protected abstract ReactionMenu onGameStart(SlashCommandEvent event,
+    protected abstract ReactionMenu onGameStart(SlashCommandInteraction event,
         BlankUser user, GameMetadata metadata);
 
     protected abstract ReactionMenu onGameContinue(BlankUser user,

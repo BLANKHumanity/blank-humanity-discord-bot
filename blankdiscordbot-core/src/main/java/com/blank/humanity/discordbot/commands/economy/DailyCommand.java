@@ -9,8 +9,8 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.user.ClaimDataType;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class DailyCommand extends AbstractCommand {
@@ -21,12 +21,12 @@ public class DailyCommand extends AbstractCommand {
     }
 
     @Override
-    protected CommandData createCommandData(CommandData dailyCommand) {
+    protected SlashCommandData createCommandData(SlashCommandData dailyCommand) {
 	return dailyCommand;
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
+    protected void onCommand(SlashCommandInteraction event) {
 	BlankUser blankUser = blankUserService.getUser(event);
 
 	FormattingData formattingData = blankUserService
