@@ -1,4 +1,9 @@
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      release-version:
+        description: 'Release Tag'
+        required: true
 
 jobs:
   deploy:
@@ -18,6 +23,6 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
     - name: Build and publish new Docker Container Release
-      run: cd dockerBuild && ./releaseDockerVersion.sh
+      run: cd dockerBuild && ./releaseDockerVersion.sh ${{ github.event.inputs.release-version }}
       env:
         DOCKER_USER: ${{ secrets.DOCKER_HUB_USERNAME }}
