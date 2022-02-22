@@ -2,18 +2,21 @@ package com.blank.humanity.discordbot.commands.games;
 
 import java.security.SecureRandom;
 import java.util.function.Consumer;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.blank.humanity.discordbot.commands.games.messages.GameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GameMessageType;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class RockPaperScissorsGameCommand extends AbstractGame {
@@ -30,7 +33,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
     }
 
     @Override
-    protected CommandData createCommandData(CommandData commandData) {
+    protected SlashCommandData createCommandData(SlashCommandData commandData) {
         OptionData betAmount = new OptionData(OptionType.INTEGER, "bet",
             getCommandDefinition().getOptionDescription("bet"), true);
         betAmount.setMinValue(1);
@@ -45,7 +48,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
     }
 
     @Override
-    protected ReactionMenu onGameStart(SlashCommandEvent event, BlankUser user,
+    protected ReactionMenu onGameStart(SlashCommandInteraction event, BlankUser user,
         GameMetadata metadata) {
         int betAmount = (int) event.getOption("bet").getAsLong();
         if (betAmount > user.getBalance()) {
@@ -98,7 +101,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
         };
     }
 
-    private void loss(SlashCommandEvent event, BlankUser user, int betAmount,
+    private void loss(SlashCommandInteraction event, BlankUser user, int betAmount,
         int userSel, int botSel) {
         getBlankUserService().decreaseUserBalance(user, betAmount);
 
@@ -114,7 +117,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
         reply(event, result);
     }
 
-    private void win(SlashCommandEvent event, BlankUser user, int betAmount,
+    private void win(SlashCommandInteraction event, BlankUser user, int betAmount,
         int userSel, int botSel) {
             int reward = calculateWinnings(betAmount);
         getBlankUserService()
@@ -134,7 +137,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
         reply(event, result);
     }
 
-    private void tie(SlashCommandEvent event, BlankUser user, int betAmount,
+    private void tie(SlashCommandInteraction event, BlankUser user, int betAmount,
         int userSel, int botSel) {
         FormattingData result = getBlankUserService()
             .createFormattingData(user,

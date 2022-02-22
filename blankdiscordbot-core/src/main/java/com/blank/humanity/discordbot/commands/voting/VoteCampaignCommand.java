@@ -2,8 +2,10 @@ package com.blank.humanity.discordbot.commands.voting;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.blank.humanity.discordbot.commands.AbstractHiddenCommand;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingFormatDataKey;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingMessageType;
@@ -11,9 +13,10 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.voting.VotingCampaign;
 import com.blank.humanity.discordbot.services.VotingService;
 import com.blank.humanity.discordbot.utils.FormattingData;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 @Component
@@ -31,7 +34,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
     private VoteCommand voteCommand;
 
     @Override
-    protected CommandData createCommandData(CommandData commandData) {
+    protected SlashCommandData createCommandData(SlashCommandData commandData) {
         SubcommandData create = new SubcommandData("create",
             getCommandDefinition().getOptionDescription("create"));
         create
@@ -94,7 +97,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
+    protected void onCommand(SlashCommandInteraction event) {
         switch (event.getSubcommandName()) {
         case "create" -> create(event);
         case "addchoice" -> addChoice(event);
@@ -105,7 +108,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
         }
     }
 
-    private void create(SlashCommandEvent event) {
+    private void create(SlashCommandInteraction event) {
         BlankUser user = getBlankUserService().getUser(event);
         String campaign = event.getOption("name").getAsString();
         String description = event.getOption("description").getAsString();
@@ -134,7 +137,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
                 .build());
     }
 
-    private void addChoice(SlashCommandEvent event) {
+    private void addChoice(SlashCommandInteraction event) {
         String campaign = event.getOption("campaign").getAsString();
 
         Optional<VotingCampaign> votingCampaign = votingService
@@ -166,7 +169,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
         }
     }
 
-    private void removeChoice(SlashCommandEvent event) {
+    private void removeChoice(SlashCommandInteraction event) {
         String campaign = event.getOption("campaign").getAsString();
 
         Optional<VotingCampaign> votingCampaign = votingService
@@ -208,7 +211,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
         }
     }
 
-    private void start(SlashCommandEvent event) {
+    private void start(SlashCommandInteraction event) {
         String campaign = event.getOption("campaign").getAsString();
 
         Optional<VotingCampaign> votingCampaign = votingService
@@ -233,7 +236,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
         }
     }
 
-    private void stop(SlashCommandEvent event) {
+    private void stop(SlashCommandInteraction event) {
         String campaign = event.getOption("campaign").getAsString();
 
         Optional<VotingCampaign> votingCampaign = votingService
@@ -258,7 +261,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
         }
     }
 
-    private void list(SlashCommandEvent event) {
+    private void list(SlashCommandInteraction event) {
         BlankUser user = getBlankUserService().getUser(event);
         String body = votingService
             .getVotingCampaigns()

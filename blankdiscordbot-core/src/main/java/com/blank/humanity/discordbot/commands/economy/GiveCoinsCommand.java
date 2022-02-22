@@ -8,9 +8,9 @@ import com.blank.humanity.discordbot.commands.economy.messages.EconomyMessageTyp
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class GiveCoinsCommand extends AbstractCommand {
@@ -21,7 +21,7 @@ public class GiveCoinsCommand extends AbstractCommand {
     }
 
     @Override
-    protected CommandData createCommandData(CommandData commandData) {
+    protected SlashCommandData createCommandData(SlashCommandData commandData) {
 	commandData
 		.addOption(OptionType.USER, "user",
 			getCommandDefinition().getOptionDescription("user"),
@@ -34,7 +34,7 @@ public class GiveCoinsCommand extends AbstractCommand {
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
+    protected void onCommand(SlashCommandInteraction event) {
 	Member receiver = event.getOption("user").getAsMember();
 	BlankUser receivingUser = getBlankUserService().getUser(receiver);
 

@@ -1,21 +1,24 @@
 package com.blank.humanity.discordbot.commands;
 
 import static com.blank.humanity.discordbot.utils.Wrapper.transactionCallback;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
+
 import com.blank.humanity.discordbot.config.DiscordBotConfig;
 import com.blank.humanity.discordbot.config.commands.CommandConfig;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
@@ -25,10 +28,12 @@ import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.config.messages.MessagesConfig;
 import com.blank.humanity.discordbot.services.BlankUserService;
 import com.blank.humanity.discordbot.services.TransactionExecutor;
+import com.blank.humanity.discordbot.utils.FormatDataKey;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.NamedFormatter;
 import com.blank.humanity.discordbot.utils.Wrapper;
 import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
+
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +42,12 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.internal.utils.Checks;
 
@@ -81,15 +89,15 @@ public abstract class AbstractCommand extends ListenerAdapter {
     @Autowired
     private TaskScheduler taskScheduler;
 
-    private CommandData commandData;
+    private SlashCommandData commandData;
 
     private CommandDefinition commandDefinition;
 
-    private static Map<SlashCommandEvent, MessageEmbed[]> cachedEmbeds = new HashMap<>();
+    private static Map<SlashCommandInteraction, MessageEmbed[]> cachedEmbeds = new HashMap<>();
 
-    private static Map<SlashCommandEvent, ReactionMenu> cachedMenus = new HashMap<>();
+    private static Map<SlashCommandInteraction, ReactionMenu> cachedMenus = new HashMap<>();
 
-    private static Map<SlashCommandEvent, Runnable> cachedTasks = new HashMap<>();
+    private static Map<SlashCommandInteraction, Runnable> cachedTasks = new HashMap<>();
 
     /**
      * Waits for JDA to get ready and then sets up and registers this command to
@@ -117,8 +125,9 @@ public abstract class AbstractCommand extends ListenerAdapter {
     public void updateCommandDefinition() {
         this.commandDefinition = commandConfig
             .getCommandDefinition(getCommandName());
-        commandData = createCommandData(new CommandData(getCommandName(),
-            getCommandDefinition().getDescription()));
+        commandData = createCommandData(Commands
+            .slash(getCommandName(),
+                getCommandDefinition().getDescription()));
 
         Guild guild = jda.getGuildById(commandConfig.getGuildId());
 
@@ -150,7 +159,8 @@ public abstract class AbstractCommand extends ListenerAdapter {
      *                    and description is already pre-filled.
      * @return The modified CommandData
      */
-    protected abstract CommandData createCommandData(CommandData commandData);
+    protected abstract SlashCommandData createCommandData(
+        SlashCommandData commandData);
 
     /**
      * @see AbstractHiddenCommand
@@ -172,12 +182,12 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * @param event The SlashCommandEvent from Discord
      */
     @Override
-    public void onSlashCommand(@NonNull SlashCommandEvent event) {
+    public void onSlashCommandInteraction(@NonNull SlashCommandInteractionEvent event) {
         if (commandData.getName().equals(event.getName())) {
             boolean hidden = isEphemeral() || commandDefinition.isHidden()
                 || isChannelHidden(event.getChannel().getIdLong());
             event.deferReply(hidden).queue();
-
+            
             transactionExecutor
                 .executeAsTransaction(
                     transactionCallback(
@@ -190,13 +200,14 @@ public abstract class AbstractCommand extends ListenerAdapter {
 
     /**
      * Handles sending of replies and menus, as well as starting long running
-     * Tasks after the {@link #onCommand(SlashCommandEvent)} Call.<br>
+     * Tasks after the {@link #onCommand(SlashCommandInteraction)} Call.<br>
      * If no reply has been set via {@link #reply}, then this will send a error
      * message to notify the user.
      * 
      * @param event The Command Event that needs to be finished
      */
-    private void transactionFinishHandler(@NonNull SlashCommandEvent event) {
+    private void transactionFinishHandler(
+        @NonNull SlashCommandInteraction event) {
         if (!cachedEmbeds.containsKey(event)) {
             sendErrorMessage(event, "This command somehow didn't respond!");
         }
@@ -218,13 +229,13 @@ public abstract class AbstractCommand extends ListenerAdapter {
 
     /**
      * Any Exception that is thrown during the
-     * {@link #onCommand(SlashCommandEvent)} Call is getting logged here and the
+     * {@link #onCommand(SlashCommandInteraction)} Call is getting logged here and the
      * user is notified with a Error Message.
      * 
      * @param event The event that resulted in an Exception.
      * @param e     The exception that was thrown.
      */
-    private void transactionExceptionHandler(@NonNull SlashCommandEvent event,
+    private void transactionExceptionHandler(@NonNull SlashCommandInteraction event,
         @NonNull Exception e) {
         log.error("Transaction threw Exception", e);
         sendErrorMessage(event,
@@ -235,13 +246,13 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * Builds a Message of Type ERROR_MESSAGE with the given
      * {@code errorMessage}<br>
      * It is a Utility Function wrapping a
-     * {@link #reply(SlashCommandEvent, FormattingData)} call.
+     * {@link #reply(SlashCommandInteraction, FormattingData)} call.
      * 
      * @param event        The CommandEvent that a error needs to be sent to as
      *                     a reply
      * @param errorMessage The actual error message
      */
-    protected void sendErrorMessage(@NonNull SlashCommandEvent event,
+    protected void sendErrorMessage(@NonNull SlashCommandInteraction event,
         @NonNull String errorMessage) {
         reply(event,
             FormattingData
@@ -272,13 +283,13 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * execution, calling this function twice, will cause your first reply to be
      * discarded.<br>
      * If you need direct control over generated MessageEmbeds, use
-     * {@link #reply(SlashCommandEvent, MessageEmbed...)}
+     * {@link #reply(SlashCommandInteraction, MessageEmbed...)}
      * 
      * @param event          The SlashCommandEvent that is to be replied to
      * @param formattingData The {@link FormattingData}s that describe the
      *                       replies.
      */
-    protected void reply(@NonNull SlashCommandEvent event,
+    protected void reply(@NonNull SlashCommandInteraction event,
         @NonNull FormattingData... formattingDatas) {
         MessageEmbed[] embeds = Arrays
             .stream(formattingDatas)
@@ -299,10 +310,10 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * Using {@linkplain #reply(SlashCommandEvent, FormattingData...)} is
      * preferred, since it forces you to use configurable Messages.
      * 
-     * @param event  The SlashCommandEvent that is to be replied to
+     * @param event  The SlashCommandInteraction that is to be replied to
      * @param embeds The {@link MessageEmbed}s that should be sent out.
      */
-    protected void reply(@NonNull SlashCommandEvent event,
+    protected void reply(@NonNull SlashCommandInteraction event,
         @NonNull MessageEmbed... embeds) {
         Checks.noneNull(embeds, "MessageEmbeds");
         cachedEmbeds.put(event, embeds);
@@ -347,11 +358,11 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * Notice: Calling this function twice will discard the earlier set
      * ReactionMenu.
      * 
-     * @param event        The {@linkplain SlashCommandEvent} that the
+     * @param event        The {@linkplain SlashCommandInteraction} that the
      *                     ReactionMenu should be added to.
      * @param reactionMenu The {@linkplain ReactionMenu} to be added.
      */
-    protected void addReactionMenu(@NonNull SlashCommandEvent event,
+    protected void addReactionMenu(@NonNull SlashCommandInteraction event,
         @NonNull ReactionMenu reactionMenu) {
         cachedMenus.put(event, reactionMenu);
     }
@@ -367,11 +378,11 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * take longer to finish.<br>
      * Notice: Calling this function twice will discard the earlier set Task.
      * 
-     * @param event The {@linkplain SlashCommandEvent} that the Task should be
+     * @param event The {@linkplain SlashCommandInteraction} that the Task should be
      *              added to.
      * @param task  The {@linkplain Subtask} that should be executed.
      */
-    protected void addLongRunningTask(@NonNull SlashCommandEvent event,
+    protected void addLongRunningTask(@NonNull SlashCommandInteraction event,
         @NonNull Subtask task) {
         Consumer<FormattingData[]> updateMessages = messages -> event
             .getHook()
@@ -409,12 +420,12 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * The various protected Methods of this class can be used to reply to this
      * command invocation.
      * 
-     * @param event The {@linkplain SlashCommandEvent} that caused this command
+     * @param event The {@linkplain SlashCommandInteraction} that caused this command
      *              invocation.
      * @see #reply(SlashCommandEvent, FormattingData...)
      * @see #sendErrorMessage(SlashCommandEvent, String)
      * @see #addReactionMenu(SlashCommandEvent, ReactionMenu)
      * @see #addLongRunningTask(SlashCommandEvent, Subtask)
      */
-    protected abstract void onCommand(@NonNull SlashCommandEvent event);
+    protected abstract void onCommand(@NonNull SlashCommandInteraction event);
 }

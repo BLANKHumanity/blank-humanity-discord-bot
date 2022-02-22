@@ -5,12 +5,15 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+
 import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
 import com.blank.humanity.discordbot.config.commands.CommandConfig;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
@@ -23,12 +26,13 @@ import com.blank.humanity.discordbot.entities.user.UserClaimData;
 import com.blank.humanity.discordbot.entities.user.fake.FakeUserType;
 import com.blank.humanity.discordbot.utils.FormatDataKey;
 import com.blank.humanity.discordbot.utils.FormattingData;
+
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 
 @Slf4j
 @Service
@@ -56,7 +60,7 @@ public class BlankUserServiceImpl implements BlankUserService {
             .orElseGet(() -> registerUser(discordId, guildId));
     }
 
-    public BlankUser getUser(SlashCommandEvent event) {
+    public BlankUser getUser(SlashCommandInteraction event) {
         return getUser(event.getUser().getIdLong(),
             event.getGuild().getIdLong());
     }
@@ -119,7 +123,8 @@ public class BlankUserServiceImpl implements BlankUserService {
         return data;
     }
 
-    public FormattingData createSimpleFormattingData(SlashCommandEvent event,
+    public FormattingData createSimpleFormattingData(
+        SlashCommandInteraction event,
         MessageType messageType) {
         return createFormattingData(getUser(event.getUser().getIdLong(),
             event.getGuild().getIdLong()), messageType).build();

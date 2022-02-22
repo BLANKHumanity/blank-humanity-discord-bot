@@ -1,7 +1,6 @@
 package com.blank.humanity.discordbot.commands;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.both;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
@@ -10,16 +9,16 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
+
 import javax.validation.Validator;
+
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,30 +33,32 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.support.TransactionCallback;
+
 import com.blank.humanity.discordbot.config.DiscordBotConfig;
 import com.blank.humanity.discordbot.config.commands.CommandConfig;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
-import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.config.messages.MessagesConfig;
 import com.blank.humanity.discordbot.services.BlankUserService;
 import com.blank.humanity.discordbot.services.TransactionExecutor;
-import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
+
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.CommandCreateAction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -133,7 +134,7 @@ class AbstractCommandTest {
         CommandDefinition commandDefinition = mockCommandDefinition(
             COMMAND_NAME, "TestDescription", false, false);
 
-        CommandData testCommandData = new CommandData(COMMAND_NAME,
+        CommandData testCommandData = Commands.slash(COMMAND_NAME,
             commandDefinition.getDescription());
 
         Guild testGuild = Mockito.mock(Guild.class);
@@ -163,7 +164,7 @@ class AbstractCommandTest {
         CommandDefinition commandDefinition = mockCommandDefinition(
             COMMAND_NAME, "TestDescription", false, true, 12345678l, 87654321l);
 
-        CommandData testCommandData = new CommandData(COMMAND_NAME,
+        CommandData testCommandData = Commands.slash(COMMAND_NAME,
             commandDefinition.getDescription());
 
         Guild testGuild = Mockito.mock(Guild.class);
@@ -218,7 +219,7 @@ class AbstractCommandTest {
     }
 
     @SuppressWarnings("unchecked")
-    private void testOnSlashCommand(SlashCommandEvent event,
+    private void testOnSlashCommandInteraction(SlashCommandInteractionEvent event,
         String[] embedReplies,
         Exception callExceptionHandler) {
         mockCommandDefinition(COMMAND_NAME, "TestDescription", false, false);
@@ -233,7 +234,7 @@ class AbstractCommandTest {
         when(commandConfig.getHiddenCommandChannels())
             .thenReturn(Collections.emptyList());
 
-        ReplyAction action = mock(ReplyAction.class);
+        ReplyCallbackAction action = mock(ReplyCallbackAction.class);
 
         when(event.deferReply(false)).thenReturn(action);
 
@@ -266,7 +267,7 @@ class AbstractCommandTest {
         when(hook.editOriginalEmbeds(embedCaptor.capture()))
             .thenReturn(restAction);
 
-        abstractCommand.onSlashCommand(event);
+        abstractCommand.onSlashCommandInteraction(event);
 
         verify(transactionExecutor, atLeast(1))
             .executeAsTransaction(Mockito.notNull(), Mockito.notNull(),
@@ -288,13 +289,13 @@ class AbstractCommandTest {
 
     @Test
     void testTransactionExceptionHandler() {
-        SlashCommandEvent event = mock(SlashCommandEvent.class);
+        SlashCommandInteractionEvent event = mock(SlashCommandInteractionEvent.class);
 
         Exception exc = new Exception("Test Exception");
 
         mockMessageType("ERROR_MESSAGE", "Test ERROR_MESSAGE: %(errorMessage)");
 
-        testOnSlashCommand(event,
+        testOnSlashCommandInteraction(event,
             new String[] {
                 "Test ERROR_MESSAGE: This command threw this error 'Test Exception'" },
             exc);
@@ -302,20 +303,20 @@ class AbstractCommandTest {
 
     @Test
     void testTransactionFinishHandler() {
-        SlashCommandEvent event = mock(SlashCommandEvent.class);
+        SlashCommandInteractionEvent event = mock(SlashCommandInteractionEvent.class);
 
         mockOnCommand(event, "Working");
 
-        testOnSlashCommand(event, new String[] { "Working" }, null);
+        testOnSlashCommandInteraction(event, new String[] { "Working" }, null);
     }
 
     @Test
     void testMissingReply() {
-        SlashCommandEvent event = mock(SlashCommandEvent.class);
+        SlashCommandInteractionEvent event = mock(SlashCommandInteractionEvent.class);
 
         mockMessageType("ERROR_MESSAGE", "Test ERROR_MESSAGE: %(errorMessage)");
 
-        testOnSlashCommand(event,
+        testOnSlashCommandInteraction(event,
             new String[] {
                 "Test ERROR_MESSAGE: This command somehow didn't respond!" },
             null);
@@ -323,7 +324,7 @@ class AbstractCommandTest {
 
     @Test
     void testAddReactionMenu() {
-        SlashCommandEvent event = mock(SlashCommandEvent.class);
+        SlashCommandInteractionEvent event = mock(SlashCommandInteractionEvent.class);
 
         mockOnCommand(event, "Working");
 
@@ -331,7 +332,7 @@ class AbstractCommandTest {
 
         abstractCommand.addReactionMenu(event, menu);
 
-        testOnSlashCommand(event, new String[] { "Working" }, null);
+        testOnSlashCommandInteraction(event, new String[] { "Working" }, null);
 
         verify(menu)
             .buildMenu(Mockito.eq(jda), Mockito.any(),
@@ -340,7 +341,7 @@ class AbstractCommandTest {
 
     @Test
     void testAddLongRunningTask() {
-        SlashCommandEvent event = mock(SlashCommandEvent.class);
+        SlashCommandInteractionEvent event = mock(SlashCommandInteractionEvent.class);
 
         mockOnCommand(event, "Working");
 
@@ -348,13 +349,13 @@ class AbstractCommandTest {
 
         abstractCommand.addLongRunningTask(event, task);
 
-        testOnSlashCommand(event, new String[] { "Working" }, null);
+        testOnSlashCommandInteraction(event, new String[] { "Working" }, null);
 
         verify(task)
             .accept(Mockito.notNull());
     }
 
-    private void mockOnCommand(SlashCommandEvent event, String message) {
+    private void mockOnCommand(SlashCommandInteraction event, String message) {
         Answer<?> setEmbed = invocation -> {
             MessageEmbed embed = mock(MessageEmbed.class);
             lenient()
@@ -392,7 +393,7 @@ class AbstractCommandTest {
 
     private CommandData mockCommandData(String commandName,
         String description) {
-        CommandData data = new CommandData(commandName, description);
+        CommandData data = Commands.slash(commandName, description);
 
         ReflectionTestUtils.setField(abstractCommand, "commandData", data);
 

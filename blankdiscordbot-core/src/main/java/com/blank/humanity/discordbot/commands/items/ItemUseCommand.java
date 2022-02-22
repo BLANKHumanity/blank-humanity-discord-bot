@@ -1,16 +1,19 @@
 package com.blank.humanity.discordbot.commands.items;
 
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.InventoryService;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class ItemUseCommand extends AbstractCommand {
@@ -27,7 +30,7 @@ public class ItemUseCommand extends AbstractCommand {
     private InventoryService inventoryService;
 
     @Override
-    protected CommandData createCommandData(CommandData commandData) {
+    protected SlashCommandData createCommandData(SlashCommandData commandData) {
         commandData
             .addOption(OptionType.STRING, ITEM,
                 getCommandDefinition().getOptionDescription(ITEM),
@@ -40,7 +43,7 @@ public class ItemUseCommand extends AbstractCommand {
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
+    protected void onCommand(SlashCommandInteraction event) {
         BlankUser user = blankUserService.getUser(event);
 
         OptionMapping item = event.getOption(ITEM);

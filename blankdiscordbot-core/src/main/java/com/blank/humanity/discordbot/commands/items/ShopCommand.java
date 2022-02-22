@@ -2,8 +2,10 @@ package com.blank.humanity.discordbot.commands.items;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
@@ -13,12 +15,13 @@ import com.blank.humanity.discordbot.config.items.ShopItem;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.ShopService;
 import com.blank.humanity.discordbot.utils.FormattingData;
+
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class ShopCommand extends AbstractCommand {
@@ -35,7 +38,7 @@ public class ShopCommand extends AbstractCommand {
     private ItemConfiguration itemConfiguration;
 
     @Override
-    protected CommandData createCommandData(CommandData shopCommand) {
+    protected SlashCommandData createCommandData(SlashCommandData shopCommand) {
         OptionData page = new OptionData(OptionType.INTEGER, "page",
             getCommandDefinition().getOptionDescription("page"));
         page.setMinValue(1);
@@ -45,7 +48,7 @@ public class ShopCommand extends AbstractCommand {
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
+    protected void onCommand(SlashCommandInteraction event) {
         int page = Optional
             .ofNullable(event.getOption("page"))
             .map(OptionMapping::getAsLong)
