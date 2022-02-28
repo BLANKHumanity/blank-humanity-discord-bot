@@ -6,7 +6,6 @@ import com.blank.humanity.discordbot.services.MenuService;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction;
 
 public interface DiscordMenu {
     

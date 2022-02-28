@@ -4,7 +4,6 @@ import java.security.SecureRandom;
 
 import javax.security.auth.login.LoginException;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.utils;
 
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.validation.constraints.NotNull;
 
 import com.blank.humanity.discordbot.config.messages.MessageType;

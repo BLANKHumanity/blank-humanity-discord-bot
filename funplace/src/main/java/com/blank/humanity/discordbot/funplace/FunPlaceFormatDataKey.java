@@ -1,6 +1,7 @@
 package com.blank.humanity.discordbot.funplace;
 
 import com.blank.humanity.discordbot.utils.FormatDataKey;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;

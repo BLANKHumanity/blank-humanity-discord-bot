@@ -62,26 +62,26 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
                 .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
                 .build());
             abort(metadata);
-            return null;
+        } else {
+
+            int opponentRoll = random.nextInt(3);
+
+            int userSelection = selectionToInt(
+                event.getOption(CHOICE).getAsString());
+
+            char result = resultMap[opponentRoll][userSelection];
+
+            switch (result) {
+            case 't' -> tie(betAmount, userSelection, opponentRoll);
+            case 'w' -> win(betAmount, userSelection, opponentRoll);
+            case 'l' -> loss(betAmount, userSelection, opponentRoll);
+            default -> throw new IllegalArgumentException(
+                "RPS Result can only be 't', 'w', or 'l', but it is '" + result
+                    + "'!");
+            }
+
+            finish(metadata);
         }
-
-        int opponentRoll = random.nextInt(3);
-
-        int userSelection = selectionToInt(
-            event.getOption(CHOICE).getAsString());
-
-        char result = resultMap[opponentRoll][userSelection];
-
-        switch (result) {
-        case 't' -> tie(betAmount, userSelection, opponentRoll);
-        case 'w' -> win(betAmount, userSelection, opponentRoll);
-        case 'l' -> loss(betAmount, userSelection, opponentRoll);
-        default -> throw new IllegalArgumentException(
-            "RPS Result can only be 't', 'w', or 'l', but it is '" + result
-                + "'!");
-        }
-
-        finish(metadata);
         return null;
     }
 

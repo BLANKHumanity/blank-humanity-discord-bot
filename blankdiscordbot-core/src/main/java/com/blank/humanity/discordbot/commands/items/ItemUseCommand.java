@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
-import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.services.InventoryService;
 
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;

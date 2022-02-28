@@ -1,7 +1,9 @@
 package com.blank.humanity.discordbot.config.messages;
 
 import java.util.List;
+
 import javax.validation.constraints.NotNull;
+
 import org.springframework.core.env.Environment;
 
 import com.blank.humanity.discordbot.utils.FormatDataKey;

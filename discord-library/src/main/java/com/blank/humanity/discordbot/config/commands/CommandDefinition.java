@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.config.commands;
 
 import java.util.HashMap;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

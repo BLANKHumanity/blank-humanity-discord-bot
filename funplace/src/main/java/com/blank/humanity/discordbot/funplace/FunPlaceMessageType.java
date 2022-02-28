@@ -1,9 +1,12 @@
 package com.blank.humanity.discordbot.funplace;
 
 import java.util.Optional;
+
 import org.springframework.core.env.Environment;
+
 import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.utils.FormatDataKey;
+
 import lombok.Getter;
 import lombok.ToString;
 

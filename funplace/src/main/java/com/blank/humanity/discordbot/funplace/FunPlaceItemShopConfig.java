@@ -2,10 +2,13 @@ package com.blank.humanity.discordbot.funplace;
 
 import java.util.List;
 import java.util.Optional;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
 import lombok.Data;
 
 @Data
