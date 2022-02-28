@@ -1,8 +1,6 @@
 package com.blank.humanity.discordbot.commands.games;
 
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,14 +9,10 @@ import com.blank.humanity.discordbot.commands.games.messages.GameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GameMessageType;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
-import com.blank.humanity.discordbot.entities.game.RockPaperScissorsMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -29,6 +23,8 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
 
     @Autowired
     private SecureRandom random;
+
+    private static final String CHOICE = "choice";
 
     private char[][] resultMap = { { 't', 'w', 'l' }, { 'l', 't', 'w' },
         { 'w', 'l', 't' } };
@@ -45,13 +41,12 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
             definition.getOptionDescription("bet"), true);
         betAmount.setMinValue(1);
         betAmount.setMaxValue(getCommandConfig().getMaxGameBetAmount());
-//        OptionData selection = new OptionData(OptionType.STRING, "choice",
-//            definition.getOptionDescription("choice"), true);
-//        selection.addChoice("🇷", "rock");
-//        selection.addChoice("🇵", "paper");
-//        selection.addChoice("🇸", "scissors");
-//        commandData.addOptions(betAmount, selection);
-        commandData.addOptions(betAmount);
+        OptionData selection = new OptionData(OptionType.STRING, CHOICE,
+            definition.getOptionDescription(CHOICE), true);
+        selection.addChoice("🇷", "rock");
+        selection.addChoice("🇵", "paper");
+        selection.addChoice("🇸", "scissors");
+        commandData.addOptions(betAmount, selection);
         return commandData;
     }
 
@@ -68,54 +63,14 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
                 .build());
             abort(metadata);
             return null;
-        } else {
-            getBlankUserService().decreaseUserBalance(user, betAmount);
-
-            metadata
-                .setMetadata(
-                    RockPaperScissorsMetadata
-                        .builder()
-                        .betAmount(betAmount)
-                        .build());
-
-            long discordId = user.getDiscordId();
-            long guildId = user.getGuildId();
-
-            reply(new EmbedBuilder().setDescription("Choose one!").build());
-            
-            return componentMenu()
-                .restricted(true)
-                .allowedDiscordIds(List.of(user.getDiscordId()))
-                .singleUse(true)
-                .selection("rpsSelection")
-                .addOption("Rock", "rock", Emoji.fromUnicode("🪨"))
-                .addOption("Paper", "paper",
-                    Emoji.fromUnicode("📰"))
-                .addOption("Scissors", "scissors",
-                    Emoji.fromUnicode("✂️"))
-                .finish()
-                .timeoutTask(() -> {
-                    getBlankUserService()
-                        .increaseUserBalance(discordId, guildId, betAmount);
-                    finish(metadata.getId());
-                })
-                .build();
         }
-    }
-
-    @Override
-    protected DiscordMenu onGameContinue(BlankUser user, GameMetadata metadata,
-        Object argument) {
-        RockPaperScissorsMetadata rockPaperScissors = metadata
-            .getMetadata(RockPaperScissorsMetadata.class);
 
         int opponentRoll = random.nextInt(3);
 
-        int userSelection = selectionToInt((String) argument);
+        int userSelection = selectionToInt(
+            event.getOption(CHOICE).getAsString());
 
         char result = resultMap[opponentRoll][userSelection];
-
-        int betAmount = rockPaperScissors.getBetAmount();
 
         switch (result) {
         case 't' -> tie(betAmount, userSelection, opponentRoll);
@@ -195,6 +150,12 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
             .build();
 
         reply(result);
+    }
+
+    @Override
+    protected DiscordMenu onGameContinue(BlankUser user, GameMetadata metadata,
+        Object argument) {
+        return null;
     }
 
 }

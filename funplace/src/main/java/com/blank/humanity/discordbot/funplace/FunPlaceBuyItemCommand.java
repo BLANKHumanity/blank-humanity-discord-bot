@@ -1,5 +1,6 @@
 package com.blank.humanity.discordbot.funplace;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,10 @@ import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
+import lombok.NonNull;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -21,6 +25,9 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class FunPlaceBuyItemCommand extends AbstractCommand {
+
+    private static final String AMOUNT = "amount";
+    private static final String ITEM = "item";
 
     @Autowired
     private FunPlaceShopService shopService;
@@ -37,10 +44,10 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
     public SlashCommandData createCommandData(SlashCommandData commandData,
         CommandDefinition definition) {
         commandData
-            .addOption(OptionType.STRING, "item",
-                definition.getOptionDescription("item"), true);
-        OptionData amount = new OptionData(OptionType.INTEGER, "amount",
-            definition.getOptionDescription("amount"));
+            .addOption(OptionType.STRING, ITEM,
+                definition.getOptionDescription(ITEM), true);
+        OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
+            definition.getOptionDescription(AMOUNT));
         amount.setMinValue(1);
         commandData.addOptions(amount);
         return commandData;
@@ -51,12 +58,10 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
         BlankUser user = getUser();
 
         Optional<ShopItem> shopItem = shopService
-            .getShopItem(event.getOption("item").getAsString());
+            .getShopItem(event.getOption(ITEM, OptionMapping::getAsString));
 
-        int amount = Optional
-            .ofNullable(event.getOption("amount"))
-            .map(OptionMapping::getAsLong)
-            .orElse(1L)
+        int amount = event
+            .getOption(AMOUNT, () -> 1l, OptionMapping::getAsLong)
             .intValue();
 
         if (shopItem.isEmpty()) {
@@ -98,6 +103,18 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
             .build();
 
         reply(data);
+    }
+
+    @Override
+    @NonNull
+    protected Collection<Command.Choice> onAutoComplete(
+        @NonNull CommandAutoCompleteInteractionEvent event) {
+        String itemName = event
+            .getOption(ITEM, () -> "", OptionMapping::getAsString)
+            .toLowerCase();
+
+        return shopService
+            .autoCompleteShopItems(itemName);
     }
 
 }

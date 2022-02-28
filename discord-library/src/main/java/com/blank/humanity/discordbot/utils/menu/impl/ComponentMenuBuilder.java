@@ -10,10 +10,8 @@ import javax.annotation.Nullable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenuBuilder;
 
-import lombok.experimental.Delegate;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
