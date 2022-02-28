@@ -73,12 +73,12 @@ public abstract class DiscordMenuBuilder<M extends DiscordMenu> {
 
     public abstract M build();
 
-    public abstract DiscordMenuBuilder allowedDiscordIds(List<Long> allowedIds);
+    public abstract DiscordMenuBuilder<M> allowedDiscordIds(List<Long> allowedIds);
 
-    public abstract DiscordMenuBuilder restricted(boolean restricted);
+    public abstract DiscordMenuBuilder<M> restricted(boolean restricted);
 
-    public abstract DiscordMenuBuilder singleUse(boolean singleUse);
+    public abstract DiscordMenuBuilder<M> singleUse(boolean singleUse);
 
-    public abstract DiscordMenuBuilder timeoutTask(Runnable timeoutTask);
+    public abstract DiscordMenuBuilder<M> timeoutTask(Runnable timeoutTask);
 
 }

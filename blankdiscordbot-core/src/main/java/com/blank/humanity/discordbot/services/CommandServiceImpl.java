@@ -2,7 +2,6 @@ package com.blank.humanity.discordbot.services;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import javax.annotation.PostConstruct;
 

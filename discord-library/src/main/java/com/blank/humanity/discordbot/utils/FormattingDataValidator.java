@@ -1,8 +1,7 @@
 package com.blank.humanity.discordbot.utils;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder;

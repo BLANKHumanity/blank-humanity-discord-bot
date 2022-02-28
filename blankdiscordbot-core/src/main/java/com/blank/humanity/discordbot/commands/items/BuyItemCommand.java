@@ -21,7 +21,6 @@ import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.item.ItemBuyStatus;
 
 import lombok.NonNull;
-import net.dv8tion.jda.api.events.interaction.GenericAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -111,6 +110,7 @@ public class BuyItemCommand extends AbstractCommand {
         reply(data);
     }
 
+    @Override
     @NonNull
     protected Collection<Command.Choice> onAutoComplete(
         @NonNull CommandAutoCompleteInteractionEvent event) {

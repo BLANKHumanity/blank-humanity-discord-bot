@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.services;
 
 import java.sql.Connection;
 import java.util.function.Consumer;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;

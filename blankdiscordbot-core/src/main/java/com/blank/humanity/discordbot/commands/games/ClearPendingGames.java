@@ -11,7 +11,6 @@ import com.blank.humanity.discordbot.database.GameMetadataDao;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component

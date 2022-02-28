@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.entities.user;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,7 +13,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+
 import org.springframework.validation.annotation.Validated;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;

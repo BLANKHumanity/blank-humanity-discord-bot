@@ -1,10 +1,8 @@
 package com.blank.humanity.discordbot.commands.games;
 
 import java.security.SecureRandom;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,15 +18,12 @@ import com.blank.humanity.discordbot.entities.game.RouletteMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
-import com.blank.humanity.discordbot.utils.menu.impl.ComponentMenu;
-import com.blank.humanity.discordbot.utils.menu.impl.ReactionMenu;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 
 @Component
@@ -85,17 +80,11 @@ public class RouletteGameCommand extends AbstractGame {
         Object argument) {
         if (argument instanceof List) {
             reply(rejectNewCommand(user));
-            return null;
-        }
-
-        if (argument.equals("STOP")) {
+        } else if (argument.equals("STOP")) {
             finish(metadata);
-            return null;
+        } else {
+            reply(playGame(metadata));
         }
-
-        FormattingData reply = playGame(metadata);
-
-        reply(reply);
         return null;
     }
 

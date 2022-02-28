@@ -10,8 +10,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
-import org.springframework.context.annotation.Bean;
-
 import com.blank.humanity.discordbot.exceptions.menu.NonUniqueInteractionId;
 import com.blank.humanity.discordbot.services.MenuService;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;

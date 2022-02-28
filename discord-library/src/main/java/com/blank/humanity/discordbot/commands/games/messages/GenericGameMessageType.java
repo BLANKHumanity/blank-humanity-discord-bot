@@ -1,8 +1,11 @@
 package com.blank.humanity.discordbot.commands.games.messages;
 
 import java.util.Optional;
+
 import org.springframework.core.env.Environment;
+
 import com.blank.humanity.discordbot.config.messages.MessageType;
+
 import lombok.Getter;
 
 @Getter
