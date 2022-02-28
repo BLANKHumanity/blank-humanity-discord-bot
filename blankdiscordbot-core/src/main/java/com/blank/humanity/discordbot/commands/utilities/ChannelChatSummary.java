@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.utilities.messages.UtilityFormatDataKey;
 import com.blank.humanity.discordbot.commands.utilities.messages.UtilityMessageType;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
@@ -25,9 +26,9 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.utils.TimeUtil;
@@ -36,29 +37,30 @@ import net.dv8tion.jda.api.utils.TimeUtil;
 public class ChannelChatSummary extends AbstractCommand {
 
     @Override
-    protected String getCommandName() {
+    public String getCommandName() {
         return "chatsummary";
     }
 
     @Override
-    protected SlashCommandData createCommandData(SlashCommandData commandData) {
+    public SlashCommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition) {
         commandData
             .addOption(OptionType.CHANNEL, "channel",
-                getCommandDefinition().getOptionDescription("channel"),
+                definition.getOptionDescription("channel"),
                 true);
         OptionData hours = new OptionData(OptionType.INTEGER, "hours",
-            getCommandDefinition().getOptionDescription("hours"));
+            definition.getOptionDescription("hours"));
         hours.setMinValue(1);
         hours.setMaxValue(480);
         OptionData startingMessage = new OptionData(OptionType.STRING,
             "startmessageid",
-            getCommandDefinition().getOptionDescription("startmessageid"));
+            definition.getOptionDescription("startmessageid"));
         commandData.addOptions(hours, startingMessage);
         return commandData;
     }
 
     @Override
-    protected void onCommand(SlashCommandInteraction event) {
+    protected void onCommand(GenericCommandInteractionEvent event) {
         TextChannel channel = (TextChannel) event
             .getOption("channel")
             .getAsGuildChannel();
@@ -76,13 +78,11 @@ public class ChannelChatSummary extends AbstractCommand {
             .orElse(-1l);
 
         BlankUser user = getBlankUserService().getUser(event);
-        reply(event,
-            createLists(new LinkedHashMap<>(), true, channel, user)[0]);
+        reply(createLists(new LinkedHashMap<>(), true, channel, user)[0]);
 
-        addLongRunningTask(event,
-            updateMessages -> retrieveMessages(channel,
-                event.getUser().getIdLong(), hours, lastMessageID,
-                updateMessages));
+        addLongRunningTask(updateMessages -> retrieveMessages(channel,
+            event.getUser().getIdLong(), hours, lastMessageID,
+            updateMessages));
     }
 
     protected void retrieveMessages(TextChannel channel, long userId, int hours,
@@ -166,10 +166,11 @@ public class ChannelChatSummary extends AbstractCommand {
                 .reversed())
             .iterator();
 
-        String pendingMarker = format(getBlankUserService()
-            .createFormattingData(sender,
-                UtilityMessageType.CHAT_SUMMARY_PENDING)
-            .build());
+        String pendingMarker = getMessageService()
+            .format(getBlankUserService()
+                .createFormattingData(sender,
+                    UtilityMessageType.CHAT_SUMMARY_PENDING)
+                .build());
 
         for (int i = 0; i < lists.length; i++) {
             String body = Stream
@@ -186,7 +187,7 @@ public class ChannelChatSummary extends AbstractCommand {
                     .dataPairing(UtilityFormatDataKey.MESSAGE_COUNT,
                         entry.getValue())
                     .build())
-                .map(this::format)
+                .map(getMessageService()::format)
                 .collect(Collectors.joining("\n"));
 
             lists[i] = getBlankUserService()

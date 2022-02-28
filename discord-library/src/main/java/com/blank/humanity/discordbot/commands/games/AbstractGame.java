@@ -2,12 +2,14 @@ package com.blank.humanity.discordbot.commands.games;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.blank.humanity.discordbot.commands.AbstractCommand;
@@ -19,14 +21,24 @@ import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.GameService;
 import com.blank.humanity.discordbot.utils.FormattingData;
-import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
+import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
+import com.blank.humanity.discordbot.utils.menu.impl.ComponentMenu;
+import com.blank.humanity.discordbot.utils.menu.impl.ComponentMenuBuilder;
+import com.blank.humanity.discordbot.utils.menu.impl.ReactionMenu;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 
+@Slf4j
 @Getter
 public abstract class AbstractGame extends AbstractCommand {
 
@@ -36,9 +48,10 @@ public abstract class AbstractGame extends AbstractCommand {
     @Autowired
     private GameConfig gameConfig;
 
-    private GameDefinition gameDefinition;
+    @Autowired
+    private ObjectProvider<ComponentMenuBuilder> componentMenuBuilderProvider;
 
-    private MessageEmbed cachedEdit;
+    private GameDefinition gameDefinition;
 
     @PostConstruct
     private void loadGameDefinition() {
@@ -49,8 +62,8 @@ public abstract class AbstractGame extends AbstractCommand {
     }
 
     @Override
-    protected void onCommand(SlashCommandInteraction event) {
-        BlankUser user = getBlankUserService().getUser(event);
+    protected void onCommand(GenericCommandInteractionEvent event) {
+        BlankUser user = getUser();
 
         Optional<GameMetadata> gameMetadata = gameService
             .getGameMetadata(user, getCommandName());
@@ -72,7 +85,7 @@ public abstract class AbstractGame extends AbstractCommand {
                     .between(possibleEarlierTime, metadata.getLastPlayed())
                     % 60;
 
-                reply(event, getBlankUserService()
+                reply(getBlankUserService()
                     .createFormattingData(user,
                         GenericGameMessageType.GAME_ON_COOLDOWN)
                     .dataPairing(GenericGameFormatDataKey.COOLDOWN_MINUTES,
@@ -92,33 +105,30 @@ public abstract class AbstractGame extends AbstractCommand {
             metadata = gameService.saveGameMetadata(metadata);
         }
 
-        ReactionMenu menu = null;
+        DiscordMenu menu = null;
         if (metadata.isGameFinished()) {
+            log
+                .info("Starting new Game: " + getCommandName() + " for "
+                    + user.getId() + " (game: " + metadata.getId() + ")");
             // Previous Game was finished
             metadata.setGameFinished(false);
             menu = onGameStart(event, user, metadata);
         } else {
-            synchronized (this) {
-                cachedEdit = null;
-                menu = onGameContinue(user, metadata, event.getOptions(),
-                    formattingData -> {
-                        EmbedBuilder builder = new EmbedBuilder();
-                        builder.setDescription(format(formattingData));
-
-                        cachedEdit = builder.build();
-                    });
-                reply(event, cachedEdit);
-            }
+            log
+                .info("Continuing Game via SlashCommand: " + getCommandName()
+                    + " for " + user.getId() + " (game: " + metadata.getId()
+                    + ")");
+            menu = onGameContinue(user, metadata, event.getOptions());
         }
         if (menu != null) {
-            addReactionMenu(event, menu);
+            addMenu(menu);
         }
     }
 
-    private boolean reactionInteractionWrapper(MessageReactionAddEvent event,
-        ReactionMenu menu, Object argument) {
+    private boolean interactionEventWrapper(MessageChannel channel,
+        long messageId, Member member, DiscordMenu menu, Object argument) {
         BlankUser user = getBlankUserService()
-            .getUser(event.retrieveMember().complete());
+            .getUser(member);
 
         Optional<GameMetadata> gameMetadata = gameService
             .getGameMetadata(user, getCommandName());
@@ -129,55 +139,70 @@ public abstract class AbstractGame extends AbstractCommand {
 
         GameMetadata metadata = gameMetadata.get();
 
-        ReactionMenu newMenu = null;
+        DiscordMenu newMenu = null;
 
-        synchronized (this) {
-            cachedEdit = null;
-            newMenu = onGameContinue(user, metadata, argument,
-                formattingData -> {
-                    EmbedBuilder builder = new EmbedBuilder();
-                    builder.setDescription(format(formattingData));
+        try {
+            setUser(user);
+            setMember(member);
 
-                    cachedEdit = builder.build();
-                });
-            if (cachedEdit != null) {
-                event
-                    .getChannel()
-                    .editMessageEmbedsById(event.getMessageIdLong(),
-                        cachedEdit)
-                    .queue();
+            log
+                .info("Continuing Game via Menu: " + getCommandName() + " for "
+                    + user.getId() + " (game: " + metadata.getId() + ")");
+
+            newMenu = onGameContinue(user, metadata, argument);
+            if (getUnsentReply() != null) {
+                channel
+                    .editMessageEmbedsById(messageId, getUnsentReply())
+                    .complete();
             }
-        }
-        if (newMenu != null || metadata.isGameFinished()) {
-            menu.discard();
-            if (newMenu != null) {
-                newMenu
-                    .buildMenu(getJda(),
-                        event
-                            .getChannel()
-                            .retrieveMessageById(
-                                event.getMessageIdLong())
-                            .complete(),
-                        getTaskScheduler(), getTransactionExecutor());
-            }
-        }
 
+            if (newMenu != null || metadata.isGameFinished()) {
+                menu.discard();
+                if (newMenu != null) {
+                    newMenu
+                        .buildMenu(getJda(),
+                            channel
+                                .retrieveMessageById(
+                                    messageId)
+                                .complete(),
+                            getMenuService());
+                }
+            }
+        } finally {
+            clearThreadLocals();
+        }
         return true;
     }
 
-    protected void createMenuEntry(ReactionMenu menu, String emoji,
-        Object argument) {
-        menu
-            .addMenuAction(emoji, event -> reactionInteractionWrapper(event,
-                menu, argument));
+    protected ComponentMenuBuilder componentMenu() {
+        ComponentMenuBuilder builder = componentMenuBuilderProvider.getObject();
+        builder
+            .addWrapper(ButtonInteractionEvent.class,
+                (event, menu, argument) -> interactionEventWrapper(
+                    event.getChannel(), event.getMessageIdLong(),
+                    event.getMember(), menu, argument));
+
+        builder
+            .addWrapper(SelectMenuInteractionEvent.class,
+                (event, menu, argument) -> {
+                    Object arg = argument;
+                    if (event.getSelectMenu().getMaxValues() > 1) {
+                        arg = Arrays.asList(argument.split(","));
+                    }
+                    return interactionEventWrapper(event.getChannel(),
+                        event.getMessageIdLong(), event.getMember(),
+                        menu, arg);
+                });
+
+        return builder;
     }
 
-    protected abstract ReactionMenu onGameStart(SlashCommandInteraction event,
+    protected abstract DiscordMenu onGameStart(
+        GenericCommandInteractionEvent event,
         BlankUser user, GameMetadata metadata);
 
-    protected abstract ReactionMenu onGameContinue(BlankUser user,
-        GameMetadata metadata, Object argument,
-        Consumer<FormattingData> messageEdit);
+    protected abstract DiscordMenu onGameContinue(BlankUser user,
+        GameMetadata metadata, Object argument);
 
     protected void abort(GameMetadata metadata) {
         metadata.clearMetadata();
@@ -188,6 +213,7 @@ public abstract class AbstractGame extends AbstractCommand {
         metadata.clearMetadata();
         metadata.setGameFinished(true);
         metadata.setLastPlayed(LocalDateTime.now());
+        gameService.saveGameMetadata(metadata);
     }
 
     protected void finish(long gameId) {

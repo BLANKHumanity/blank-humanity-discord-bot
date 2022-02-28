@@ -1,6 +1,7 @@
 package com.blank.humanity.discordbot.commands.games;
 
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,13 +9,18 @@ import org.springframework.stereotype.Component;
 
 import com.blank.humanity.discordbot.commands.games.messages.GameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GameMessageType;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
+import com.blank.humanity.discordbot.entities.game.RockPaperScissorsMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
-import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
+import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.Emoji;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
@@ -28,50 +34,93 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
         { 'w', 'l', 't' } };
 
     @Override
-    protected String getCommandName() {
+    public String getCommandName() {
         return "rps";
     }
 
     @Override
-    protected SlashCommandData createCommandData(SlashCommandData commandData) {
+    public SlashCommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition) {
         OptionData betAmount = new OptionData(OptionType.INTEGER, "bet",
-            getCommandDefinition().getOptionDescription("bet"), true);
+            definition.getOptionDescription("bet"), true);
         betAmount.setMinValue(1);
         betAmount.setMaxValue(getCommandConfig().getMaxGameBetAmount());
-        OptionData selection = new OptionData(OptionType.STRING, "choice",
-            getCommandDefinition().getOptionDescription("choice"), true);
-        selection.addChoice("🇷", "rock");
-        selection.addChoice("🇵", "paper");
-        selection.addChoice("🇸", "scissors");
-        commandData.addOptions(betAmount, selection);
+//        OptionData selection = new OptionData(OptionType.STRING, "choice",
+//            definition.getOptionDescription("choice"), true);
+//        selection.addChoice("🇷", "rock");
+//        selection.addChoice("🇵", "paper");
+//        selection.addChoice("🇸", "scissors");
+//        commandData.addOptions(betAmount, selection);
+        commandData.addOptions(betAmount);
         return commandData;
     }
 
     @Override
-    protected ReactionMenu onGameStart(SlashCommandInteraction event, BlankUser user,
+    protected DiscordMenu onGameStart(GenericCommandInteractionEvent event,
+        BlankUser user,
         GameMetadata metadata) {
         int betAmount = (int) event.getOption("bet").getAsLong();
         if (betAmount > user.getBalance()) {
-            reply(event, getBlankUserService()
+            reply(getBlankUserService()
                 .createFormattingData(user,
                     GameMessageType.GAME_BET_NOT_ENOUGH_MONEY)
                 .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
                 .build());
             abort(metadata);
             return null;
+        } else {
+            getBlankUserService().decreaseUserBalance(user, betAmount);
+
+            metadata
+                .setMetadata(
+                    RockPaperScissorsMetadata
+                        .builder()
+                        .betAmount(betAmount)
+                        .build());
+
+            long discordId = user.getDiscordId();
+            long guildId = user.getGuildId();
+
+            reply(new EmbedBuilder().setDescription("Choose one!").build());
+            
+            return componentMenu()
+                .restricted(true)
+                .allowedDiscordIds(List.of(user.getDiscordId()))
+                .singleUse(true)
+                .selection("rpsSelection")
+                .addOption("Rock", "rock", Emoji.fromUnicode("🪨"))
+                .addOption("Paper", "paper",
+                    Emoji.fromUnicode("📰"))
+                .addOption("Scissors", "scissors",
+                    Emoji.fromUnicode("✂️"))
+                .finish()
+                .timeoutTask(() -> {
+                    getBlankUserService()
+                        .increaseUserBalance(discordId, guildId, betAmount);
+                    finish(metadata.getId());
+                })
+                .build();
         }
+    }
+
+    @Override
+    protected DiscordMenu onGameContinue(BlankUser user, GameMetadata metadata,
+        Object argument) {
+        RockPaperScissorsMetadata rockPaperScissors = metadata
+            .getMetadata(RockPaperScissorsMetadata.class);
 
         int opponentRoll = random.nextInt(3);
 
-        int userSelection = selectionToInt(
-            event.getOption("choice").getAsString());
+        int userSelection = selectionToInt((String) argument);
 
         char result = resultMap[opponentRoll][userSelection];
 
+        int betAmount = rockPaperScissors.getBetAmount();
+
         switch (result) {
-        case 't' -> tie(event, user, betAmount, userSelection, opponentRoll);
-        case 'w' -> win(event, user, betAmount, userSelection, opponentRoll);
-        case 'l' -> loss(event, user, betAmount, userSelection, opponentRoll);
+        case 't' -> tie(betAmount, userSelection, opponentRoll);
+        case 'w' -> win(betAmount, userSelection, opponentRoll);
+        case 'l' -> loss(betAmount, userSelection, opponentRoll);
         default -> throw new IllegalArgumentException(
             "RPS Result can only be 't', 'w', or 'l', but it is '" + result
                 + "'!");
@@ -101,12 +150,11 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
         };
     }
 
-    private void loss(SlashCommandInteraction event, BlankUser user, int betAmount,
-        int userSel, int botSel) {
-        getBlankUserService().decreaseUserBalance(user, betAmount);
+    private void loss(int betAmount, int userSel, int botSel) {
+        getBlankUserService().decreaseUserBalance(getUser(), betAmount);
 
         FormattingData result = getBlankUserService()
-            .createFormattingData(user,
+            .createFormattingData(getUser(),
                 GameMessageType.ROCK_PAPER_SCISSORS_LOSS)
             .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
             .dataPairing(GameFormatDataKey.RPS_USER,
@@ -114,18 +162,16 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
             .dataPairing(GameFormatDataKey.RPS_BOT, intToSelection(botSel))
             .build();
 
-        reply(event, result);
+        reply(result);
     }
 
-    private void win(SlashCommandInteraction event, BlankUser user, int betAmount,
-        int userSel, int botSel) {
-            int reward = calculateWinnings(betAmount);
+    private void win(int betAmount, int userSel, int botSel) {
+        int reward = calculateWinnings(betAmount);
         getBlankUserService()
-            .increaseUserBalance(user,
-                reward - betAmount);
+            .increaseUserBalance(getUser(), reward - betAmount);
 
         FormattingData result = getBlankUserService()
-            .createFormattingData(user,
+            .createFormattingData(getUser(),
                 GameMessageType.ROCK_PAPER_SCISSORS_WIN)
             .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
             .dataPairing(GameFormatDataKey.REWARD_AMOUNT, reward)
@@ -134,13 +180,12 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
             .dataPairing(GameFormatDataKey.RPS_BOT, intToSelection(botSel))
             .build();
 
-        reply(event, result);
+        reply(result);
     }
 
-    private void tie(SlashCommandInteraction event, BlankUser user, int betAmount,
-        int userSel, int botSel) {
+    private void tie(int betAmount, int userSel, int botSel) {
         FormattingData result = getBlankUserService()
-            .createFormattingData(user,
+            .createFormattingData(getUser(),
                 GameMessageType.ROCK_PAPER_SCISSORS_TIE)
             .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
             .dataPairing(GameFormatDataKey.RPS_USER,
@@ -149,13 +194,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
                 intToSelection(botSel))
             .build();
 
-        reply(event, result);
-    }
-
-    @Override
-    protected ReactionMenu onGameContinue(BlankUser user, GameMetadata metadata,
-        Object argument, Consumer<FormattingData> messageEdit) {
-        return null;
+        reply(result);
     }
 
 }

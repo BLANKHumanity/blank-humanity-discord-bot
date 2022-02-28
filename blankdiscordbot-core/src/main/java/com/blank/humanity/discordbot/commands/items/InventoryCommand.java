@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.entities.item.Item;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
@@ -16,37 +17,35 @@ import com.blank.humanity.discordbot.services.InventoryService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class InventoryCommand extends AbstractCommand {
 
-    @Override
-    protected String getCommandName() {
-        return "inventory";
-    }
-
     @Autowired
     private InventoryService inventoryService;
 
     @Override
-    protected SlashCommandData createCommandData(SlashCommandData commandData) {
+    public String getCommandName() {
+        return "inventory";
+    }
+
+    @Override
+    public SlashCommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition) {
         commandData
             .addOption(OptionType.USER, "user",
-                getCommandDefinition().getOptionDescription("user"));
+                definition.getOptionDescription("user"));
         return commandData;
     }
 
     @Override
-    protected void onCommand(SlashCommandInteraction event) {
-        Member discordUser = Optional
-            .ofNullable(event.getOption("user"))
-            .map(OptionMapping::getAsMember)
-            .orElse(event.getMember());
-        BlankUser user = getBlankUserService().getUser(discordUser);
+    protected void onCommand(GenericCommandInteractionEvent event) {
+        BlankUser user = event
+            .getOption("user", this::getUser, getBlankUserService()::getUser);
 
         FormattingData.FormattingDataBuilder builder = blankUserService
             .createFormattingData(user, null);
@@ -62,7 +61,7 @@ public class InventoryCommand extends AbstractCommand {
             .dataPairing(ItemFormatDataKey.INVENTORY_BODY, inventoryDisplay)
             .build();
 
-        reply(event, inventoryViewer);
+        reply(inventoryViewer);
     }
 
     private String generateItemDescription(Item item,
@@ -83,16 +82,18 @@ public class InventoryCommand extends AbstractCommand {
             .dataPairing(ItemFormatDataKey.ITEM_DESCRIPTION,
                 definition.getDescription());
         if (definition.getUseName() == null) {
-            return format(formatBuilder
-                .messageType(ItemMessageType.INVENTORY_ITEM_DESCRIPTION)
-                .build());
+            return getMessageService()
+                .format(formatBuilder
+                    .messageType(ItemMessageType.INVENTORY_ITEM_DESCRIPTION)
+                    .build());
         } else {
-            return format(formatBuilder
-                .dataPairing(ItemFormatDataKey.ITEM_USE_NAME,
-                    definition.getUseName())
-                .messageType(
-                    ItemMessageType.INVENTORY_ITEM_DESCRIPTION_WITH_USE)
-                .build());
+            return getMessageService()
+                .format(formatBuilder
+                    .dataPairing(ItemFormatDataKey.ITEM_USE_NAME,
+                        definition.getUseName())
+                    .messageType(
+                        ItemMessageType.INVENTORY_ITEM_DESCRIPTION_WITH_USE)
+                    .build());
         }
     }
 }

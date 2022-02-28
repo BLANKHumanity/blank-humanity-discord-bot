@@ -52,4 +52,14 @@ public class TransactionExecutor {
         });
     }
 
+    public <T> T executeAsTransactionSync(TransactionCallback<T> executable) {
+        TransactionTemplate txTemplate = new TransactionTemplate(
+            transactionManager);
+        txTemplate
+            .setPropagationBehavior(
+                TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        txTemplate.setIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ);
+        return txTemplate.execute(executable);
+    }
+
 }

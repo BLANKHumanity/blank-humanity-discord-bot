@@ -6,25 +6,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blank.humanity.discordbot.commands.AbstractCommand;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.items.ItemConfiguration;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class FunPlaceBuyItemCommand extends AbstractCommand {
-
-    @Override
-    protected String getCommandName() {
-        return "funbuy";
-    }
 
     @Autowired
     private FunPlaceShopService shopService;
@@ -33,21 +29,26 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
     private ItemConfiguration itemConfiguration;
 
     @Override
-    protected SlashCommandData createCommandData(SlashCommandData commandData) {
+    public String getCommandName() {
+        return "funbuy";
+    }
+
+    @Override
+    public SlashCommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition) {
         commandData
             .addOption(OptionType.STRING, "item",
-                getCommandDefinition().getOptionDescription("item"),
-                true);
+                definition.getOptionDescription("item"), true);
         OptionData amount = new OptionData(OptionType.INTEGER, "amount",
-            getCommandDefinition().getOptionDescription("amount"));
+            definition.getOptionDescription("amount"));
         amount.setMinValue(1);
         commandData.addOptions(amount);
         return commandData;
     }
 
     @Override
-    protected void onCommand(SlashCommandInteraction event) {
-        BlankUser user = blankUserService.getUser(event);
+    protected void onCommand(GenericCommandInteractionEvent event) {
+        BlankUser user = getUser();
 
         Optional<ShopItem> shopItem = shopService
             .getShopItem(event.getOption("item").getAsString());
@@ -65,7 +66,7 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
                 .dataPairing(FunPlaceFormatDataKey.ITEM_NAME,
                     event.getOption("item").getAsString())
                 .build();
-            reply(event, data);
+            reply(data);
             return;
         }
 
@@ -96,7 +97,7 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
                     .orElse("NAME_ERROR"))
             .build();
 
-        reply(event, data);
+        reply(data);
     }
 
 }

@@ -1,27 +1,26 @@
 package com.blank.humanity.discordbot.commands.items;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blank.humanity.discordbot.commands.AbstractCommand;
-import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
+import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.services.InventoryService;
 
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class ItemUseCommand extends AbstractCommand {
-
-    @Override
-    protected String getCommandName() {
-        return "use";
-    }
 
     private static final String ITEM = "item";
     private static final String AMOUNT = "amount";
@@ -30,22 +29,26 @@ public class ItemUseCommand extends AbstractCommand {
     private InventoryService inventoryService;
 
     @Override
-    protected SlashCommandData createCommandData(SlashCommandData commandData) {
+    public String getCommandName() {
+        return "use";
+    }
+
+    @Override
+    public SlashCommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition) {
         commandData
             .addOption(OptionType.STRING, ITEM,
-                getCommandDefinition().getOptionDescription(ITEM),
-                true);
+                definition.getOptionDescription(ITEM),
+                true, true);
         OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
-            getCommandDefinition().getOptionDescription(AMOUNT));
+            definition.getOptionDescription(AMOUNT));
         amount.setMinValue(1);
         commandData.addOptions(amount);
         return commandData;
     }
 
     @Override
-    protected void onCommand(SlashCommandInteraction event) {
-        BlankUser user = blankUserService.getUser(event);
-
+    protected void onCommand(GenericCommandInteractionEvent event) {
         OptionMapping item = event.getOption(ITEM);
 
         int amount = Optional
@@ -55,8 +58,18 @@ public class ItemUseCommand extends AbstractCommand {
             .intValue();
 
         inventoryService
-            .useItem(user, item.getAsString(), amount,
-                embeds -> reply(event, embeds));
+            .useItem(getUser(), item.getAsString(), amount, this::reply);
+    }
+
+    @Override
+    protected Collection<Command.Choice> onAutoComplete(
+        CommandAutoCompleteInteractionEvent event) {
+        String itemName = event
+            .getOption(ITEM, () -> "", OptionMapping::getAsString)
+            .toLowerCase();
+
+        return inventoryService
+            .autoCompleteUserItems(getUser(), itemName);
     }
 
 }

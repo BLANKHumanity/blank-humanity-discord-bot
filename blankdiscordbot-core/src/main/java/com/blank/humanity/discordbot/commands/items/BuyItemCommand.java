@@ -9,6 +9,7 @@ import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.items.ItemConfiguration;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.items.ShopItem;
@@ -18,6 +19,7 @@ import com.blank.humanity.discordbot.services.ShopService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.item.ItemBuyStatus;
 
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
@@ -26,11 +28,6 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class BuyItemCommand extends AbstractCommand {
-
-    @Override
-    protected String getCommandName() {
-        return "buy";
-    }
 
     private static final String AMOUNT = "amount";
     private static final String ITEM = "item";
@@ -42,21 +39,27 @@ public class BuyItemCommand extends AbstractCommand {
     private ItemConfiguration itemConfiguration;
 
     @Override
-    protected SlashCommandData createCommandData(SlashCommandData commandData) {
+    public String getCommandName() {
+        return "buy";
+    }
+
+    @Override
+    public SlashCommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition) {
         commandData
             .addOption(OptionType.STRING, ITEM,
-                getCommandDefinition().getOptionDescription(ITEM),
+                definition.getOptionDescription(ITEM),
                 true);
         OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
-            getCommandDefinition().getOptionDescription(AMOUNT));
+            definition.getOptionDescription(AMOUNT));
         amount.setMinValue(1);
         commandData.addOptions(amount);
         return commandData;
     }
 
     @Override
-    protected void onCommand(SlashCommandInteraction event) {
-        BlankUser user = blankUserService.getUser(event);
+    protected void onCommand(GenericCommandInteractionEvent event) {
+        BlankUser user = getUser();
 
         Optional<ShopItem> shopItem = shopService
             .getShopItem(event.getOption("item").getAsString());
@@ -73,7 +76,7 @@ public class BuyItemCommand extends AbstractCommand {
                 .dataPairing(ItemFormatDataKey.ITEM_NAME,
                     event.getOption(ITEM).getAsString())
                 .build();
-            reply(event, data);
+            reply(data);
             return;
         }
 
@@ -103,7 +106,7 @@ public class BuyItemCommand extends AbstractCommand {
                     .orElse("NAME_ERROR"))
             .build();
 
-        reply(event, data);
+        reply(data);
     }
 
 }

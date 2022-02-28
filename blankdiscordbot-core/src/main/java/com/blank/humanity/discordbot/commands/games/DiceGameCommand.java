@@ -9,16 +9,17 @@ import org.springframework.stereotype.Component;
 
 import com.blank.humanity.discordbot.commands.games.messages.GameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GameMessageType;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.user.fake.FakeUser;
 import com.blank.humanity.discordbot.entities.user.fake.FakeUserType;
 import com.blank.humanity.discordbot.utils.FormattingData;
-import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
+import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
@@ -29,14 +30,15 @@ public class DiceGameCommand extends AbstractGame {
     private SecureRandom random;
 
     @Override
-    protected String getCommandName() {
+    public String getCommandName() {
         return "dice";
     }
 
     @Override
-    protected SlashCommandData createCommandData(SlashCommandData commandData) {
+    public SlashCommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition) {
         OptionData bet = new OptionData(OptionType.INTEGER, "bet",
-            getCommandDefinition().getOptionDescription("bet"), true);
+            definition.getOptionDescription("bet"), true);
         bet.setMinValue(1);
         bet.setMaxValue(getCommandConfig().getMaxGameBetAmount());
         commandData.addOptions(bet);
@@ -44,11 +46,12 @@ public class DiceGameCommand extends AbstractGame {
     }
 
     @Override
-    protected ReactionMenu onGameStart(SlashCommandInteraction event, BlankUser user,
+    protected DiscordMenu onGameStart(GenericCommandInteractionEvent event,
+        BlankUser user,
         GameMetadata metadata) {
         int betAmount = (int) event.getOption("bet").getAsLong();
         if (betAmount > user.getBalance()) {
-            reply(event, getBlankUserService()
+            reply(getBlankUserService()
                 .createFormattingData(user,
                     GameMessageType.GAME_BET_NOT_ENOUGH_MONEY)
                 .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
@@ -96,7 +99,7 @@ public class DiceGameCommand extends AbstractGame {
                     .increaseUserBalance(user, reward);
             }
 
-            reply(event, getBlankUserService()
+            reply(getBlankUserService()
                 .createFormattingData(user, messageType)
                 .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
                 .dataPairing(GameFormatDataKey.REWARD_AMOUNT, reward)
@@ -116,8 +119,8 @@ public class DiceGameCommand extends AbstractGame {
     }
 
     @Override
-    protected ReactionMenu onGameContinue(BlankUser user, GameMetadata metadata,
-        Object argument, Consumer<FormattingData> messageEdit) {
+    protected DiscordMenu onGameContinue(BlankUser user, GameMetadata metadata,
+        Object argument) {
         return null;
     }
 

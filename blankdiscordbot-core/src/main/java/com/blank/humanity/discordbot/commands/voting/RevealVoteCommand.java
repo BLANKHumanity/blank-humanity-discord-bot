@@ -9,21 +9,24 @@ import org.springframework.stereotype.Component;
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingFormatDataKey;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingMessageType;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.voting.VoteChoice;
 import com.blank.humanity.discordbot.entities.voting.VotingCampaign;
 import com.blank.humanity.discordbot.services.VotingService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class RevealVoteCommand extends AbstractCommand {
 
     @Override
-    protected String getCommandName() {
+    public String getCommandName() {
         return "revealvote";
     }
 
@@ -31,16 +34,16 @@ public class RevealVoteCommand extends AbstractCommand {
     private VotingService votingService;
 
     @Override
-    protected SlashCommandData createCommandData(SlashCommandData commandData) {
+    public CommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition commandDefinition) {
         commandData
-            .addOption(OptionType.STRING, "campaign", "The VoteCampaign",
-                true);
+            .addOption(OptionType.STRING, "campaign", "The VoteCampaign", true);
         return commandData;
     }
 
     @Override
-    protected void onCommand(SlashCommandInteraction event) {
-        BlankUser user = getBlankUserService().getUser(event);
+    protected void onCommand(GenericCommandInteractionEvent event) {
+        BlankUser user = getUser();
 
         String campaign = event.getOption("campaign").getAsString();
 
@@ -54,16 +57,15 @@ public class RevealVoteCommand extends AbstractCommand {
                 .collect(Collectors.joining("\n")));
 
         if (choiceBody.isEmpty()) {
-            reply(event,
-                getBlankUserService()
-                    .createFormattingData(user,
-                        VotingMessageType.VOTE_CAMPAIGN_NOT_FOUND)
-                    .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
-                        campaign)
-                    .build());
+            reply(getBlankUserService()
+                .createFormattingData(user,
+                    VotingMessageType.VOTE_CAMPAIGN_NOT_FOUND)
+                .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
+                    campaign)
+                .build());
             return;
         }
-        reply(event, getBlankUserService()
+        reply(getBlankUserService()
             .createFormattingData(user,
                 VotingMessageType.VOTE_CAMPAIGN_VOTE_DISPLAY_HEADER)
             .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME, campaign)
@@ -76,14 +78,15 @@ public class RevealVoteCommand extends AbstractCommand {
     }
 
     private String formatVotes(VoteChoice choice) {
-        return format(FormattingData
-            .builder()
-            .messageType(
-                VotingMessageType.VOTE_CAMPAIGN_VOTE_CHOICE_DISPLAY)
-            .dataPairing(VotingFormatDataKey.VOTE_CHOICE, choice.getValue())
-            .dataPairing(VotingFormatDataKey.VOTE_COUNT,
-                choice.getVoteCount())
-            .build());
+        return getMessageService()
+            .format(FormattingData
+                .builder()
+                .messageType(
+                    VotingMessageType.VOTE_CAMPAIGN_VOTE_CHOICE_DISPLAY)
+                .dataPairing(VotingFormatDataKey.VOTE_CHOICE, choice.getValue())
+                .dataPairing(VotingFormatDataKey.VOTE_COUNT,
+                    choice.getVoteCount())
+                .build());
     }
 
 }

@@ -1,19 +1,15 @@
-package com.blank.humanity.discordbot.utils.menu;
+package com.blank.humanity.discordbot.utils.menu.impl;
 
-import static com.blank.humanity.discordbot.utils.Wrapper.wrap;
-
-import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.ScheduledFuture;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 
-import org.springframework.scheduling.TaskScheduler;
-
-import com.blank.humanity.discordbot.services.TransactionExecutor;
+import com.blank.humanity.discordbot.exceptions.menu.NonUniqueInteractionId;
+import com.blank.humanity.discordbot.services.MenuService;
+import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,12 +20,12 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction;
 
 @Slf4j
 @Accessors(chain = true, fluent = true)
-public class ReactionMenu extends ListenerAdapter {
+public class ReactionMenu implements DiscordMenu {
 
     private JDA jda;
 
@@ -39,7 +35,10 @@ public class ReactionMenu extends ListenerAdapter {
 
     private TemporalAmount timeout;
 
+    private MenuService menuService;
+
     @Setter
+    @Getter
     private Runnable timeoutTask;
 
     @Getter
@@ -57,15 +56,11 @@ public class ReactionMenu extends ListenerAdapter {
     @Setter
     private boolean singleUse = false;
 
-    private ScheduledFuture<?> futureRemoval;
-
-    private TransactionExecutor transactionExecutor;
-
     @Getter
     @Setter(value = AccessLevel.PRIVATE)
     private boolean isDiscarded = false;
 
-    public ReactionMenu(TemporalAmount timeout) {
+    ReactionMenu(TemporalAmount timeout) {
         this.timeout = timeout;
     }
 
@@ -78,67 +73,65 @@ public class ReactionMenu extends ListenerAdapter {
         this.menuActions.put(emoji, action);
     }
 
-    public void buildMenu(JDA jda, Message message, TaskScheduler scheduler,
-        TransactionExecutor transactionExecutor) {
+    public void buildMenu(JDA jda, Message message, MenuService menuService) {
         this.jda = jda;
         this.messageId = message.getIdLong();
         this.guildChannelId = message.getChannel().getIdLong();
-        this.transactionExecutor = transactionExecutor;
-
-        this.jda.addEventListener(this);
+        this.menuService = menuService;
 
         menuActions
             .keySet()
             .stream()
-            .parallel()
             .map(message::addReaction)
             .forEach(RestAction::complete);
 
-        futureRemoval = scheduler
-            .schedule(this::timeout,
-                OffsetDateTime.now().plus(timeout).toInstant());
-    }
+        try {
+            this.menuService
+                .registerReactionAddInteraction(this, messageId,
+                    this::onMessageReactionAdd);
+        } catch (NonUniqueInteractionId e) {
+            log
+                .error(
+                    "An Exception occured during reaction interaction registration",
+                    e);
+            throw new RuntimeException(e);
+        }
 
-    public void timeout() {
-        discard();
-        timeoutTask.run();
+        this.menuService.registerDiscordMenuTimeout(this, timeout);
     }
 
     public void discard() {
         if (!isDiscarded()) {
-            futureRemoval.cancel(false);
-            this.jda.removeEventListener(this);
+            this.menuService.discardMenuListeners(this);
             this.jda
                 .getTextChannelById(guildChannelId)
                 .clearReactionsById(messageId)
                 .complete();
-            isDiscarded(true);
+            isDiscarded = true;
         }
     }
 
-    @Override
     public void onMessageReactionAdd(@Nonnull MessageReactionAddEvent event) {
-        if (messageId == event.getMessageIdLong() && !event.getUser().isBot()) {
-            String reactionCode = event.getReactionEmote().getAsReactionCode();
-            if (!menuActions.containsKey(reactionCode)) {
-                event.getReaction().removeReaction().queue();
-                return;
-            }
-
-            Member member = event.retrieveMember().complete();
-            if (restricted
-                && !allowedDiscordIds.contains(member.getUser().getIdLong())) {
-                event.getReaction().removeReaction().queue();
-                return;
-            }
-
-            Predicate<MessageReactionAddEvent> action = menuActions
-                .get(reactionCode);
-            transactionExecutor
-                .executeAsTransaction(status -> action.test(event),
-                    wrap(this::reactionMenuInteractionErrorHandler, event),
-                    wrap(this::finishReactionMenuInteraction, event));
+        String reactionCode = event.getReactionEmote().getAsReactionCode();
+        if (!menuActions.containsKey(reactionCode)) {
+            event.getReaction().removeReaction().queue();
+            return;
         }
+
+        Member member = event.retrieveMember().complete();
+        if (restricted
+            && !allowedDiscordIds.contains(member.getUser().getIdLong())) {
+            event.getReaction().removeReaction().queue();
+            return;
+        }
+
+        Boolean success = null;
+        try {
+            success = menuActions.get(reactionCode).test(event);
+        } catch (Exception exception) {
+            reactionMenuInteractionErrorHandler(event, exception);
+        }
+        finishReactionMenuInteraction(event, success);
     }
 
     private void reactionMenuInteractionErrorHandler(
@@ -161,6 +154,8 @@ public class ReactionMenu extends ListenerAdapter {
         }
         if (singleUse) {
             discard();
+        } else {
+            menuService.registerDiscordMenuTimeout(this, timeout);
         }
     }
 

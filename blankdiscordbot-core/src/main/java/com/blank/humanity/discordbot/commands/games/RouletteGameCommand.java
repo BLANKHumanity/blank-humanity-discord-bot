@@ -13,18 +13,23 @@ import org.springframework.stereotype.Component;
 import com.blank.humanity.discordbot.commands.games.messages.GameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GameMessageType;
 import com.blank.humanity.discordbot.commands.games.messages.GenericGameFormatDataKey;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.game.RouletteMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
-import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
+import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
+import com.blank.humanity.discordbot.utils.menu.impl.ComponentMenu;
+import com.blank.humanity.discordbot.utils.menu.impl.ReactionMenu;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 
 @Component
 @Slf4j
@@ -34,14 +39,15 @@ public class RouletteGameCommand extends AbstractGame {
     private SecureRandom random;
 
     @Override
-    protected String getCommandName() {
+    public String getCommandName() {
         return "roulette";
     }
 
     @Override
-    protected SlashCommandData createCommandData(SlashCommandData commandData) {
+    public SlashCommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition) {
         OptionData betAmount = new OptionData(OptionType.INTEGER, "bet",
-            getCommandDefinition().getOptionDescription("bet"), true);
+            definition.getOptionDescription("bet"), true);
         betAmount.setMinValue(1);
         betAmount.setMaxValue(getCommandConfig().getMaxGameBetAmount());
         commandData.addOptions(betAmount);
@@ -49,7 +55,8 @@ public class RouletteGameCommand extends AbstractGame {
     }
 
     @Override
-    protected ReactionMenu onGameStart(SlashCommandInteraction event, BlankUser user,
+    protected DiscordMenu onGameStart(GenericCommandInteractionEvent event,
+        BlankUser user,
         GameMetadata metadata) {
         int betAmount = (int) event.getOption("bet").getAsLong();
 
@@ -63,21 +70,21 @@ public class RouletteGameCommand extends AbstractGame {
 
         FormattingData reply = playGame(metadata);
 
-        reply(event, reply);
+        reply(reply);
 
         log.info("Is Game Finished: " + metadata.isGameFinished());
         if (!metadata.isGameFinished()) {
-            return createMenuEntry(metadata);
+            return createMenu(metadata);
         } else {
             return null;
         }
     }
 
     @Override
-    protected ReactionMenu onGameContinue(BlankUser user, GameMetadata metadata,
-        Object argument, Consumer<FormattingData> messageEdit) {
+    protected DiscordMenu onGameContinue(BlankUser user, GameMetadata metadata,
+        Object argument) {
         if (argument instanceof List) {
-            messageEdit.accept(rejectNewCommand(user));
+            reply(rejectNewCommand(user));
             return null;
         }
 
@@ -88,12 +95,8 @@ public class RouletteGameCommand extends AbstractGame {
 
         FormattingData reply = playGame(metadata);
 
-        messageEdit.accept(reply);
-        if (!metadata.isGameFinished()) {
-            return createMenuEntry(metadata);
-        } else {
-            return null;
-        }
+        reply(reply);
+        return null;
     }
 
     private FormattingData rejectNewCommand(BlankUser user) {
@@ -103,16 +106,14 @@ public class RouletteGameCommand extends AbstractGame {
             .build();
     }
 
-    private ReactionMenu createMenuEntry(GameMetadata metadata) {
-        ReactionMenu menu = new ReactionMenu(Duration.ofMinutes(1))
-            .singleUse(true)
+    private DiscordMenu createMenu(GameMetadata metadata) {
+        return componentMenu()
             .restricted(true)
             .allowedDiscordIds(List.of(metadata.getUser().getDiscordId()))
-            .timeoutTask(() -> finish(metadata.getId()));
-
-        createMenuEntry(menu, "🛑", "STOP");
-        createMenuEntry(menu, "▶️", "CONTINUE");
-        return menu;
+            .timeoutTask(() -> finish(metadata.getId()))
+            .button("STOP", "STOP", ButtonStyle.DANGER)
+            .button("CONTINUE", "CONTINUE", ButtonStyle.PRIMARY)
+            .build();
     }
 
     private FormattingData playGame(GameMetadata metadata) {
@@ -168,22 +169,24 @@ public class RouletteGameCommand extends AbstractGame {
 
         String rouletteHeader = previousBetAmounts
             .stream()
-            .map(bet -> format(getBlankUserService()
-                .createFormattingData(user,
-                    GameMessageType.ROULETTE_BET_AND_PULL)
-                .dataPairing(GameFormatDataKey.BET_AMOUNT, bet)
-                .build()))
+            .map(bet -> getMessageService()
+                .format(getBlankUserService()
+                    .createFormattingData(user,
+                        GameMessageType.ROULETTE_BET_AND_PULL)
+                    .dataPairing(GameFormatDataKey.BET_AMOUNT, bet)
+                    .build()))
             .collect(Collectors.joining("\n"));
 
         roulette.setPreviousBetAmounts(previousBetAmounts);
 
         metadata.setMetadata(roulette);
 
-        String rouletteResult = format(getBlankUserService()
-            .createFormattingData(user, resultMessage)
-            .dataPairing(GameFormatDataKey.REWARD_AMOUNT, reward)
-            .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
-            .build());
+        String rouletteResult = getMessageService()
+            .format(getBlankUserService()
+                .createFormattingData(user, resultMessage)
+                .dataPairing(GameFormatDataKey.REWARD_AMOUNT, reward)
+                .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
+                .build());
 
         return getBlankUserService()
             .createFormattingData(user, GameMessageType.ROULETTE_DISPLAY)

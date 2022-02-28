@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class BlankDiscordBotApplication {
 
     public static void main(String[] args) {
-	SpringApplication.run(BlankDiscordBotApplication.class, args);
+        SpringApplication.run(BlankDiscordBotApplication.class, args);
     }
 
 }
