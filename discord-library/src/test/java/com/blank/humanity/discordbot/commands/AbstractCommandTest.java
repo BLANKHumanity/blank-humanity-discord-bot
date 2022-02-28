@@ -1,72 +1,58 @@
 package com.blank.humanity.discordbot.commands;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atMost;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-
 import javax.validation.Validator;
 
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.transaction.support.TransactionCallback;
 
 import com.blank.humanity.discordbot.config.DiscordBotConfig;
 import com.blank.humanity.discordbot.config.commands.CommandConfig;
-import com.blank.humanity.discordbot.config.commands.CommandDefinition;
+import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
+import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.config.messages.MessagesConfig;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.command.OutsideOfCommandContextException;
 import com.blank.humanity.discordbot.services.BlankUserService;
+import com.blank.humanity.discordbot.services.CommandService;
+import com.blank.humanity.discordbot.services.MenuService;
+import com.blank.humanity.discordbot.services.MessageService;
 import com.blank.humanity.discordbot.services.TransactionExecutor;
-import com.blank.humanity.discordbot.utils.menu.impl.ReactionMenu;
+import com.blank.humanity.discordbot.utils.FormattingData;
+import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Channel;
-import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
-import net.dv8tion.jda.api.requests.RestAction;
-import net.dv8tion.jda.api.requests.restaction.CommandCreateAction;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 
-@Disabled
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 class AbstractCommandTest {
-
-    @Mock
-    Validator validator;
 
     @Mock
     private JDA jda;
@@ -78,32 +64,66 @@ class AbstractCommandTest {
     private MessagesConfig messagesConfig;
 
     @Mock
-    private CommandConfig commandConfig;
-
-    @Mock
-    private DiscordBotConfig discordBotConfig;
-
-    @Mock
     private TransactionExecutor transactionExecutor;
 
     @Mock
-    private Environment environment;
+    private MenuService menuService;
 
     @Mock
-    private TaskScheduler taskScheduler;
+    private MessageService messageService;
 
-    private final String COMMAND_NAME = "testcommand";
+    @Mock
+    private CommandService commandService;
 
-    private final Long GUILD_ID = 123456L;
+    @Mock
+    private ThreadLocal<GenericCommandInteractionEvent> commandEvent;
+
+    @Mock
+    private ThreadLocal<CommandAutoCompleteInteractionEvent> autoCompleteEvent;
+
+    @Mock
+    private ThreadLocal<BlankUser> localUser;
+
+    @Mock
+    private ThreadLocal<Member> localMember;
+
+    @Mock
+    private ThreadLocal<MessageEmbed[]> localEmbedsToSend;
+
+    @Mock
+    private ThreadLocal<DiscordMenu> localMenu;
+
+    @Mock
+    private ThreadLocal<Runnable> localCachedTasks;
 
     private AbstractCommand abstractCommand;
 
     @BeforeEach
-    public void test() {
+    void setupThreadLocalMocks() {
+        ReflectionTestUtils
+            .setField(AbstractCommand.class, "commandEvent", commandEvent);
+        ReflectionTestUtils
+            .setField(AbstractCommand.class, "autoCompleteEvent",
+                autoCompleteEvent);
+        ReflectionTestUtils
+            .setField(AbstractCommand.class, "localUser", localUser);
+        ReflectionTestUtils
+            .setField(AbstractCommand.class, "localMember", localMember);
+        ReflectionTestUtils
+            .setField(AbstractCommand.class, "localEmbedsToSend",
+                localEmbedsToSend);
+        ReflectionTestUtils
+            .setField(AbstractCommand.class, "localMenu", localMenu);
+        ReflectionTestUtils
+            .setField(AbstractCommand.class, "localCachedTasks",
+                localCachedTasks);
+    }
+
+    @BeforeEach
+    void setupVariables() {
         abstractCommand = Mockito
             .mock(AbstractCommand.class,
                 withSettings().defaultAnswer(CALLS_REAL_METHODS));
-        ReflectionTestUtils.setField(abstractCommand, "validator", validator);
         ReflectionTestUtils.setField(abstractCommand, "jda", jda);
         ReflectionTestUtils
             .setField(abstractCommand, "blankUserService",
@@ -111,312 +131,274 @@ class AbstractCommandTest {
         ReflectionTestUtils
             .setField(abstractCommand, "messagesConfig", messagesConfig);
         ReflectionTestUtils
-            .setField(abstractCommand, "commandConfig", commandConfig);
-        ReflectionTestUtils
-            .setField(abstractCommand, "discordBotConfig",
-                discordBotConfig);
-        ReflectionTestUtils
             .setField(abstractCommand, "transactionExecutor",
                 transactionExecutor);
         ReflectionTestUtils
-            .setField(abstractCommand, "taskScheduler", taskScheduler);
-
-        Mockito
-            .lenient()
-            .doReturn(COMMAND_NAME)
-            .when(abstractCommand)
-            .getCommandName();
+            .setField(abstractCommand, "menuService", menuService);
+        ReflectionTestUtils
+            .setField(abstractCommand, "messageService", messageService);
+        ReflectionTestUtils
+            .setField(abstractCommand, "commandService", commandService);
+        
     }
 
     @Test
-    void testUpdateCommandDefinition() {
-        CommandDefinition commandDefinition = mockCommandDefinition(
-            COMMAND_NAME, "TestDescription", false, false);
+    void testClearLocalThreads() {
+        abstractCommand.clearThreadLocals();
 
-        CommandData testCommandData = Commands
-            .slash(COMMAND_NAME,
-                commandDefinition.getDescription());
-
-        Guild testGuild = Mockito.mock(Guild.class);
-
-        when(commandConfig.getCommandDefinition(COMMAND_NAME))
-            .thenReturn(commandDefinition);
-        doReturn(testCommandData)
-            .when(abstractCommand)
-            .createCommandData(Mockito.notNull(), Mockito.notNull());
-
-        when(commandConfig.getGuildId()).thenReturn(GUILD_ID);
-        when(jda.getGuildById(GUILD_ID)).thenReturn(testGuild);
-
-        CommandCreateAction createAction = Mockito
-            .mock(CommandCreateAction.class);
-
-        when(testGuild.upsertCommand(testCommandData)).thenReturn(createAction);
-
-        verify(testGuild).upsertCommand(testCommandData);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    void testUpdateCommandDefinitionRestricted() {
-        CommandDefinition commandDefinition = mockCommandDefinition(
-            COMMAND_NAME, "TestDescription", false, true, 12345678l, 87654321l);
-
-        CommandData testCommandData = Commands
-            .slash(COMMAND_NAME,
-                commandDefinition.getDescription());
-
-        Guild testGuild = Mockito.mock(Guild.class);
-
-        long commandID = 54321L;
-
-        doReturn(testCommandData)
-            .when(abstractCommand)
-            .createCommandData(Mockito.notNull(), Mockito.notNull());
-
-        when(commandConfig.getGuildId()).thenReturn(GUILD_ID);
-        when(jda.getGuildById(GUILD_ID)).thenReturn(testGuild);
-
-        Command command = Mockito.mock(Command.class);
-
-        Mockito.when(command.getIdLong()).thenReturn(commandID);
-
-        CommandCreateAction createAction = mockRestActionQueue(
-            CommandCreateAction.class, command);
-
-        when(testGuild.upsertCommand(testCommandData)).thenReturn(createAction);
-
-        ArgumentCaptor<List<CommandPrivilege>> captor = ArgumentCaptor
-            .forClass(List.class);
-
-        RestAction<List<CommandPrivilege>> updatePrivilegesAction = Mockito
-            .mock(RestAction.class);
-
-        when(testGuild
-            .updateCommandPrivilegesById(Mockito.eq(commandID),
-                captor.capture())).thenReturn(updatePrivilegesAction);
-
-        List<CommandPrivilege> privilegeList = captor.getValue();
-        assertThat(privilegeList)
-            .isNotNull()
-            .hasSize(2)
-            .anyMatch(privilege -> privilege.getIdLong() == 12345678l)
-            .anyMatch(privilege -> privilege.getIdLong() == 87654321l);
+        verify(commandEvent).remove();
+        verify(autoCompleteEvent).remove();
+        verify(localUser).remove();
+        verify(localMember).remove();
+        verify(localEmbedsToSend).remove();
+        verify(localMenu).remove();
+        verify(localCachedTasks).remove();
     }
 
     @Test
     void testSetupCommand() throws InterruptedException {
-        abstractCommand.setupCommand();
-
-        verify(jda).awaitReady();
-        verify(jda).addEventListener(abstractCommand);
+        this.abstractCommand.setupCommand();
+        verify(commandService).registerCommand(abstractCommand);
     }
 
-    @SuppressWarnings("unchecked")
-    private void testOnSlashCommandInteraction(
-        SlashCommandInteractionEvent event,
-        String[] embedReplies,
-        Exception callExceptionHandler) {
-        mockCommandDefinition(COMMAND_NAME, "TestDescription", false, false);
-        mockCommandData(COMMAND_NAME, "TestDescription");
+    @Test
+    void testReceiveCommandInteractionMinimal() {
 
-        when(event.getName()).thenReturn(COMMAND_NAME);
-
-        TextChannel mockChannel = mockTextChannel(1234l);
-
-        when(event.getChannel()).thenReturn(mockChannel);
-
-        when(commandConfig.getHiddenCommandChannels())
-            .thenReturn(Collections.emptyList());
-
-        ReplyCallbackAction action = mock(ReplyCallbackAction.class);
-
-        when(event.deferReply(false)).thenReturn(action);
-
-        doAnswer(invocation -> {
-            invocation
-                .getArgument(0, TransactionCallback.class)
-                .doInTransaction(null);
-            if (callExceptionHandler != null) {
-                invocation
-                    .getArgument(1, Consumer.class)
-                    .accept(callExceptionHandler);
-            }
-            invocation.getArgument(2, Consumer.class).accept(null);
-            return null;
-        })
-            .when(transactionExecutor)
-            .executeAsTransaction(Mockito.notNull(), Mockito.notNull(),
-                Mockito.notNull());
+        GenericCommandInteractionEvent event = mock(
+            GenericCommandInteractionEvent.class);
 
         InteractionHook hook = mock(InteractionHook.class);
 
-        when(event.getHook()).thenReturn(hook);
+        MessageEmbed embed = mock(MessageEmbed.class);
+        MessageEmbed[] embeds = new MessageEmbed[] { embed };
 
-        WebhookMessageUpdateAction<Message> restAction = mock(
+        @SuppressWarnings("unchecked")
+        WebhookMessageUpdateAction<Message> updateAction = mock(
             WebhookMessageUpdateAction.class);
 
-        ArgumentCaptor<MessageEmbed> embedCaptor = ArgumentCaptor
-            .forClass(MessageEmbed.class);
+        when(event.getHook()).thenReturn(hook);
+        when(hook.editOriginalEmbeds(embeds)).thenReturn(updateAction);
 
-        when(hook.editOriginalEmbeds(embedCaptor.capture()))
-            .thenReturn(restAction);
+        doNothing().when(abstractCommand).onCommand(event);
+        doNothing().when(abstractCommand).clearThreadLocals();
 
-        abstractCommand.onSlashCommandInteraction(event);
+        doReturn(event).when(commandEvent).get();
+        doReturn(embeds).when(localEmbedsToSend).get();
 
-        verify(transactionExecutor, atLeast(1))
-            .executeAsTransaction(Mockito.notNull(), Mockito.notNull(),
-                Mockito.notNull());
-        verify(transactionExecutor, atMost(2))
-            .executeAsTransaction(Mockito.notNull(), Mockito.notNull(),
-                Mockito.notNull());
+        Boolean result = abstractCommand.receiveCommandInteraction(event);
+
+        assertThat(result).isTrue();
 
         verify(abstractCommand).onCommand(event);
+        verify(abstractCommand).clearThreadLocals();
+        verify(updateAction).complete();
 
-        List<MessageEmbed> embeds = embedCaptor.getAllValues();
-
-        assertThat(embeds).isNotNull().hasSize(embedReplies.length);
-        for (int i = 0; i < embedReplies.length; i++) {
-            String expectedReply = embedReplies[i];
-            assertThat(embeds.get(i).getDescription()).contains(expectedReply);
-        }
+        verify(abstractCommand, never())
+            .reply(Mockito.any(FormattingData[].class));
+        verify(abstractCommand, never())
+            .reply(Mockito.any(MessageEmbed[].class));
+        verify(abstractCommand, never()).sendErrorMessage(Mockito.anyString());
     }
 
     @Test
-    void testTransactionExceptionHandler() {
-        SlashCommandInteractionEvent event = mock(
-            SlashCommandInteractionEvent.class);
+    void testReceiveCommandInteractionAll() {
 
-        Exception exc = new Exception("Test Exception");
+        GenericCommandInteractionEvent event = mock(
+            GenericCommandInteractionEvent.class);
 
-        mockMessageType("ERROR_MESSAGE", "Test ERROR_MESSAGE: %(errorMessage)");
+        InteractionHook hook = mock(InteractionHook.class);
 
-        testOnSlashCommandInteraction(event,
-            new String[] {
-                "Test ERROR_MESSAGE: This command threw this error 'Test Exception'" },
-            exc);
+        MessageEmbed embed = mock(MessageEmbed.class);
+        MessageEmbed[] embeds = new MessageEmbed[] { embed };
+
+        @SuppressWarnings("unchecked")
+        WebhookMessageUpdateAction<Message> updateAction = mock(
+            WebhookMessageUpdateAction.class);
+
+        DiscordMenu menu = mock(DiscordMenu.class);
+        Runnable task = mock(Runnable.class);
+
+        Message message = mock(Message.class);
+
+        when(event.getHook()).thenReturn(hook);
+        when(hook.editOriginalEmbeds(embeds)).thenReturn(updateAction);
+        when(updateAction.complete()).thenReturn(message);
+
+        doNothing().when(abstractCommand).onCommand(event);
+        doNothing().when(abstractCommand).clearThreadLocals();
+
+        doReturn(event).when(commandEvent).get();
+        doReturn(embeds).when(localEmbedsToSend).get();
+        doReturn(menu).when(localMenu).get();
+        doReturn(task).when(localCachedTasks).get();
+
+        Boolean result = abstractCommand.receiveCommandInteraction(event);
+
+        assertThat(result).isTrue();
+
+        verify(abstractCommand).onCommand(event);
+        verify(abstractCommand).clearThreadLocals();
+        verify(updateAction).complete();
+        verify(menu).buildMenu(jda, message, menuService);
+
+        verify(abstractCommand, never())
+            .reply(Mockito.any(FormattingData[].class));
+        verify(abstractCommand, never())
+            .reply(Mockito.any(MessageEmbed[].class));
     }
 
     @Test
-    void testTransactionFinishHandler() {
-        SlashCommandInteractionEvent event = mock(
-            SlashCommandInteractionEvent.class);
+    void testReceiveCommandInteractionMissingReply() {
 
-        mockOnCommand(event, "Working");
+        GenericCommandInteractionEvent event = mock(
+            GenericCommandInteractionEvent.class);
 
-        testOnSlashCommandInteraction(event, new String[] { "Working" }, null);
+        InteractionHook hook = mock(InteractionHook.class);
+
+        @SuppressWarnings("unchecked")
+        WebhookMessageUpdateAction<Message> updateAction = mock(
+            WebhookMessageUpdateAction.class);
+
+        when(event.getHook()).thenReturn(hook);
+        when(hook.editOriginalEmbeds(Mockito.nullable(MessageEmbed[].class)))
+            .thenReturn(updateAction);
+
+        doNothing().when(abstractCommand).onCommand(event);
+        doNothing().when(abstractCommand).clearThreadLocals();
+        doNothing().when(abstractCommand).sendErrorMessage(Mockito.anyString());
+
+        doReturn(event).when(commandEvent).get();
+
+        Boolean result = abstractCommand.receiveCommandInteraction(event);
+
+        assertThat(result).isTrue();
+
+        verify(abstractCommand).onCommand(event);
+        verify(abstractCommand).clearThreadLocals();
+        verify(updateAction).complete();
+        verify(abstractCommand).sendErrorMessage(Mockito.anyString());
+
+        verify(abstractCommand, never())
+            .reply(Mockito.any(FormattingData[].class));
+        verify(abstractCommand, never())
+            .reply(Mockito.any(MessageEmbed[].class));
     }
 
     @Test
-    void testMissingReply() {
-        SlashCommandInteractionEvent event = mock(
-            SlashCommandInteractionEvent.class);
+    void testReceiveCommandInteractionException() {
 
-        mockMessageType("ERROR_MESSAGE", "Test ERROR_MESSAGE: %(errorMessage)");
+        GenericCommandInteractionEvent event = mock(
+            GenericCommandInteractionEvent.class);
 
-        testOnSlashCommandInteraction(event,
-            new String[] {
-                "Test ERROR_MESSAGE: This command somehow didn't respond!" },
-            null);
+        InteractionHook hook = mock(InteractionHook.class);
+
+        MessageEmbed embed = mock(MessageEmbed.class);
+        MessageEmbed[] embeds = new MessageEmbed[] { embed };
+
+        @SuppressWarnings("unchecked")
+        WebhookMessageUpdateAction<Message> updateAction = mock(
+            WebhookMessageUpdateAction.class);
+
+        when(event.getHook()).thenReturn(hook);
+        when(hook.editOriginalEmbeds(embeds)).thenReturn(updateAction);
+
+        doThrow(RuntimeException.class).when(abstractCommand).onCommand(event);
+        doNothing().when(abstractCommand).clearThreadLocals();
+        doNothing().when(abstractCommand).sendErrorMessage(Mockito.anyString());
+
+        doReturn(embeds).when(localEmbedsToSend).get();
+        doReturn(event).when(commandEvent).get();
+
+        Boolean result = abstractCommand.receiveCommandInteraction(event);
+
+        assertThat(result).isFalse();
+
+        verify(abstractCommand).onCommand(event);
+        verify(abstractCommand).clearThreadLocals();
+        verify(updateAction).complete();
+        verify(abstractCommand).sendErrorMessage(Mockito.anyString());
+
+        verify(abstractCommand, never())
+            .reply(Mockito.any(FormattingData[].class));
+        verify(abstractCommand, never())
+            .reply(Mockito.any(MessageEmbed[].class));
     }
 
     @Test
-    void testAddReactionMenu() {
-        SlashCommandInteractionEvent event = mock(
-            SlashCommandInteractionEvent.class);
+    void testSendErrorMessage() {
 
-        mockOnCommand(event, "Working");
+        String errorMessage = "This is supposed to be a error message!";
 
-        ReactionMenu menu = mock(ReactionMenu.class);
+        ArgumentCaptor<FormattingData> dataCaptor = ArgumentCaptor
+            .forClass(FormattingData.class);
 
-        abstractCommand.addMenu(menu);
+        doNothing().when(abstractCommand).reply(dataCaptor.capture());
 
-        testOnSlashCommandInteraction(event, new String[] { "Working" }, null);
+        this.abstractCommand.sendErrorMessage(errorMessage);
 
-        verify(menu)
-            .buildMenu(Mockito.eq(jda), Mockito.any(), Mockito.any());
+        FormattingData formattingData = dataCaptor.getValue();
+        assertThat(formattingData)
+            .isNotNull()
+            .matches(
+                data -> data.messageType() == GenericMessageType.ERROR_MESSAGE)
+            .matches(data -> data
+                .get(GenericFormatDataKey.ERROR_MESSAGE)
+                .equals(errorMessage));
     }
 
     @Test
-    void testAddLongRunningTask() {
-        SlashCommandInteractionEvent event = mock(
-            SlashCommandInteractionEvent.class);
+    void testReplyFormattingData() {
+        BlankUser user = mock(BlankUser.class);
+        doReturn(user).when(localUser).get();
 
-        mockOnCommand(event, "Working");
+        String testMessage = "TestMessage";
 
-        Subtask task = mock(Subtask.class);
+        FormattingData formattingData = mock(FormattingData.class);
+        when(messageService.format(formattingData)).thenReturn(testMessage);
 
-        abstractCommand.addLongRunningTask(task);
+        ArgumentCaptor<MessageEmbed[]> embedsCapture = ArgumentCaptor
+            .forClass(MessageEmbed[].class);
+        doNothing().when(localEmbedsToSend).set(embedsCapture.capture());
 
-        testOnSlashCommandInteraction(event, new String[] { "Working" }, null);
+        this.abstractCommand.reply(formattingData);
 
-        verify(task)
-            .accept(Mockito.notNull());
+        MessageEmbed[] embeds = embedsCapture.getValue();
+
+        assertThat(embeds)
+            .isNotNull()
+            .hasSize(1)
+            .anyMatch(embed -> embed.getDescription().equals(testMessage));
     }
 
-    private void mockOnCommand(SlashCommandInteraction event, String message) {
-        Answer<?> setEmbed = invocation -> {
-            MessageEmbed embed = mock(MessageEmbed.class);
-            lenient()
-                .when(embed.getDescription())
-                .thenReturn(message);
-            abstractCommand.reply(embed);
-            return null;
-        };
-
-        doAnswer(setEmbed)
-            .when(abstractCommand)
-            .onCommand(Mockito.notNull());
+    @Test
+    void testReplyFormattingDataError() {
+        assertThatCode(() -> this.abstractCommand.reply((FormattingData) null))
+            .isInstanceOf(OutsideOfCommandContextException.class);
     }
 
-    private CommandDefinition mockCommandDefinition(String commandName,
-        String description,
-        boolean hidden, boolean roleRestricted, Long... roles) {
-        CommandDefinition commandDefinition = new CommandDefinition(description,
-            null, roleRestricted, hidden, Lists.list(roles));
+    @Test
+    void testReplyMessageEmbed() {
+        BlankUser user = mock(BlankUser.class);
+        doReturn(user).when(localUser).get();
 
-        lenient()
-            .when(commandConfig.getCommandDefinition(commandName))
-            .thenReturn(commandDefinition);
+        MessageEmbed[] mockEmbeds = new MessageEmbed[] {
+            mock(MessageEmbed.class) };
 
-        return commandDefinition;
+        ArgumentCaptor<MessageEmbed[]> embedsCapture = ArgumentCaptor
+            .forClass(MessageEmbed[].class);
+        doNothing().when(localEmbedsToSend).set(embedsCapture.capture());
+
+        this.abstractCommand.reply(mockEmbeds);
+
+        MessageEmbed[] embeds = embedsCapture.getValue();
+
+        assertThat(embeds).isEqualTo(mockEmbeds);
     }
 
-    private void mockMessageType(String messageType, String format) {
-        when(environment.getProperty("messages." + messageType))
-            .thenReturn(format);
-    }
-
-    private CommandData mockCommandData(String commandName,
-        String description) {
-        CommandData data = Commands.slash(commandName, description);
-
-        return data;
-    }
-
-    private TextChannel mockTextChannel(long id) {
-        return mockChannel(TextChannel.class, id);
-    }
-
-    private <T extends Channel> T mockChannel(Class<T> channelClass, long id) {
-        T channel = mock(channelClass);
-
-        when(channel.getIdLong()).thenReturn(id);
-
-        return channel;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected <T extends RestAction<R>, R> T mockRestActionQueue(
-        Class<T> actionClass, R result) {
-        T action = mock(actionClass);
-
-        Mockito.doAnswer(invocation -> {
-            invocation.getArgument(0, Consumer.class).accept(result);
-            return null;
-        }).when(action).queue(Mockito.notNull());
-
-        return action;
+    @Test
+    void testReplyMessageEmbedError() {
+        assertThatCode(() -> this.abstractCommand.reply((MessageEmbed) null))
+            .isInstanceOf(OutsideOfCommandContextException.class);
     }
 
 }

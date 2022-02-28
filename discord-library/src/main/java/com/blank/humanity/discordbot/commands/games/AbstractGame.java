@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.games.messages.GenericGameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GenericGameMessageType;
+import com.blank.humanity.discordbot.config.commands.CommandConfig;
 import com.blank.humanity.discordbot.config.commands.games.GameConfig;
 import com.blank.humanity.discordbot.config.commands.games.GameDefinition;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
@@ -39,6 +40,9 @@ public abstract class AbstractGame extends AbstractCommand {
 
     @Autowired
     private GameConfig gameConfig;
+
+    @Autowired
+    private CommandConfig commandConfig;
 
     @Autowired
     private ObjectProvider<ComponentMenuBuilder> componentMenuBuilderProvider;
