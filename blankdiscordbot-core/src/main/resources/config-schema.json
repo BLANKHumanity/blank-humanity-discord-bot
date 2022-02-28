@@ -1022,7 +1022,8 @@
 			"required": [
 				"id",
 				"name",
-				"description"
+				"description",
+				"useName"
 			],
 			"additionalProperties": false,
 			"allOf": [
@@ -1055,18 +1056,6 @@
 								"actionArguments"
 							]
 						}
-					}
-				},
-				{
-					"if": {
-						"required": [
-							"useName"
-						]
-					},
-					"then": {
-						"required": [
-							"action"
-						]
 					}
 				},
 				{
