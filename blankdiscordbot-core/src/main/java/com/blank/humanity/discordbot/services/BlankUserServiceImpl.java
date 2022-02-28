@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transactional;
@@ -31,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 
@@ -60,9 +62,14 @@ public class BlankUserServiceImpl implements BlankUserService {
             .orElseGet(() -> registerUser(discordId, guildId));
     }
 
-    public BlankUser getUser(SlashCommandInteraction event) {
+    public BlankUser getUser(GenericInteractionCreateEvent event) {
         return getUser(event.getUser().getIdLong(),
             event.getGuild().getIdLong());
+    }
+
+    @Override
+    public Optional<BlankUser> getUser(long userId) {
+        return blankUserDao.findById(userId);
     }
 
     private BlankUser registerUser(long discordId, long guildId) {
@@ -124,7 +131,7 @@ public class BlankUserServiceImpl implements BlankUserService {
     }
 
     public FormattingData createSimpleFormattingData(
-        SlashCommandInteraction event,
+        GenericInteractionCreateEvent event,
         MessageType messageType) {
         return createFormattingData(getUser(event.getUser().getIdLong(),
             event.getGuild().getIdLong()), messageType).build();
@@ -271,5 +278,4 @@ public class BlankUserServiceImpl implements BlankUserService {
     public String getUsername(BlankUser user) {
         return jda.retrieveUserById(user.getDiscordId()).complete().getName();
     }
-
 }

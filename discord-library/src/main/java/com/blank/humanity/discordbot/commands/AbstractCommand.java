@@ -1,21 +1,16 @@
 package com.blank.humanity.discordbot.commands;
 
-import static com.blank.humanity.discordbot.utils.Wrapper.transactionCallback;
-
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -24,31 +19,36 @@ import com.blank.humanity.discordbot.config.commands.CommandConfig;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
-import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.config.messages.MessagesConfig;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.BlankUserService;
+import com.blank.humanity.discordbot.services.CommandService;
+import com.blank.humanity.discordbot.services.MenuService;
+import com.blank.humanity.discordbot.services.MessageService;
 import com.blank.humanity.discordbot.services.TransactionExecutor;
-import com.blank.humanity.discordbot.utils.FormatDataKey;
 import com.blank.humanity.discordbot.utils.FormattingData;
-import com.blank.humanity.discordbot.utils.NamedFormatter;
 import com.blank.humanity.discordbot.utils.Wrapper;
-import com.blank.humanity.discordbot.utils.menu.ReactionMenu;
+import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.Command.Type;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction;
 import net.dv8tion.jda.internal.utils.Checks;
 
 /**
@@ -84,20 +84,34 @@ public abstract class AbstractCommand extends ListenerAdapter {
     private TransactionExecutor transactionExecutor;
 
     @Autowired
-    private Environment environment;
-
-    @Autowired
     private TaskScheduler taskScheduler;
 
-    private SlashCommandData commandData;
+    @Autowired
+    private CommandService commandService;
 
-    private CommandDefinition commandDefinition;
+    @Autowired
+    private MenuService menuService;
 
-    private static Map<SlashCommandInteraction, MessageEmbed[]> cachedEmbeds = new HashMap<>();
+    @Autowired
+    private MessageService messageService;
 
-    private static Map<SlashCommandInteraction, ReactionMenu> cachedMenus = new HashMap<>();
+    private static ThreadLocal<GenericCommandInteractionEvent> commandEvent = new ThreadLocal<>();
 
-    private static Map<SlashCommandInteraction, Runnable> cachedTasks = new HashMap<>();
+    private static ThreadLocal<CommandAutoCompleteInteractionEvent> autoCompleteEvent = new ThreadLocal<>();
+
+    private static ThreadLocal<BlankUser> localUser = new ThreadLocal<>();
+
+    private static ThreadLocal<Member> localMember = new ThreadLocal<>();
+
+    private static ThreadLocal<MessageEmbed[]> localEmbedsToSend = new ThreadLocal<>();
+
+    private static ThreadLocal<DiscordMenu> localMenu = new ThreadLocal<>();
+
+    private static ThreadLocal<Runnable> localCachedTasks = new ThreadLocal<>();
+
+    public Type getCommandType() {
+        return Type.SLASH;
+    }
 
     /**
      * Waits for JDA to get ready and then sets up and registers this command to
@@ -108,45 +122,17 @@ public abstract class AbstractCommand extends ListenerAdapter {
      */
     @PostConstruct
     void setupCommand() throws InterruptedException {
-        jda.awaitReady();
-
-        updateCommandDefinition();
-
-        jda.addEventListener(this);
-
-        log.info("Registered Command '" + getCommandName() + "'");
+        commandService.registerCommand(this);
     }
 
     /**
-     * Registers or updates this Command's Data with Discord.<br>
-     * Can be called manually, if {@link #createCommandData(CommandData)}
-     * changes. (Example: changing subcommands)
+     * Specifies the command name of this command class.<br>
+     * The name needs to always be lower-case, which is a restriction of
+     * Discord.
+     * 
+     * @return The command name.
      */
-    public void updateCommandDefinition() {
-        this.commandDefinition = commandConfig
-            .getCommandDefinition(getCommandName());
-        commandData = createCommandData(Commands
-            .slash(getCommandName(),
-                getCommandDefinition().getDescription()));
-
-        Guild guild = jda.getGuildById(commandConfig.getGuildId());
-
-        if (commandDefinition.isRoleRestricted()) {
-            commandData.setDefaultEnabled(false);
-            guild
-                .upsertCommand(commandData)
-                .queue(command -> guild
-                    .updateCommandPrivilegesById(command.getIdLong(),
-                        commandDefinition
-                            .getAllowedRoles()
-                            .stream()
-                            .map(CommandPrivilege::enableRole)
-                            .toList())
-                    .queue());
-        } else {
-            guild.upsertCommand(commandData).queue();
-        }
-    }
+    public abstract String getCommandName();
 
     /**
      * Creates CommandData including subcommands and arguments etc. to be
@@ -157,123 +143,160 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * 
      * @param commandData Already initialized CommandData Object. Command name
      *                    and description is already pre-filled.
+     * @param definition  {@link CommandDefinition} for configurable option
+     *                    names and descriptions
      * @return The modified CommandData
      */
-    protected abstract SlashCommandData createCommandData(
-        SlashCommandData commandData);
+    public abstract CommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition);
 
+    protected void setUser(BlankUser newUser) {
+        localUser.set(newUser);
+    }
+
+    protected BlankUser getUser() {
+        return localUser.get();
+    }
+
+    protected GenericCommandInteractionEvent getCommandEvent() {
+        return commandEvent.get();
+    }
+
+    protected CommandAutoCompleteInteractionEvent getAutoCompleteEvent() {
+        return autoCompleteEvent.get();
+    }
+
+    protected Member getMember() {
+        return localMember.get();
+    }
+
+    protected void setMember(Member member) {
+        localMember.set(member);
+    }
+
+    protected MessageEmbed[] getUnsentReply() {
+        return localEmbedsToSend.get();
+    }
+    
     /**
      * @see AbstractHiddenCommand
      * @return True if command should always be hidden.
      */
-    protected boolean isEphemeral() {
+    public boolean isEphemeral() {
         return false;
     }
 
-    /**
-     * Listens for {@linkplain SlashCommandEvent}s and calls
-     * {@linkplain #onCommand(SlashCommandEvent)} if the event belongs to this
-     * command.<br>
-     * Also hides the reply automatically, if either
-     * {@linkplain #isEphemeral()}, {@linkplain CommandDefinition#isHidden()
-     * getCommandDefinition().isHidden()} or {@linkplain #isChannelHidden(long)}
-     * returns true.
-     * 
-     * @param event The SlashCommandEvent from Discord
-     */
-    @Override
-    public void onSlashCommandInteraction(@NonNull SlashCommandInteractionEvent event) {
-        if (commandData.getName().equals(event.getName())) {
-            boolean hidden = isEphemeral() || commandDefinition.isHidden()
-                || isChannelHidden(event.getChannel().getIdLong());
-            event.deferReply(hidden).queue();
-            
-            transactionExecutor
-                .executeAsTransaction(
-                    transactionCallback(
-                        () -> onCommand(event)),
-                    ex -> transactionExceptionHandler(event, ex),
-                    o -> transactionFinishHandler(event));
+    protected void clearThreadLocals() {
+        commandEvent.remove();
+        autoCompleteEvent.remove();
+        localUser.remove();
+        localEmbedsToSend.remove();
+        localCachedTasks.remove();
+        localMenu.remove();
+        localMember.remove();
+    }
 
+    public Boolean receiveCommandInteraction(
+        GenericCommandInteractionEvent interactionEvent) {
+        try {
+            commandEvent.set(interactionEvent);
+            localUser
+                .set(blankUserService.getUser(interactionEvent.getMember()));
+            localMember.set(interactionEvent.getMember());
+
+            onCommand(interactionEvent);
+            return true;
+        } catch (Exception exception) {
+            receiveCommandInteractionExceptionHandler(exception);
+            return false;
+        } finally {
+            receiveCommandInteractionFinishHandler();
+
+            clearThreadLocals();
+        }
+    }
+
+    public Boolean receiveAutoCompleteInteraction(
+        CommandAutoCompleteInteractionEvent interactionEvent) {
+        try {
+            autoCompleteEvent.set(interactionEvent);
+            localUser
+                .set(blankUserService.getUser(interactionEvent.getMember()));
+            localMember.set(interactionEvent.getMember());
+
+            Collection<Command.Choice> choices = onAutoComplete(
+                interactionEvent);
+            interactionEvent.replyChoices(choices).complete();
+            return true;
+        } catch (Exception exception) {
+            log
+                .error("Auto Complete Interaction of Command '"
+                    + getCommandName() + "' has thrown an exception",
+                    exception);
+            return false;
+        } finally {
+            clearThreadLocals();
         }
     }
 
     /**
      * Handles sending of replies and menus, as well as starting long running
-     * Tasks after the {@link #onCommand(SlashCommandInteraction)} Call.<br>
+     * Tasks after the {@link #onCommand(InteractionEvent)} Call.<br>
      * If no reply has been set via {@link #reply}, then this will send a error
      * message to notify the user.
-     * 
-     * @param event The Command Event that needs to be finished
      */
-    private void transactionFinishHandler(
-        @NonNull SlashCommandInteraction event) {
-        if (!cachedEmbeds.containsKey(event)) {
-            sendErrorMessage(event, "This command somehow didn't respond!");
+    private void receiveCommandInteractionFinishHandler() {
+        if (localEmbedsToSend.get() == null) {
+            sendErrorMessage("This command somehow didn't respond!");
         }
 
-        Message message = event
+        WebhookMessageUpdateAction<Message> messageUpdateAction = getCommandEvent()
             .getHook()
-            .editOriginalEmbeds(cachedEmbeds.remove(event))
-            .complete();
-        if (cachedMenus.containsKey(event)) {
-            cachedMenus
-                .remove(event)
-                .buildMenu(getJda(), message, getTaskScheduler(),
-                    getTransactionExecutor());
+            .editOriginalEmbeds(localEmbedsToSend.get());
+
+        if (localMenu.get() != null) {
+            DiscordMenu newMenu = localMenu.get();
+
+            Message message = messageUpdateAction.complete();
+
+            newMenu.buildMenu(getJda(), message, menuService);
+        } else {
+            messageUpdateAction.complete();
         }
-        if (cachedTasks.containsKey(event)) {
-            cachedTasks.remove(event).run();
+
+        if (localCachedTasks.get() != null) {
+            localCachedTasks.get().run();
         }
     }
 
     /**
      * Any Exception that is thrown during the
-     * {@link #onCommand(SlashCommandInteraction)} Call is getting logged here and the
+     * {@link #onCommand(InteractionEvent)} Call is getting logged here and the
      * user is notified with a Error Message.
      * 
-     * @param event The event that resulted in an Exception.
-     * @param e     The exception that was thrown.
+     * @param e The exception that was thrown.
      */
-    private void transactionExceptionHandler(@NonNull SlashCommandInteraction event,
+    private void receiveCommandInteractionExceptionHandler(
         @NonNull Exception e) {
         log.error("Transaction threw Exception", e);
-        sendErrorMessage(event,
+        sendErrorMessage(
             "This command threw this error '" + e.getMessage() + "'");
     }
 
     /**
      * Builds a Message of Type ERROR_MESSAGE with the given
      * {@code errorMessage}<br>
-     * It is a Utility Function wrapping a
-     * {@link #reply(SlashCommandInteraction, FormattingData)} call.
+     * It is a Utility Function wrapping a {@link #reply(FormattingData)} call.
      * 
-     * @param event        The CommandEvent that a error needs to be sent to as
-     *                     a reply
      * @param errorMessage The actual error message
      */
-    protected void sendErrorMessage(@NonNull SlashCommandInteraction event,
-        @NonNull String errorMessage) {
-        reply(event,
-            FormattingData
-                .builder()
-                .messageType(GenericMessageType.ERROR_MESSAGE)
-                .dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
-                    errorMessage)
-                .build());
-    }
-
-    /**
-     * Determines if the channel with the Id {@code channelId} should be hidden
-     * or not.<br>
-     * Default behaviour checks the command definition configuration's
-     * hiddenCommandChannels.
-     * 
-     * @param channelId Id of the Channel that should be checked
-     * @return True if this command should be hidden in the specified channel.
-     */
-    private boolean isChannelHidden(long channelId) {
-        return commandConfig.getHiddenCommandChannels().contains(channelId);
+    protected void sendErrorMessage(@NonNull String errorMessage) {
+        reply(FormattingData
+            .builder()
+            .messageType(GenericMessageType.ERROR_MESSAGE)
+            .dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
+                errorMessage)
+            .build());
     }
 
     /**
@@ -289,16 +312,19 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * @param formattingData The {@link FormattingData}s that describe the
      *                       replies.
      */
-    protected void reply(@NonNull SlashCommandInteraction event,
-        @NonNull FormattingData... formattingDatas) {
+    protected void reply(@NonNull FormattingData... formattingDatas) {
+        if (getUser() == null)
+            throw new ApplicationContextException(
+                "reply(FormattingData) can only be called during Command Execution");
+
         MessageEmbed[] embeds = Arrays
             .stream(formattingDatas)
-            .map(this::format)
+            .map(messageService::format)
             .map(message -> new EmbedBuilder().setDescription(message))
             .map(EmbedBuilder::build)
             .toArray(size -> new MessageEmbed[size]);
 
-        cachedEmbeds.put(event, embeds);
+        localEmbedsToSend.set(embeds);
     }
 
     /**
@@ -307,64 +333,36 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * Notice: Replies are only sent out after the command has finished
      * execution, calling this function twice, will cause your first reply to be
      * discarded.<br>
-     * Using {@linkplain #reply(SlashCommandEvent, FormattingData...)} is
-     * preferred, since it forces you to use configurable Messages.
+     * Using {@linkplain #reply(FormattingData...)} is preferred, since it
+     * forces you to use configurable Messages.
      * 
-     * @param event  The SlashCommandInteraction that is to be replied to
      * @param embeds The {@link MessageEmbed}s that should be sent out.
      */
-    protected void reply(@NonNull SlashCommandInteraction event,
-        @NonNull MessageEmbed... embeds) {
+    protected void reply(@NonNull MessageEmbed... embeds) {
+        if (getUser() == null)
+            throw new ApplicationContextException(
+                "reply(MessageEmbed) can only be called during Command Execution");
+
         Checks.noneNull(embeds, "MessageEmbeds");
-        cachedEmbeds.put(event, embeds);
+        localEmbedsToSend.set(embeds);
     }
 
     /**
-     * Takes in {@linkplain FormattingData} and uses it to generate a formatted
-     * Message according to the Configuration of the specified
-     * {@linkplain MessageType}.<br>
-     * Also checks for Validity of the FormattingData, MessageType can specify
-     * {@linkplain FormatDataKey}s that need to be filled in. If any are missing
-     * a Format Error Message will be returned.
-     * 
-     * @param formattingData The {@linkplain FormattingData} that is used to
-     *                       generate the Message
-     * @return A formatted Message
-     */
-    protected String format(FormattingData formattingData) {
-        Set<ConstraintViolation<FormattingData>> constraintViolation = validator
-            .validate(formattingData);
-        if (!constraintViolation.isEmpty()) {
-            log
-                .error("Format Error\n" + constraintViolation
-                    .stream()
-                    .map(ConstraintViolation<FormattingData>::getMessage)
-                    .collect(Collectors.joining("\n")));
-            return "Format Error\n" + constraintViolation
-                .stream()
-                .map(ConstraintViolation<FormattingData>::getMessage)
-                .collect(Collectors.joining("\n"));
-        }
-        String messageFormat = formattingData
-            .messageType()
-            .getMessageFormat(environment);
-        return NamedFormatter
-            .namedFormat(messageFormat, formattingData.getDataPairings());
-    }
-
-    /**
-     * Adds a {@linkplain ReactionMenu} that will be added to the message after
+     * Adds a {@linkplain MessageMenu} that will be added to the message after
      * the command has finished execution.<br>
      * Notice: Calling this function twice will discard the earlier set
      * ReactionMenu.
      * 
-     * @param event        The {@linkplain SlashCommandInteraction} that the
-     *                     ReactionMenu should be added to.
-     * @param reactionMenu The {@linkplain ReactionMenu} to be added.
+     * @param event       The {@linkplain SlashCommandInteraction} that the
+     *                    ReactionMenu should be added to.
+     * @param discordMenu The {@linkplain DiscordMenu} to be added.
      */
-    protected void addReactionMenu(@NonNull SlashCommandInteraction event,
-        @NonNull ReactionMenu reactionMenu) {
-        cachedMenus.put(event, reactionMenu);
+    protected void addMenu(@NonNull DiscordMenu discordMenu) {
+        if (getUser() == null)
+            throw new ApplicationContextException(
+                "addMenu(DiscordMenu) can only be called during Command Execution");
+
+        localMenu.set(discordMenu);
     }
 
     /**
@@ -378,17 +376,17 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * take longer to finish.<br>
      * Notice: Calling this function twice will discard the earlier set Task.
      * 
-     * @param event The {@linkplain SlashCommandInteraction} that the Task should be
-     *              added to.
-     * @param task  The {@linkplain Subtask} that should be executed.
+     * @param task The {@linkplain Subtask} that should be executed.
      */
-    protected void addLongRunningTask(@NonNull SlashCommandInteraction event,
-        @NonNull Subtask task) {
-        Consumer<FormattingData[]> updateMessages = messages -> event
-            .getHook()
+    protected void addLongRunningTask(@NonNull Subtask task) {
+        if (getUser() == null)
+            throw new ApplicationContextException(
+                "addLongRunningTask(Subtask) can only be called during Command Execution");
+
+        InteractionHook hook = getCommandEvent().getHook();
+        Consumer<FormattingData[]> updateMessages = messages -> hook
             .editOriginalEmbeds(Stream
-                .of(messages)
-                .map(this::format)
+                .of(messageService.format(messages))
                 .map(msg -> new EmbedBuilder().setDescription(msg))
                 .map(EmbedBuilder::build)
                 .toList())
@@ -402,17 +400,8 @@ public abstract class AbstractCommand extends ListenerAdapter {
                 Exception::printStackTrace, t -> {
                 });
 
-        cachedTasks.put(event, run);
+        localCachedTasks.set(run);
     }
-
-    /**
-     * Specifies the command name of this command class.<br>
-     * The name needs to always be lower-case, which is a restriction of
-     * Discord.
-     * 
-     * @return The command name.
-     */
-    protected abstract String getCommandName();
 
     /**
      * Executes the actual command, will only be called if {@code event} matches
@@ -420,12 +409,19 @@ public abstract class AbstractCommand extends ListenerAdapter {
      * The various protected Methods of this class can be used to reply to this
      * command invocation.
      * 
-     * @param event The {@linkplain SlashCommandInteraction} that caused this command
-     *              invocation.
+     * @param event The {@linkplain GenericCommandInteractionEvent} that caused
+     *              this command invocation.
      * @see #reply(SlashCommandEvent, FormattingData...)
      * @see #sendErrorMessage(SlashCommandEvent, String)
-     * @see #addReactionMenu(SlashCommandEvent, ReactionMenu)
+     * @see #addReactionMenu(SlashCommandEvent, MessageMenu)
      * @see #addLongRunningTask(SlashCommandEvent, Subtask)
      */
-    protected abstract void onCommand(@NonNull SlashCommandInteraction event);
+    protected abstract void onCommand(
+        @NonNull GenericCommandInteractionEvent event);
+
+    @NonNull
+    protected Collection<Command.Choice> onAutoComplete(
+        @NonNull CommandAutoCompleteInteractionEvent autoCompleteEvent) {
+        return Collections.emptyList();
+    }
 }

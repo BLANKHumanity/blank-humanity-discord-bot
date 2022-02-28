@@ -28,25 +28,22 @@ public class DiscordBotConfig {
     @NonNull
     private String authToken;
 
-    @NonNull
-    @Value("BLUNK")
-    private String botName;
-
     @Bean
     public static JDA jda(DiscordBotConfig discordBotConfig)
-	    throws LoginException {
-	return JDABuilder
-		.createDefault(discordBotConfig.getAuthToken(),
-			GatewayIntent.GUILD_MEMBERS,
-			GatewayIntent.GUILD_MESSAGES,
-			GatewayIntent.GUILD_MESSAGE_REACTIONS)
-		.setMemberCachePolicy(MemberCachePolicy.ALL)
-		.build();
+        throws LoginException, InterruptedException {
+        return JDABuilder
+            .createDefault(discordBotConfig.getAuthToken(),
+                GatewayIntent.GUILD_MEMBERS,
+                GatewayIntent.GUILD_MESSAGES,
+                GatewayIntent.GUILD_MESSAGE_REACTIONS)
+            .setMemberCachePolicy(MemberCachePolicy.ALL)
+            .build()
+            .awaitReady();
     }
-    
+
     @Bean
     public static SecureRandom random() {
-	return new SecureRandom();
+        return new SecureRandom();
     }
 
 }

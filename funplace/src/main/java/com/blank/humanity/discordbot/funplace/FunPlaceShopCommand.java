@@ -7,25 +7,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blank.humanity.discordbot.commands.AbstractCommand;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.items.ItemConfiguration;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class FunPlaceShopCommand extends AbstractCommand {
-
-    @Override
-    protected String getCommandName() {
-        return "funshop";
-    }
 
     @Autowired
     private FunPlaceShopService funPlaceShopService;
@@ -34,9 +30,15 @@ public class FunPlaceShopCommand extends AbstractCommand {
     private ItemConfiguration itemConfiguration;
 
     @Override
-    protected SlashCommandData createCommandData(SlashCommandData shopCommand) {
+    public String getCommandName() {
+        return "funshop";
+    }
+
+    @Override
+    public SlashCommandData createCommandData(SlashCommandData shopCommand,
+        CommandDefinition definition) {
         OptionData page = new OptionData(OptionType.INTEGER, "page",
-            getCommandDefinition().getOptionDescription("page"));
+            definition.getOptionDescription("page"));
         page.setMinValue(1);
         page.setMaxValue(funPlaceShopService.amountShopPages());
         shopCommand.addOptions(page);
@@ -44,20 +46,18 @@ public class FunPlaceShopCommand extends AbstractCommand {
     }
 
     @Override
-    protected void onCommand(SlashCommandInteraction event) {
-        int page = Optional
-            .ofNullable(event.getOption("page"))
-            .map(OptionMapping::getAsLong)
-            .orElse(1L)
+    protected void onCommand(GenericCommandInteractionEvent event) {
+        int page = event
+            .getOption("page", () -> 1l, OptionMapping::getAsLong)
             .intValue();
 
         if (page < 1 || page > funPlaceShopService.amountShopPages()) {
-            reply(event, blankUserService
-                .createSimpleFormattingData(event,
-                    FunPlaceMessageType.SHOP_COMMAND_WRONG_PAGE));
+            reply(blankUserService
+                .createSimpleFormattingData(
+                    event, FunPlaceMessageType.SHOP_COMMAND_WRONG_PAGE));
             return;
         }
-        BlankUser blankUser = blankUserService.getUser(event);
+        BlankUser blankUser = getUser();
 
         FormattingData.FormattingDataBuilder formatBuilder = blankUserService
             .createFormattingData(blankUser, null);
@@ -66,14 +66,17 @@ public class FunPlaceShopCommand extends AbstractCommand {
         EmbedBuilder embedBuilder = new EmbedBuilder();
 
         embedBuilder
-            .setTitle(format(formatBuilder
-                .messageType(
-                    FunPlaceMessageType.FUN_PLACE_SHOP_TITLE_MESSAGE)
-                .build()));
+            .setTitle(getMessageService()
+                .format(formatBuilder
+                    .messageType(
+                        FunPlaceMessageType.FUN_PLACE_SHOP_TITLE_MESSAGE)
+                    .build()));
 
-        String shopDescription = format(formatBuilder
-            .messageType(FunPlaceMessageType.FUN_PLACE_SHOP_HEADER)
-            .build()) + "\n";
+        String shopDescription = getMessageService()
+            .format(formatBuilder
+                .messageType(FunPlaceMessageType.FUN_PLACE_SHOP_HEADER)
+                .build())
+            + "\n";
 
         shopDescription += funPlaceShopService
             .getShopPage(page)
@@ -82,13 +85,14 @@ public class FunPlaceShopCommand extends AbstractCommand {
             .map(item -> generateShopItemDescription(item, formatBuilder))
             .collect(Collectors.joining("\n"));
 
-        shopDescription += "\n" + format(formatBuilder
-            .messageType(FunPlaceMessageType.FUN_PLACE_SHOP_FOOTER)
-            .build());
+        shopDescription += "\n" + getMessageService()
+            .format(formatBuilder
+                .messageType(FunPlaceMessageType.FUN_PLACE_SHOP_FOOTER)
+                .build());
 
         embedBuilder.setDescription(shopDescription);
 
-        reply(event, embedBuilder.build());
+        reply(embedBuilder.build());
     }
 
     private String generateShopItemDescription(ShopItem item,
@@ -120,9 +124,10 @@ public class FunPlaceShopCommand extends AbstractCommand {
             .dataPairing(FunPlaceFormatDataKey.ITEM_DESCRIPTION,
                 definition.getDescription());
 
-        return format(formatBuilder
-            .messageType(FunPlaceMessageType.SHOP_ITEM_DESCRIPTION)
-            .build());
+        return getMessageService()
+            .format(formatBuilder
+                .messageType(FunPlaceMessageType.SHOP_ITEM_DESCRIPTION)
+                .build());
     }
 
 }

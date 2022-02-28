@@ -1,6 +1,9 @@
 package com.blank.humanity.discordbot.services;
 
+import java.util.Optional;
+
 import javax.transaction.Transactional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
@@ -12,14 +15,16 @@ import com.blank.humanity.discordbot.utils.FormatDataKey;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 
 public interface BlankUserService {
 
     public BlankUser getUser(long discordId, long guildId);
 
-    public BlankUser getUser(SlashCommandInteraction event);
+    public BlankUser getUser(GenericInteractionCreateEvent event);
+
+    public Optional<BlankUser> getUser(long userId);
 
     public BlankUser getUser(OptionMapping option);
 
@@ -44,7 +49,7 @@ public interface BlankUserService {
         ClaimDataType claimDataType);
 
     public FormattingData createSimpleFormattingData(
-        SlashCommandInteraction event,
+        GenericInteractionCreateEvent event,
         MessageType messageType);
 
     public FormattingData.FormattingDataBuilder createFormattingData(

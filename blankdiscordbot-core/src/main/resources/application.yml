@@ -266,6 +266,7 @@ items:
     - id: 3
       name: "Kingpin"
       description: "Become the Kingpin"
+      useName: "kingpin"
     - id: 4
       name: ".1 ETH"
       description: "Redeemable for 0.1 ETH after Bitizen Mint"
@@ -278,6 +279,7 @@ items:
         messageSendChannel: 797928031229444116
     - id: 5
       name: ".2 ETH"
+      useName: "dotTwoEth"
       description: "Redeemable for 0.2 ETH after Bitizen Mint"
 shop:
   itemsPerPage: 8
