@@ -10,7 +10,6 @@ import javax.annotation.PostConstruct;
 import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +20,7 @@ import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.config.messages.MessagesConfig;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.command.OutsideOfCommandContextException;
 import com.blank.humanity.discordbot.services.BlankUserService;
 import com.blank.humanity.discordbot.services.CommandService;
 import com.blank.humanity.discordbot.services.MenuService;
@@ -62,9 +62,6 @@ import net.dv8tion.jda.internal.utils.Checks;
 public abstract class AbstractCommand extends ListenerAdapter {
 
     @Autowired
-    Validator validator;
-
-    @Autowired
     protected JDA jda;
 
     @Autowired
@@ -74,16 +71,7 @@ public abstract class AbstractCommand extends ListenerAdapter {
     protected MessagesConfig messagesConfig;
 
     @Autowired
-    private CommandConfig commandConfig;
-
-    @Autowired
-    private DiscordBotConfig discordBotConfig;
-
-    @Autowired
     private TransactionExecutor transactionExecutor;
-
-    @Autowired
-    private TaskScheduler taskScheduler;
 
     @Autowired
     private CommandService commandService;
@@ -176,7 +164,7 @@ public abstract class AbstractCommand extends ListenerAdapter {
     protected MessageEmbed[] getUnsentReply() {
         return localEmbedsToSend.get();
     }
-    
+
     /**
      * @see AbstractHiddenCommand
      * @return True if command should always be hidden.
@@ -313,7 +301,7 @@ public abstract class AbstractCommand extends ListenerAdapter {
      */
     protected void reply(@NonNull FormattingData... formattingDatas) {
         if (getUser() == null)
-            throw new ApplicationContextException(
+            throw new OutsideOfCommandContextException(
                 "reply(FormattingData) can only be called during Command Execution");
 
         MessageEmbed[] embeds = Arrays
@@ -339,7 +327,7 @@ public abstract class AbstractCommand extends ListenerAdapter {
      */
     protected void reply(@NonNull MessageEmbed... embeds) {
         if (getUser() == null)
-            throw new ApplicationContextException(
+            throw new OutsideOfCommandContextException(
                 "reply(MessageEmbed) can only be called during Command Execution");
 
         Checks.noneNull(embeds, "MessageEmbeds");
@@ -358,7 +346,7 @@ public abstract class AbstractCommand extends ListenerAdapter {
      */
     protected void addMenu(@NonNull DiscordMenu discordMenu) {
         if (getUser() == null)
-            throw new ApplicationContextException(
+            throw new OutsideOfCommandContextException(
                 "addMenu(DiscordMenu) can only be called during Command Execution");
 
         localMenu.set(discordMenu);
@@ -379,7 +367,7 @@ public abstract class AbstractCommand extends ListenerAdapter {
      */
     protected void addLongRunningTask(@NonNull Subtask task) {
         if (getUser() == null)
-            throw new ApplicationContextException(
+            throw new OutsideOfCommandContextException(
                 "addLongRunningTask(Subtask) can only be called during Command Execution");
 
         InteractionHook hook = getCommandEvent().getHook();
