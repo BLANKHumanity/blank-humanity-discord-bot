@@ -1,5 +1,6 @@
 package com.blank.humanity.discordbot.commands.items;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,13 @@ import com.blank.humanity.discordbot.services.ShopService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.item.ItemBuyStatus;
 
+import lombok.NonNull;
+import net.dv8tion.jda.api.events.interaction.GenericAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
@@ -62,19 +66,17 @@ public class BuyItemCommand extends AbstractCommand {
         BlankUser user = getUser();
 
         Optional<ShopItem> shopItem = shopService
-            .getShopItem(event.getOption("item").getAsString());
+            .getShopItem(event.getOption(ITEM, OptionMapping::getAsString));
 
-        int amount = Optional
-            .ofNullable(event.getOption(AMOUNT))
-            .map(OptionMapping::getAsLong)
-            .orElse(1L)
+        int amount = event
+            .getOption(AMOUNT, () -> 1l, OptionMapping::getAsLong)
             .intValue();
 
         if (shopItem.isEmpty()) {
             FormattingData data = blankUserService
                 .createFormattingData(user, ItemMessageType.ITEM_NOT_EXISTS)
                 .dataPairing(ItemFormatDataKey.ITEM_NAME,
-                    event.getOption(ITEM).getAsString())
+                    event.getOption(ITEM, OptionMapping::getAsString))
                 .build();
             reply(data);
             return;
@@ -109,4 +111,14 @@ public class BuyItemCommand extends AbstractCommand {
         reply(data);
     }
 
+    @NonNull
+    protected Collection<Command.Choice> onAutoComplete(
+        @NonNull CommandAutoCompleteInteractionEvent event) {
+        String itemName = event
+            .getOption(ITEM, () -> "", OptionMapping::getAsString)
+            .toLowerCase();
+
+        return shopService
+            .autoCompleteShopItems(itemName);
+    }
 }

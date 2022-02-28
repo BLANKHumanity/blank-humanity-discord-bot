@@ -2,7 +2,6 @@
 package com.blank.humanity.discordbot.commands.games;
 
 import java.security.SecureRandom;
-import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.user.fake.FakeUser;
 import com.blank.humanity.discordbot.entities.user.fake.FakeUserType;
-import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
