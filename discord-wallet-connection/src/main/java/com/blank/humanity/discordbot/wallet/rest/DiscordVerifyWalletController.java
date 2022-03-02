@@ -11,23 +11,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.blank.humanity.discordbot.wallet.DiscordWalletService;
-import com.blank.humanity.discordbot.wallet.entities.DiscordWallet;
+import com.blank.humanity.discordbot.wallet.entities.DiscordVerifiedWallet;
 
 import lombok.NonNull;
 
 @Controller
 @Path("wallet/discord")
-public class DiscordWalletController {
+public class DiscordVerifyWalletController {
 
     @Autowired
     private DiscordWalletService discordWalletService;
 
-    @Path("registerWallet")
+    @Path("registerVerifiedWallet")
     @POST
-    public Response registerWallet(
-	    @NonNull DiscordWalletRegistrationDto discordWalletRegistrationDto) {
-	Optional<DiscordWallet> wallet = discordWalletService
-		.registerWallet(discordWalletRegistrationDto.getSignature(),
+    public Response registerVerifiedWallet(
+	    @NonNull DiscordVerfiedWalletRegistrationDto discordWalletRegistrationDto) {
+	Optional<DiscordVerifiedWallet> wallet = discordWalletService
+		.registerVerifiedWallet(discordWalletRegistrationDto.getSignature(),
 			discordWalletRegistrationDto.getSalt());
 
 	if (wallet.isEmpty()) {

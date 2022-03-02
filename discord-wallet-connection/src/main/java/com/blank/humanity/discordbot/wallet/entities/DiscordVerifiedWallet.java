@@ -16,7 +16,7 @@ import lombok.NonNull;
 @Entity
 @Data
 @NoArgsConstructor
-public class DiscordWallet {
+public class DiscordVerifiedWallet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

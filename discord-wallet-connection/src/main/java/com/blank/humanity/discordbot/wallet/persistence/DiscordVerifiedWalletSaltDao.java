@@ -9,7 +9,7 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.wallet.entities.DiscordWalletSalt;
 
 @Repository
-public interface DiscordWalletSaltDao extends JpaRepository<DiscordWalletSalt, Integer>{
+public interface DiscordVerifiedWalletSaltDao extends JpaRepository<DiscordWalletSalt, Integer>{
 
     public Optional<DiscordWalletSalt> findByUser(BlankUser user);
     

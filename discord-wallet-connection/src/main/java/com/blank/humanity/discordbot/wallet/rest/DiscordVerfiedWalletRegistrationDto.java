@@ -8,7 +8,7 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Builder
 @Jacksonized
-public class DiscordWalletRegistrationDto {
+public class DiscordVerfiedWalletRegistrationDto {
 
     @NonNull
     private String salt;

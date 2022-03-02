@@ -16,10 +16,10 @@ import org.web3j.utils.Numeric;
 
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.wallet.DiscordWalletService;
-import com.blank.humanity.discordbot.wallet.entities.DiscordWallet;
+import com.blank.humanity.discordbot.wallet.entities.DiscordVerifiedWallet;
 import com.blank.humanity.discordbot.wallet.entities.DiscordWalletSalt;
-import com.blank.humanity.discordbot.wallet.persistence.DiscordWalletDao;
-import com.blank.humanity.discordbot.wallet.persistence.DiscordWalletSaltDao;
+import com.blank.humanity.discordbot.wallet.persistence.DiscordVerifiedWalletDao;
+import com.blank.humanity.discordbot.wallet.persistence.DiscordVerifiedWalletSaltDao;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,15 +28,15 @@ import lombok.extern.slf4j.Slf4j;
 public class DiscordWalletServiceImpl implements DiscordWalletService {
 
     @Autowired
-    private DiscordWalletDao discordWalletDao;
+    private DiscordVerifiedWalletDao discordWalletDao;
     @Autowired
-    private DiscordWalletSaltDao discordWalletSaltDao;
+    private DiscordVerifiedWalletSaltDao discordWalletSaltDao;
 
     private String messageFormat = "Hi, to connect your Ethereum Address to this Discord Account {0} on the Blank Humanity Server, please sign this random message: {1}";
 
     @Override
     @Transactional
-    public String createWalletSalt(BlankUser user) {
+    public String createVerifyWalletSalt(BlankUser user) {
 	String salt = UUID.randomUUID().toString();
 
 	DiscordWalletSalt walletSalt = discordWalletSaltDao
@@ -53,7 +53,7 @@ public class DiscordWalletServiceImpl implements DiscordWalletService {
 
     @Override
     @Transactional
-    public Optional<DiscordWallet> registerWallet(String sigData, String salt) {
+    public Optional<DiscordVerifiedWallet> registerVerifiedWallet(String sigData, String salt) {
 	Optional<DiscordWalletSalt> walletSalt = discordWalletSaltDao
 		.findBySalt(salt);
 
@@ -87,21 +87,21 @@ public class DiscordWalletServiceImpl implements DiscordWalletService {
 	    return Optional.empty();
 	}
 
-	DiscordWallet discordWallet = discordWalletDao
+	DiscordVerifiedWallet discordWallet = discordWalletDao
 		.findByUser(saltWallet.getUser())
-		.orElseGet(DiscordWallet::new);
+		.orElseGet(DiscordVerifiedWallet::new);
 
 	discordWallet.setUser(saltWallet.getUser());
 	discordWallet.setWalletAddress(Numeric.toHexStringWithPrefix(pubKey));
 
-	Optional<DiscordWallet> optDiscordWallet = Optional
+	Optional<DiscordVerifiedWallet> optDiscordWallet = Optional
 		.of(discordWalletDao.save(discordWallet));
 	discordWalletSaltDao.delete(saltWallet);
 	return optDiscordWallet;
     }
 
     @Override
-    public Optional<DiscordWallet> getWallet(BlankUser user) {
+    public Optional<DiscordVerifiedWallet> getWallet(BlankUser user) {
 	return discordWalletDao.findByUser(user);
     }
 

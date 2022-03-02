@@ -40,7 +40,7 @@ public class VerifyCommand extends AbstractHiddenCommand {
     protected void onCommand(@NonNull GenericCommandInteractionEvent event) {
         BlankUser user = getUser();
 
-        String salt = discordWalletService.createWalletSalt(user);
+        String salt = discordWalletService.createVerifyWalletSalt(user);
 
         reply(blankUserService
                 .createFormattingData(user,

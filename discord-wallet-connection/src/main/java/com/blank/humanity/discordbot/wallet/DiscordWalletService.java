@@ -3,15 +3,15 @@ package com.blank.humanity.discordbot.wallet;
 import java.util.Optional;
 
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.wallet.entities.DiscordWallet;
+import com.blank.humanity.discordbot.wallet.entities.DiscordVerifiedWallet;
 
 public interface DiscordWalletService {
 
-    public String createWalletSalt(BlankUser user);
+    public String createVerifyWalletSalt(BlankUser user);
 
-    public Optional<DiscordWallet> registerWallet(String sigData,
+    public Optional<DiscordVerifiedWallet> registerVerifiedWallet(String sigData,
 	    String salt);
 
-    public Optional<DiscordWallet> getWallet(BlankUser user);
+    public Optional<DiscordVerifiedWallet> getWallet(BlankUser user);
 
 }
