@@ -52,7 +52,7 @@ public class BuyItemCommand extends AbstractCommand {
         commandData
             .addOption(OptionType.STRING, ITEM,
                 definition.getOptionDescription(ITEM),
-                true);
+                true, true);
         OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
             definition.getOptionDescription(AMOUNT));
         amount.setMinValue(1);
