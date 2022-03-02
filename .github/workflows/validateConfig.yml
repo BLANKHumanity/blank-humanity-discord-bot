@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: InoUno/yaml-ls-check@v1.1.0
       with:
         root: blankdiscordbot-core/src/main/resources
