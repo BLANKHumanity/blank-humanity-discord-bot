@@ -45,7 +45,7 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
         CommandDefinition definition) {
         commandData
             .addOption(OptionType.STRING, ITEM,
-                definition.getOptionDescription(ITEM), true);
+                definition.getOptionDescription(ITEM), true, true);
         OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
             definition.getOptionDescription(AMOUNT));
         amount.setMinValue(1);
