@@ -1,10 +1,13 @@
-package de.zorro909.blank.BlankDiscordBot.wallet.messages;
+package com.blank.humanity.discordbot.wallet.messages;
 
 import java.util.Optional;
+
 import org.springframework.core.env.Environment;
-import de.zorro909.blank.BlankDiscordBot.config.messages.GenericFormatDataKey;
-import de.zorro909.blank.BlankDiscordBot.config.messages.MessageType;
-import de.zorro909.blank.BlankDiscordBot.utils.FormatDataKey;
+
+import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
+import com.blank.humanity.discordbot.config.messages.MessageType;
+import com.blank.humanity.discordbot.utils.FormatDataKey;
+
 import lombok.Getter;
 import lombok.ToString;
 

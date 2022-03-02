@@ -1,4 +1,4 @@
-package de.zorro909.blank.BlankDiscordBot.wallet.config;
+package com.blank.humanity.discordbot.wallet.config;
 
 import javax.validation.constraints.NotNull;
 

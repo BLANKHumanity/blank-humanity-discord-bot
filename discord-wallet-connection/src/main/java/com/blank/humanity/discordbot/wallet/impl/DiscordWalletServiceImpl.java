@@ -1,23 +1,26 @@
-package de.zorro909.blank.BlankDiscordBot.wallet.impl;
+package com.blank.humanity.discordbot.wallet.impl;
 
-import java.awt.font.NumericShaper;
 import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.Optional;
 import java.util.UUID;
+
 import javax.transaction.Transactional;
+
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.utils.Numeric;
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.wallet.DiscordWalletService;
-import de.zorro909.blank.BlankDiscordBot.wallet.entities.DiscordWallet;
-import de.zorro909.blank.BlankDiscordBot.wallet.entities.DiscordWalletSalt;
-import de.zorro909.blank.BlankDiscordBot.wallet.persistence.DiscordWalletDao;
-import de.zorro909.blank.BlankDiscordBot.wallet.persistence.DiscordWalletSaltDao;
+
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.wallet.DiscordWalletService;
+import com.blank.humanity.discordbot.wallet.entities.DiscordWallet;
+import com.blank.humanity.discordbot.wallet.entities.DiscordWalletSalt;
+import com.blank.humanity.discordbot.wallet.persistence.DiscordWalletDao;
+import com.blank.humanity.discordbot.wallet.persistence.DiscordWalletSaltDao;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

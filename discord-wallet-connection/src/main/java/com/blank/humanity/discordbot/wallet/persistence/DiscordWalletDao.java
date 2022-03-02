@@ -1,12 +1,13 @@
-package de.zorro909.blank.BlankDiscordBot.wallet.persistence;
+package com.blank.humanity.discordbot.wallet.persistence;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.wallet.entities.DiscordWallet;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.wallet.entities.DiscordWallet;
+
 import lombok.NonNull;
 
 @Repository

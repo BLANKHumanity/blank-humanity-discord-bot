@@ -1,9 +1,9 @@
-package de.zorro909.blank.BlankDiscordBot.wallet.config;
+package com.blank.humanity.discordbot.wallet.config;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
 
-import de.zorro909.blank.BlankDiscordBot.wallet.rest.DiscordWalletController;
+import com.blank.humanity.discordbot.wallet.rest.DiscordWalletController;
 
 @Configuration
 public class JerseyConfig extends ResourceConfig {

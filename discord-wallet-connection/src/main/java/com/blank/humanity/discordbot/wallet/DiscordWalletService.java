@@ -1,11 +1,9 @@
-package de.zorro909.blank.BlankDiscordBot.wallet;
+package com.blank.humanity.discordbot.wallet;
 
 import java.util.Optional;
 
-import org.web3j.crypto.Sign.SignatureData;
-
-import de.zorro909.blank.BlankDiscordBot.entities.user.BlankUser;
-import de.zorro909.blank.BlankDiscordBot.wallet.entities.DiscordWallet;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.wallet.entities.DiscordWallet;
 
 public interface DiscordWalletService {
 
