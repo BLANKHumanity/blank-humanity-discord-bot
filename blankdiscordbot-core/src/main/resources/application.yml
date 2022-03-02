@@ -18,8 +18,8 @@ discord:
   maximum-daily-reward: 100
   minimum-work-reward: 25
   maximum-work-reward: 100
-  reward-multiplier: 1
-  streak-multiplier: 1.1
+  claim-multiplier: 1
+  streak-log-base: 4
   user-list-page-size: 8
   max-game-bet-amount: 300
   command-definitions:
@@ -50,6 +50,11 @@ discord:
         bet: "How much do you want to bet?"
     buy:
       description: "Buys an Item"
+      options:
+        item: "The name of the Shop Item to buy"
+        amount: "The amount of items you want to buy (default: 1)"
+    funbuy:
+      description: "Buys an Item from the Fun Place Shop"
       options:
         item: "The name of the Shop Item to buy"
         amount: "The amount of items you want to buy (default: 1)"
@@ -84,7 +89,7 @@ discord:
       options:
         user: "The User to give the item to"
         item: "Name of the item to give away"
-        amount: "The amount of items to give away (default: 1)"      
+        amount: "The amount of items to give away (default: 1)"
     inventory:
       description: "Displays your Inventory"
       options:
@@ -98,11 +103,15 @@ discord:
       description: "Displays all buyable Items from the Shop"
       options:
         page: "Shop-Page"
+    funshop:
+      description: "Displays all buyable Items from the Fun Place Shop"
+      options:
+        page: "Shop-Page"
     votecampaign:
       description: "Allows management of voting campaigns"
       options:
         create: "Creates a new VoteCampaign"
-        addchoice: "Adds a voteable choice to a VoteCampaign"      
+        addchoice: "Adds a voteable choice to a VoteCampaign"
         removechoice: "Removes a choice from a VoteCampaign"
         start: "Starts a VoteCampaign"
         stop: "Stops a VoteCampaign"
@@ -129,7 +138,7 @@ discord:
       roleRestricted: true
       allowedRoles:
         - 923652378803187802
-    chatsummary: 
+    chatsummary:
       description: "Lists the number of messages of every User in the past x hours in a specific channel"
       roleRestricted: true
       allowedRoles:
@@ -140,6 +149,28 @@ discord:
         startmessageid: "Id of last message to count"
     verify:
       description: "Verify your Wallet"
+      roleRestricted: true
+      allowedRoles:
+        - 0
+games:
+  dice:
+    displayName: Dice
+    cooldownAmount: 2
+    cooldownTimeUnit: SECONDS
+    metadataClass: null
+    winningsMultiplier: 2
+  rps:
+    displayName: Rock paper scissors
+    cooldownAmount: 2
+    cooldownTimeUnit: SECONDS
+    metadataClass: null
+    winningsMultiplier: 2
+  roulette:
+    displayName: Roulette
+    cooldownAmount: 2
+    cooldownTimeUnit: SECONDS
+    metadataClass: com.blank.humanity.discordbot.entities.game.RouletteMetadata
+    winningsMultiplier: 1.2 # 1.2 is Fair = 0% House Edge
 messages:
   BALANCE_COMMAND_MESSAGE: "%(user) has %(balance)"
   DAILY_COMMAND_MESSAGE: "%(userMention) got %(claimReward) as a daily reward!"
@@ -152,10 +183,14 @@ messages:
   SHOP_HEADER: "Use /buy <item name> to buy an item"
   SHOP_FOOTER: ""
   SHOP_ITEM_DESCRIPTION: "%(shopItemId) - %(itemName) - %(shopItemPrice) - Available: %(shopItemAvailableAmount)\n----%(itemDescription) : /buy %(shopItemBuyName)"
+  FUN_PLACE_SHOP_TITLE_MESSAGE: "Fun Place Shop Page %(shopPage)"
+  FUN_PLACE_SHOP_HEADER: "Use /buy <item name> to buy an item"
+  FUN_PLACE_SHOP_FOOTER: ""
   ITEM_USE_ACTION_UNDEFINED: "%(userMention), this item has no usage action defined. This is likely a configuration error. Please contact an administrator!"
   ITEM_NOT_EXISTS: "%(userMention), the item '%(itemName)' does not exist"
   ITEM_USE_NOT_OWNED: "%(userMention), you don't have %(itemAmount) of this item"
-  ITEM_USE_ONLY_SINGLE_ITEM: "%(userMention), the item '%(itemName)' can only be used seperately" 
+  ITEM_USE_ONLY_SINGLE_ITEM: "%(userMention), the item '%(itemName)' can only be used seperately"
+  ITEM_USE_ONLY_REQUIRED_AMOUNT: "%(userMention), the item '%(itemName)' requires the use of exactly '%(itemAmount)'x"
   ITEM_GIVE_NOT_ENOUGH_OWNED: "%(userMention), you don't have %(itemAmount) of %(itemName) to give away"
   ITEM_GIVE_SUCCESS: "%(userMention), you gave %(receivingUserMention) %(itemAmount) x %(itemName)"
   BUY_ITEM_NO_SUPPLY: "%(userMention), this item has no supply left"
@@ -198,7 +233,12 @@ messages:
     :game_die: %(user) gets %(diceRollUser) ...
     :game_die: %(user), your opponent throws their dice... and gets %(diceRollOpponent)...
     :game_die: %(user), you lost %(betAmount) 🔳
-  DICE_GAME_WIN:  |-
+  DICE_GAME_DRAW: |-
+    :game_die: %(user) bets %(betAmount) 🔳 and throws their dice...
+    :game_die: %(user) gets %(diceRollUser) ...
+    :game_die: %(user), your opponent throws their dice... and gets %(diceRollOpponent)...
+    :game_die: %(user), you get your %(betAmount) 🔳 back
+  DICE_GAME_WIN: |-
     :game_die: %(user) bets %(betAmount) 🔳 and throws their dice...
     :game_die: %(user) gets %(diceRollUser) ...
     :game_die: %(user), your opponent throws their dice... and gets %(diceRollOpponent)...
@@ -219,64 +259,77 @@ messages:
   WALLET_VERIFY_DISPLAY_LINK: "Please connect your web3 wallet [here](%(walletVerifyLink))"
 items:
   definitions:
-    -
-      id: 1
+    - id: 1
       name: "First Class Ticket"
       description: "Useful for you"
       useName: "firstClassTicket"
       action: "ROLE_REWARD"
       actionArguments:
         roleId: 923197747153223700
-    -
-      id: 2
+    - id: 2
       name: "High Roller Role"
       description: "Why is this more expensive?"
       useName: "highRollerRole"
       action: "ROLE_REWARD"
       actionArguments:
         roleId: 923652378803187802
-    - 
-      id: 3
+    - id: 3
       name: "Kingpin"
       description: "Become the Kingpin"
-    - 
-      id: 4
+      useName: "kingpin"
+    - id: 4
       name: ".1 ETH"
       description: "Redeemable for 0.1 ETH after Bitizen Mint"
-    - 
-      id: 5
+      useName: "dotOneEth"
+      action: MESSAGE_ACTION
+      actionArguments:
+        requiredAmount: 1
+        replyMessage: "Hello World"
+        messageSend: "Ping Moderator that %(user) redeemed .1 ETH Item"
+        messageSendChannel: 797928031229444116
+    - id: 5
       name: ".2 ETH"
-      description: "Redeemable for 0.2 ETH after Bitizen Mint"   
+      useName: "dotTwoEth"
+      description: "Redeemable for 0.2 ETH after Bitizen Mint"
 shop:
   itemsPerPage: 8
   shopItems:
-    -
-     id: 1
-     itemId: 1
-     buyName: "firstClassTicket"
-     price: 50
-     amountAvailable: 100
-    -
-     id: 2
-     itemId: 2
-     buyName: "highRollerRole"
-     price: 100
-     amountAvailable: 5
-    -
-     id: 3
-     itemId: 3
-     buyName: "kingpin"
-     price: 200
-     amountAvailable: 1
-    -
-     id: 4
-     itemId: 4
-     buyName: "pointOneEth"
-     price: 1000
-     amountAvailable: 1
-    -
-     id: 5
-     itemId: 5
-     buyName: "pointTwoEth"
-     price: 2000
-     amountAvailable: 1
+    - id: 1
+      itemId: 1
+      buyName: "firstClassTicket"
+      price: 50
+      amountAvailable: 100
+      order: 5
+    - id: 2
+      itemId: 2
+      buyName: "highRollerRole"
+      price: 100
+      amountAvailable: 5
+      order: 4
+    - id: 3
+      itemId: 3
+      buyName: "kingpin"
+      price: 200
+      amountAvailable: 1
+      order: 3
+    - id: 4
+      itemId: 4
+      buyName: "pointOneEth"
+      price: 1000
+      amountAvailable: 1
+      order: 2
+    - id: 5
+      itemId: 5
+      buyName: "pointTwoEth"
+      price: 2000
+      amountAvailable: 1
+      order: 1
+funshop: # Different Shop, uses different IDs
+  itemsPerPage: 8
+  shopItems:
+    - id: 1
+      itemId: 1
+      buyName: "firstClassTicket"
+      price: 10
+      amountAvailable: 5
+      order: 1
