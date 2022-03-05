@@ -1,7 +1,6 @@
 package com.blank.humanity.discordbot.wallet.service;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.web3j.abi.datatypes.Address;
 

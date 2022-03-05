@@ -3,7 +3,6 @@ package com.blank.humanity.discordbot.services;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.blank.humanity.discordbot.entities.user.BlankUser;

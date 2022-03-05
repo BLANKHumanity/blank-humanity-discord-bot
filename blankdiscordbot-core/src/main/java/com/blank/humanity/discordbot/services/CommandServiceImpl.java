@@ -69,11 +69,9 @@ public class CommandServiceImpl implements CommandService, EventListener {
                 .error("Error occured during Command Registration of '"
                     + command.getCommandName() + "'", error);
             return null;
-        }).thenAccept(object -> {
-            log
-                .info("Registered Command '" + command.getCommandName()
-                    + "'");
-        });
+        })
+            .thenAccept(object -> log
+                .info("Registered Command '" + command.getCommandName() + "'"));
     }
 
     @Override
