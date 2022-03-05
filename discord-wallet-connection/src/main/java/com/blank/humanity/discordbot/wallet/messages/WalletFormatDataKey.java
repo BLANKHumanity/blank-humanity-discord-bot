@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public enum WalletFormatDataKey implements FormatDataKey {
-    WALLET_VERIFY_LINK("walletVerifyLink");
+    WALLET_VERIFY_LINK("walletVerifyLink"),
+    AIRDROP_WALLET("airdropWallet");
 
     @NonNull
     private String key;

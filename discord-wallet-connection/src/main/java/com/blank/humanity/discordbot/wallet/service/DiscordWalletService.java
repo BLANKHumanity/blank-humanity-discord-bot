@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.wallet;
+package com.blank.humanity.discordbot.wallet.service;
 
 import java.util.Optional;
 

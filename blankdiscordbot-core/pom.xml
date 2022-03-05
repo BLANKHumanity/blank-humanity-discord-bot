@@ -24,7 +24,7 @@
 			<version>1.0.4</version>
 		</dependency>
 		<dependency>
-			<groupId>de.zorro909.blank</groupId>
+			<groupId>com.blank.humanity</groupId>
 			<artifactId>discord-wallet-connection</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>

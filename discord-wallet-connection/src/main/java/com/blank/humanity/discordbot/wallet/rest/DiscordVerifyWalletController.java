@@ -2,38 +2,37 @@ package com.blank.humanity.discordbot.wallet.rest;
 
 import java.util.Optional;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.blank.humanity.discordbot.wallet.DiscordWalletService;
 import com.blank.humanity.discordbot.wallet.entities.DiscordVerifiedWallet;
+import com.blank.humanity.discordbot.wallet.rest.dto.DiscordVerfiedWalletRegistrationDto;
+import com.blank.humanity.discordbot.wallet.service.DiscordWalletService;
 
 import lombok.NonNull;
+import reactor.core.publisher.Mono;
 
-@Controller
-@Path("wallet/discord")
+@RestController
+@RequestMapping("/wallets/discord")
 public class DiscordVerifyWalletController {
 
     @Autowired
     private DiscordWalletService discordWalletService;
 
-    @Path("registerVerifiedWallet")
-    @POST
-    public Response registerVerifiedWallet(
-	    @NonNull DiscordVerfiedWalletRegistrationDto discordWalletRegistrationDto) {
-	Optional<DiscordVerifiedWallet> wallet = discordWalletService
-		.registerVerifiedWallet(discordWalletRegistrationDto.getSignature(),
-			discordWalletRegistrationDto.getSalt());
+    @PostMapping("registerVerifiedWallet")
+    public Mono<ResponseEntity<Void>> registerVerifiedWallet(
+        @NonNull DiscordVerfiedWalletRegistrationDto discordWalletRegistrationDto) {
+        Optional<DiscordVerifiedWallet> wallet = discordWalletService
+            .registerVerifiedWallet(discordWalletRegistrationDto.getSignature(),
+                discordWalletRegistrationDto.getSalt());
 
-	if (wallet.isEmpty()) {
-	    return Response.status(Status.BAD_REQUEST).build();
-	}
-	return Response.ok().build();
+        if (wallet.isEmpty()) {
+            return Mono.just(ResponseEntity.notFound().build());
+        }
+        return Mono.just(ResponseEntity.ok().build());
     }
 
 }

@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 import com.blank.humanity.discordbot.commands.AbstractHiddenCommand;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.wallet.DiscordWalletService;
 import com.blank.humanity.discordbot.wallet.config.WalletVerifyConfig;
 import com.blank.humanity.discordbot.wallet.messages.WalletFormatDataKey;
 import com.blank.humanity.discordbot.wallet.messages.WalletMessageType;
+import com.blank.humanity.discordbot.wallet.service.DiscordWalletService;
 
 import lombok.NonNull;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;

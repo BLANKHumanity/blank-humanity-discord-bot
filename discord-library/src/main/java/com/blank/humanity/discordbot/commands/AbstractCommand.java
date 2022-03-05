@@ -7,14 +7,10 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
-import com.blank.humanity.discordbot.config.DiscordBotConfig;
-import com.blank.humanity.discordbot.config.commands.CommandConfig;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
@@ -40,7 +36,6 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.Command.Type;
@@ -59,7 +54,7 @@ import net.dv8tion.jda.internal.utils.Checks;
 @Component
 @Getter
 @Slf4j
-public abstract class AbstractCommand extends ListenerAdapter {
+public abstract class AbstractCommand {
 
     @Autowired
     protected JDA jda;

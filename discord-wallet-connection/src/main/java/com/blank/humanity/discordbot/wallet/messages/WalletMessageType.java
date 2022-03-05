@@ -15,20 +15,24 @@ import lombok.ToString;
 @ToString
 public enum WalletMessageType implements MessageType {
     WALLET_VERIFY_DISPLAY_LINK(WalletFormatDataKey.WALLET_VERIFY_LINK,
-	    GenericFormatDataKey.USER, GenericFormatDataKey.USER_MENTION);
+        GenericFormatDataKey.USER, GenericFormatDataKey.USER_MENTION),
+    SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR(GenericFormatDataKey.USER,
+        GenericFormatDataKey.USER_MENTION),
+    SET_AIRDROP_WALLET_SUCCESS(WalletFormatDataKey.AIRDROP_WALLET,
+        GenericFormatDataKey.USER, GenericFormatDataKey.USER_MENTION);
 
     private WalletMessageType(FormatDataKey... keys) {
-	this.availableDataKeys = keys;
+        this.availableDataKeys = keys;
     }
 
     private FormatDataKey[] availableDataKeys;
 
     public String getMessageFormat(Environment env) {
-	return Optional
-		.ofNullable(env.getProperty("messages." + name()))
-		.orElseThrow(() -> new RuntimeException(
-			"Non-existent Message Configuration '" + name()
-				+ "'!"));
+        return Optional
+            .ofNullable(env.getProperty("messages." + name()))
+            .orElseThrow(() -> new RuntimeException(
+                "Non-existent Message Configuration '" + name()
+                    + "'!"));
     }
 
 }

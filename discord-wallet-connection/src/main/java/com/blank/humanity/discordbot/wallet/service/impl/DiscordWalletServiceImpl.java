@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.wallet.impl;
+package com.blank.humanity.discordbot.wallet.service.impl;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
@@ -15,11 +15,11 @@ import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.utils.Numeric;
 
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.wallet.DiscordWalletService;
 import com.blank.humanity.discordbot.wallet.entities.DiscordVerifiedWallet;
 import com.blank.humanity.discordbot.wallet.entities.DiscordWalletSalt;
 import com.blank.humanity.discordbot.wallet.persistence.DiscordVerifiedWalletDao;
 import com.blank.humanity.discordbot.wallet.persistence.DiscordVerifiedWalletSaltDao;
+import com.blank.humanity.discordbot.wallet.service.DiscordWalletService;
 
 import lombok.extern.slf4j.Slf4j;
 

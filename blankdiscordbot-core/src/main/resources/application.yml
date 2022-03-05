@@ -151,7 +151,11 @@ discord:
       description: "Verify your Wallet"
       roleRestricted: true
       allowedRoles:
-        - 0
+        - 123542  # Invalid role, effectively disables command for everyone
+    set-airdrop-wallet:
+      description: "Set your airdrop wallet"
+      options:
+        wallet: "Your ethereum wallet"
 games:
   dice:
     displayName: Dice
@@ -257,6 +261,8 @@ messages:
   CHAT_SUMMARY_PENDING: "Messages are still counted, please wait!"
   ITEM_REMOVE_SUCCESS: "You have removed %(itemAmount) x %(itemName) from %(user)'s inventory"
   WALLET_VERIFY_DISPLAY_LINK: "Please connect your web3 wallet [here](%(walletVerifyLink))"
+  SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR: "The specified wallet address has an invalid format. Are you using a ethereum address?"
+  SET_AIRDROP_WALLET_SUCCESS: "Your airdrop wallet was sucessfully set to '%(airdropWallet)'!"
 items:
   definitions:
     - id: 1

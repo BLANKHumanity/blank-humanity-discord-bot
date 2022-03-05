@@ -622,6 +622,21 @@
 						"verify": {
 							"type": "object",
 							"$ref": "#/$defs/command"
+						},
+						"set-airdrop-wallet": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties":{
+								"options":{
+									"type": "object",
+									"properties": {
+										"wallet": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									}
+								}	
+							}
 						}
 					},
 					"required": [
@@ -645,9 +660,10 @@
 						"revealvote",
 						"clearpendinggames",
 						"chatsummary",
-						"verify",
 						"funbuy",
-						"funshop"
+						"funshop",
+						"verify",
+						"set-airdrop-wallet"
 					],
 					"additionalProperties": false
 				}
@@ -861,7 +877,7 @@
 					"$ref": "#/$defs/message"
 				},
 				"WALLET_VERIFY_DISPLAY_LINK": {
-        	"$ref": "#/$defs/message"
+        			"$ref": "#/$defs/message"
 				},
 				"FUN_PLACE_SHOP_TITLE_MESSAGE": {
 					"$ref": "#/$defs/message"
@@ -870,6 +886,12 @@
 					"$ref": "#/$defs/message"
 				},
 				"FUN_PLACE_SHOP_FOOTER": {
+					"$ref": "#/$defs/message"
+				},
+				"SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR": {
+					"$ref": "#/$defs/message"
+				},
+				"SET_AIRDROP_WALLET_SUCCESS": {
 					"$ref": "#/$defs/message"
 				}
 			},
@@ -935,10 +957,12 @@
 				"CHAT_SUMMARY_ENTRY",
 				"CHAT_SUMMARY_PENDING",
 				"ITEM_REMOVE_SUCCESS",
-				"WALLET_VERIFY_DISPLAY_LINK",
 				"FUN_PLACE_SHOP_TITLE_MESSAGE",
 				"FUN_PLACE_SHOP_HEADER",
-				"FUN_PLACE_SHOP_FOOTER"
+				"FUN_PLACE_SHOP_FOOTER",
+				"WALLET_VERIFY_DISPLAY_LINK",
+				"SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR",
+				"SET_AIRDROP_WALLET_SUCCESS"
 			],
  			"additionalProperties": false
 		},

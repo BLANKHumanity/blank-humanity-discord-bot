@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.wallet.rest;
+package com.blank.humanity.discordbot.wallet.rest.dto;
 
 import lombok.Builder;
 import lombok.Data;
