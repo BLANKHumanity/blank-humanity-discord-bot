@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.services;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.PostConstruct;
 
@@ -59,15 +60,22 @@ public class CommandServiceImpl implements CommandService, EventListener {
 
     @Override
     public void registerCommand(AbstractCommand command) {
+        log.info("Registering Command '" + command.getCommandName() + "'");
+
         commands.put(command.getCommandName(), command);
 
-        updateCommand(command.getCommandName());
-
-        log.info("Registered Command '" + command.getCommandName() + "'");
+        updateCommand(command.getCommandName()).exceptionally(error -> {
+            log
+                .error("Error occured during Command Registration of '"
+                    + command.getCommandName() + "'", error);
+            return null;
+        })
+            .thenAccept(object -> log
+                .info("Registered Command '" + command.getCommandName() + "'"));
     }
 
     @Override
-    public void updateCommand(String commandName) {
+    public CompletableFuture<?> updateCommand(String commandName) {
         CommandDefinition commandDefinition = commandConfig
             .getCommandDefinition(commandName);
 
@@ -89,7 +97,7 @@ public class CommandServiceImpl implements CommandService, EventListener {
 
         if (commandDefinition.isRoleRestricted()) {
             commandData.setDefaultEnabled(false);
-            guild
+            return guild
                 .upsertCommand(modifiedCommandData)
                 .map(Command::getIdLong)
                 .flatMap(commandId -> guild
@@ -99,9 +107,9 @@ public class CommandServiceImpl implements CommandService, EventListener {
                             .stream()
                             .map(CommandPrivilege::enableRole)
                             .toList()))
-                .queue();
+                .submit();
         } else {
-            guild.upsertCommand(commandData).queue();
+            return guild.upsertCommand(commandData).submit();
         }
     }
 

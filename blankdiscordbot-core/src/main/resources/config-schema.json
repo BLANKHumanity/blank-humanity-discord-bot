@@ -66,6 +66,36 @@
 				}
 			}
 		},
+		"web3": {
+			"type": "object",
+			"properties": {
+				"wallet": {
+					"type": "object",
+					"properties": {
+						"verify": {
+							"type": "object",
+							"properties": {
+								"baseUrl": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"baseUrl"
+							],
+							"additionalProperties": false
+						}
+					},
+					"required": [
+						"verify"
+					],
+					"additionalProperties": false
+				}
+			},
+			"required": [
+				"wallet"
+			],
+			"additionalProperties": false
+		},
 		"discord": {
 			"type": "object",
 			"properties": {
@@ -562,6 +592,7 @@
 							"$ref": "#/$defs/command"
 						},
 						"chatsummary": {
+							"$ref": "#/$defs/command",
 							"properties": {
 								"options": {
 									"type": "object",
@@ -587,15 +618,54 @@
 									"additionalProperties": false
 								}
 							}
+						},
+						"verify": {
+							"type": "object",
+							"$ref": "#/$defs/command"
+						},
+						"set-airdrop-wallet": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties":{
+								"options":{
+									"type": "object",
+									"properties": {
+										"wallet": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									}
+								}	
+							}
 						}
 					},
 					"required": [
 						"balance",
 						"daily",
 						"richest",
+						"work",
+						"dice",
+						"rps",
+						"roulette",
+						"buy",
+						"give-coins",
+						"gift",
+						"remove-item",
+						"give",
+						"inventory",
+						"use",
+						"shop",
+						"votecampaign",
+						"vote",
+						"revealvote",
+						"clearpendinggames",
+						"chatsummary",
 						"funbuy",
-						"funshop"
-					]
+						"funshop",
+						"verify",
+						"set-airdrop-wallet"
+					],
+					"additionalProperties": false
 				}
 			},
 			"required": [
@@ -806,6 +876,9 @@
 				"ITEM_REMOVE_SUCCESS": {
 					"$ref": "#/$defs/message"
 				},
+				"WALLET_VERIFY_DISPLAY_LINK": {
+        			"$ref": "#/$defs/message"
+				},
 				"FUN_PLACE_SHOP_TITLE_MESSAGE": {
 					"$ref": "#/$defs/message"
 				},
@@ -813,6 +886,12 @@
 					"$ref": "#/$defs/message"
 				},
 				"FUN_PLACE_SHOP_FOOTER": {
+					"$ref": "#/$defs/message"
+				},
+				"SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR": {
+					"$ref": "#/$defs/message"
+				},
+				"SET_AIRDROP_WALLET_SUCCESS": {
 					"$ref": "#/$defs/message"
 				}
 			},
@@ -880,8 +959,12 @@
 				"ITEM_REMOVE_SUCCESS",
 				"FUN_PLACE_SHOP_TITLE_MESSAGE",
 				"FUN_PLACE_SHOP_HEADER",
-				"FUN_PLACE_SHOP_FOOTER"
-			]
+				"FUN_PLACE_SHOP_FOOTER",
+				"WALLET_VERIFY_DISPLAY_LINK",
+				"SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR",
+				"SET_AIRDROP_WALLET_SUCCESS"
+			],
+ 			"additionalProperties": false
 		},
 		"items": {
 			"type": "object",
