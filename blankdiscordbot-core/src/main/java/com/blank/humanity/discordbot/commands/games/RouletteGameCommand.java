@@ -97,7 +97,6 @@ public class RouletteGameCommand extends AbstractGame {
 
     private DiscordMenu createMenu(GameMetadata metadata) {
         return componentMenu()
-            .restricted(true)
             .allowedDiscordIds(List.of(metadata.getUser().getDiscordId()))
             .timeoutTask(() -> finish(metadata.getId()))
             .button("STOP", "STOP", ButtonStyle.DANGER)

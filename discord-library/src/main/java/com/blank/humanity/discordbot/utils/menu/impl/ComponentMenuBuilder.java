@@ -3,7 +3,6 @@ package com.blank.humanity.discordbot.utils.menu.impl;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -11,9 +10,11 @@ import javax.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.blank.humanity.discordbot.utils.menu.DiscordMenuBuilder;
+import com.blank.humanity.discordbot.utils.menu.InteractionRestrictionWrapper;
 
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
@@ -113,22 +114,14 @@ public class ComponentMenuBuilder extends DiscordMenuBuilder<ComponentMenu> {
         menu
             .addSelectMenu(selectMenu,
                 wrapAction(SelectMenuInteractionEvent.class, menu,
-                    event -> event
-                        .getValues()
-                        .stream()
-                        .collect(Collectors.joining(","))));
+                    SelectMenuInteractionEvent::getValues));
         return this;
     }
 
     @Override
     public ComponentMenuBuilder allowedDiscordIds(List<Long> allowedIds) {
-        menu.allowedDiscordIds(allowedIds);
-        return this;
-    }
-
-    @Override
-    public ComponentMenuBuilder restricted(boolean restricted) {
-        menu.restricted(restricted);
+        addWrapperFirst(GenericComponentInteractionCreateEvent.class,
+            new InteractionRestrictionWrapper<>(allowedIds));
         return this;
     }
 

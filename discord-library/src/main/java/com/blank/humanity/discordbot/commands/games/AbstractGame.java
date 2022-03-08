@@ -2,7 +2,6 @@ package com.blank.humanity.discordbot.commands.games;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,10 +25,9 @@ import com.blank.humanity.discordbot.utils.menu.impl.ComponentMenuBuilder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 
 @Slf4j
 @Getter
@@ -61,59 +59,26 @@ public abstract class AbstractGame extends AbstractCommand {
     protected void onCommand(GenericCommandInteractionEvent event) {
         BlankUser user = getUser();
 
-        Optional<GameMetadata> gameMetadata = gameService
-            .getGameMetadata(user, getCommandName());
+        GameMetadata metadata = retrieveGameMetadata();
 
-        GameMetadata metadata = new GameMetadata();
-
-        if (gameMetadata.isPresent()) {
-            metadata = gameMetadata.get();
-
-            LocalDateTime possibleEarlierTime = LocalDateTime
-                .now()
-                .minus(getGameDefinition().getCooldownAmount(),
-                    getGameDefinition().getCooldownTimeUnit());
-
-            if (metadata.getLastPlayed().isAfter(possibleEarlierTime)) {
-                long minutes = ChronoUnit.MINUTES
-                    .between(possibleEarlierTime, metadata.getLastPlayed());
-                long seconds = ChronoUnit.SECONDS
-                    .between(possibleEarlierTime, metadata.getLastPlayed())
-                    % 60;
-
-                reply(getBlankUserService()
-                    .createFormattingData(user,
-                        GenericGameMessageType.GAME_ON_COOLDOWN)
-                    .dataPairing(GenericGameFormatDataKey.COOLDOWN_MINUTES,
-                        minutes)
-                    .dataPairing(GenericGameFormatDataKey.COOLDOWN_SECONDS,
-                        seconds)
-                    .dataPairing(GenericGameFormatDataKey.GAME_NAME,
-                        getGameDefinition().getDisplayName())
-                    .build());
-                return;
-            }
-        } else {
-            metadata.setGame(getCommandName());
-            metadata.setGameFinished(true);
-            metadata.setLastPlayed(LocalDateTime.of(2000, 1, 1, 0, 0));
-            metadata.setUser(user);
-            metadata = gameService.saveGameMetadata(metadata);
+        if (!isAbleToPlay(metadata)) {
+            sendCooldownResponse(metadata);
+            return;
         }
 
         DiscordMenu menu = null;
         if (metadata.isGameFinished()) {
             log
-                .info("Starting new Game: " + getCommandName() + " for "
-                    + user.getId() + " (game: " + metadata.getId() + ")");
+                .info("Starting a new Game of {} for {} (gameId: {})",
+                    getCommandName(), user.getId(), metadata.getId());
             // Previous Game was finished
             metadata.setGameFinished(false);
             menu = onGameStart(event, user, metadata);
         } else {
             log
-                .info("Continuing Game via SlashCommand: " + getCommandName()
-                    + " for " + user.getId() + " (game: " + metadata.getId()
-                    + ")");
+                .info(
+                    "Continuing a Game of {} via SlashCommand for {} (gameId: {})",
+                    getCommandName(), user.getId(), metadata.getId());
             menu = onGameContinue(user, metadata, event.getOptions());
         }
         if (menu != null) {
@@ -121,74 +86,60 @@ public abstract class AbstractGame extends AbstractCommand {
         }
     }
 
-    private boolean interactionEventWrapper(MessageChannel channel,
-        long messageId, Member member, DiscordMenu menu, Object argument) {
-        BlankUser user = getBlankUserService()
-            .getUser(member);
+    private void sendCooldownResponse(GameMetadata metadata) {
+        long seconds = ChronoUnit.SECONDS
+            .between(getEarliestPossibleTimeToHavePlayedLast(),
+                metadata.getLastPlayed());
 
+        long minutes = seconds / 60;
+        long remainingSeconds = seconds % 60;
+
+        reply(getBlankUserService()
+            .createFormattingData(getUser(),
+                GenericGameMessageType.GAME_ON_COOLDOWN)
+            .dataPairing(GenericGameFormatDataKey.COOLDOWN_MINUTES,
+                minutes)
+            .dataPairing(GenericGameFormatDataKey.COOLDOWN_SECONDS,
+                remainingSeconds)
+            .dataPairing(GenericGameFormatDataKey.GAME_NAME,
+                getGameDefinition().getDisplayName())
+            .build());
+    }
+
+    private GameMetadata retrieveGameMetadata() {
         Optional<GameMetadata> gameMetadata = gameService
-            .getGameMetadata(user, getCommandName());
+            .getGameMetadata(getUser(), getCommandName());
 
-        if (gameMetadata.isEmpty()) {
-            return false;
+        if (gameMetadata.isPresent()) {
+            return gameMetadata.get();
+        } else {
+            GameMetadata metadata = new GameMetadata();
+            metadata.setGame(getCommandName());
+            metadata.setGameFinished(true);
+            metadata.setLastPlayed(LocalDateTime.of(2000, 1, 1, 0, 0));
+            metadata.setUser(getUser());
+            return gameService.saveGameMetadata(metadata);
         }
+    }
 
-        GameMetadata metadata = gameMetadata.get();
+    private boolean isAbleToPlay(GameMetadata metadata) {
+        return metadata
+            .getLastPlayed()
+            .isBefore(getEarliestPossibleTimeToHavePlayedLast());
+    }
 
-        DiscordMenu newMenu = null;
-
-        try {
-            setUser(user);
-            setMember(member);
-
-            log
-                .info("Continuing Game via Menu: " + getCommandName() + " for "
-                    + user.getId() + " (game: " + metadata.getId() + ")");
-
-            newMenu = onGameContinue(user, metadata, argument);
-            if (getUnsentReply() != null) {
-                channel
-                    .editMessageEmbedsById(messageId, getUnsentReply())
-                    .complete();
-            }
-
-            if (newMenu != null || metadata.isGameFinished()) {
-                menu.discard();
-                if (newMenu != null) {
-                    newMenu
-                        .buildMenu(getJda(),
-                            channel
-                                .retrieveMessageById(
-                                    messageId)
-                                .complete(),
-                            getMenuService());
-                }
-            }
-        } finally {
-            clearThreadLocals();
-        }
-        return true;
+    private LocalDateTime getEarliestPossibleTimeToHavePlayedLast() {
+        return LocalDateTime
+            .now()
+            .minus(getGameDefinition().getCooldownAmount(),
+                getGameDefinition().getCooldownTimeUnit());
     }
 
     protected ComponentMenuBuilder componentMenu() {
         ComponentMenuBuilder builder = componentMenuBuilderProvider.getObject();
         builder
-            .addWrapper(ButtonInteractionEvent.class,
-                (event, menu, argument) -> interactionEventWrapper(
-                    event.getChannel(), event.getMessageIdLong(),
-                    event.getMember(), menu, argument));
-
-        builder
-            .addWrapper(SelectMenuInteractionEvent.class,
-                (event, menu, argument) -> {
-                    Object arg = argument;
-                    if (event.getSelectMenu().getMaxValues() > 1) {
-                        arg = Arrays.asList(argument.split(","));
-                    }
-                    return interactionEventWrapper(event.getChannel(),
-                        event.getMessageIdLong(), event.getMember(),
-                        menu, arg);
-                });
+            .addWrapper(GenericComponentInteractionCreateEvent.class,
+                new GameInteractionEventExecutor<>(this));
 
         return builder;
     }
@@ -203,6 +154,7 @@ public abstract class AbstractGame extends AbstractCommand {
     protected void abort(GameMetadata metadata) {
         metadata.clearMetadata();
         metadata.setGameFinished(true);
+        gameService.saveGameMetadata(metadata);
     }
 
     protected void finish(GameMetadata metadata) {
@@ -221,7 +173,26 @@ public abstract class AbstractGame extends AbstractCommand {
         }
         GameMetadata metadata = metadataGetter.get();
         finish(metadata);
-        gameService.saveGameMetadata(metadata);
+    }
+
+    @Override
+    protected final void setUser(BlankUser user) {
+        super.setUser(user);
+    }
+
+    @Override
+    protected final void setMember(Member member) {
+        super.setMember(member);
+    }
+
+    @Override
+    protected final MessageEmbed[] getUnsentReply() {
+        return super.getUnsentReply();
+    }
+
+    @Override
+    protected final void clearThreadLocals() {
+        super.clearThreadLocals();
     }
 
     /**

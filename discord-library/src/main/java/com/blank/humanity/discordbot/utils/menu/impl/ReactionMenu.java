@@ -17,7 +17,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -42,10 +41,6 @@ public class ReactionMenu implements DiscordMenu {
 
     @Getter
     private LinkedHashMap<String, Predicate<MessageReactionAddEvent>> menuActions = new LinkedHashMap<>();
-
-    @Getter
-    @Setter
-    private boolean restricted = false;
 
     @Getter
     @Setter
@@ -113,13 +108,6 @@ public class ReactionMenu implements DiscordMenu {
     public void onMessageReactionAdd(@Nonnull MessageReactionAddEvent event) {
         String reactionCode = event.getReactionEmote().getAsReactionCode();
         if (!menuActions.containsKey(reactionCode)) {
-            event.getReaction().removeReaction().queue();
-            return;
-        }
-
-        Member member = event.retrieveMember().complete();
-        if (restricted
-            && !allowedDiscordIds.contains(member.getUser().getIdLong())) {
             event.getReaction().removeReaction().queue();
             return;
         }

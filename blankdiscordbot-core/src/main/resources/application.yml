@@ -165,14 +165,14 @@ games:
     winningsMultiplier: 2
   rps:
     displayName: Rock paper scissors
-    cooldownAmount: 2
-    cooldownTimeUnit: SECONDS
+    cooldownAmount: 10
+    cooldownTimeUnit: MINUTES
     metadataClass: null
     winningsMultiplier: 2
   roulette:
     displayName: Roulette
-    cooldownAmount: 2
-    cooldownTimeUnit: SECONDS
+    cooldownAmount: 10
+    cooldownTimeUnit: MINUTES
     metadataClass: com.blank.humanity.discordbot.entities.game.RouletteMetadata
     winningsMultiplier: 1.2 # 1.2 is Fair = 0% House Edge
 messages:
