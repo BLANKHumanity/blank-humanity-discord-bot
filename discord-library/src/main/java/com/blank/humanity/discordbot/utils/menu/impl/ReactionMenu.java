@@ -45,10 +45,6 @@ public class ReactionMenu implements DiscordMenu {
 
     @Getter
     @Setter
-    private boolean restricted = false;
-
-    @Getter
-    @Setter
     private List<Long> allowedDiscordIds;
 
     @Getter
@@ -113,13 +109,6 @@ public class ReactionMenu implements DiscordMenu {
     public void onMessageReactionAdd(@Nonnull MessageReactionAddEvent event) {
         String reactionCode = event.getReactionEmote().getAsReactionCode();
         if (!menuActions.containsKey(reactionCode)) {
-            event.getReaction().removeReaction().queue();
-            return;
-        }
-
-        Member member = event.retrieveMember().complete();
-        if (restricted
-            && !allowedDiscordIds.contains(member.getUser().getIdLong())) {
             event.getReaction().removeReaction().queue();
             return;
         }

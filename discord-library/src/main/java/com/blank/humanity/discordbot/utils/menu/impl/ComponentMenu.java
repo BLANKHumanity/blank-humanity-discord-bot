@@ -53,10 +53,6 @@ public class ComponentMenu implements DiscordMenu {
 
     @Getter
     @Setter
-    private boolean restricted = false;
-
-    @Getter
-    @Setter
     private List<Long> allowedDiscordIds;
 
     @Getter
@@ -187,13 +183,7 @@ public class ComponentMenu implements DiscordMenu {
     }
 
     private <E extends GenericComponentInteractionCreateEvent> void wrapper(
-        E event,
-        Predicate<E> value) {
-        if (restricted()
-            && !allowedDiscordIds.contains(event.getMember().getIdLong())) {
-            event.deferEdit().complete();
-            return;
-        }
+        E event, Predicate<E> value) {
         InteractionHook callback = event.deferEdit().complete();
         try {
             if (value.test(event)) {
