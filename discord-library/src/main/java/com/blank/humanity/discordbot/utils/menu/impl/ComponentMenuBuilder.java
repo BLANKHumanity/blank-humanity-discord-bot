@@ -3,7 +3,6 @@ package com.blank.humanity.discordbot.utils.menu.impl;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
