@@ -65,28 +65,36 @@ public class MigrationListener extends ListenerAdapter {
     }
 
     private void checkEmbed(TextChannel textChannel, Matcher matcher) {
-	BlankUser user = blankUserService
-		.getUser(textChannel.getGuild().getIdLong(), matcher.group(1),
-			matcher.group(2));
-	if (user == null) {
-	    textChannel
-		    .sendMessage(matcher.group(1) + "#" + matcher.group(2)
-			    + " please use !coins to migrate :D")
-		    .queue();
-	    return;
-	}
+		BlankUser user = blankUserService
+			.getUser(textChannel.getGuild().getIdLong(), matcher.group(1),
+				matcher.group(2));
+		if (user == null) {
+			textChannel
+				.sendMessage(matcher.group(1) + "#" + matcher.group(2)
+					+ " please use !coins to migrate :D")
+				.queue();
+			return;
+		}
 
-	int mee6Balance = Integer.valueOf(matcher.group(3).replace(",", ""));
-	if (!user.isMigrated()) {
-	    blankUserService
-		    .migrateUser(user.getDiscordId(), user.getGuildId(),
-			    mee6Balance);
-	    textChannel
-		    .sendMessage("<@" + user.getDiscordId()
-			    + "> migrated successfully with a balance of "
-			    + mee6Balance)
-		    .queue();
-	}
+		int mee6Balance = Integer.valueOf(matcher.group(3).replace(",", ""));
+		if (!user.isMigrated()) {
+			blankUserService
+				.migrateUser(user.getDiscordId(), user.getGuildId(),
+					mee6Balance);
+			textChannel
+				.sendMessage("<@" + user.getDiscordId()
+					+ "> migrated successfully with a balance of "
+					+ mee6Balance)
+				.queue();
+		} else {
+			int currentBalance = user.getBalance();
+			textChannel
+				.sendMessage("<@" + user.getDiscordId()
+					+ "> the /coins command is no longer useful for you, please use /balance for most up to date balance going forward. "
+					+ "Your current balance is: "
+					+ currentBalance)
+				.queue();
+		}
     }
 
 }
