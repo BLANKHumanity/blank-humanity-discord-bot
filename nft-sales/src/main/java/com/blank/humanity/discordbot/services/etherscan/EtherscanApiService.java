@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.blank.humanity.discordbot.config.EtherscanApiConfig;
 import com.blank.humanity.discordbot.entities.etherscan.EtherscanRequest;
@@ -28,6 +29,7 @@ import io.github.bucket4j.MathType;
 import io.github.bucket4j.TimeMeter;
 import io.github.bucket4j.local.SynchronizedBucket;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
@@ -65,7 +67,7 @@ public class EtherscanApiService {
             .apikey(etherscanApiConfig.getApiKey());
 
         return Stream
-            .of(consumeThenExecute(NftTokenTransferEventsResponse.class,
+            .of(retryExecute(NftTokenTransferEventsResponse.class,
                 transferEventsRequest))
             .map(Supplier::get)
             .filter(Objects::nonNull)
@@ -78,45 +80,40 @@ public class EtherscanApiService {
         request.apikey(etherscanApiConfig.getApiKey());
 
         return Stream
-            .of(consumeThenExecute(TransactionLogsResponse.class, request))
+            .of(retryExecute(TransactionLogsResponse.class, request))
             .map(Supplier::get)
             .filter(Objects::nonNull)
             .filter(response -> response.getStatusCode() == HttpStatus.OK)
             .map(ResponseEntity::getBody);
     }
 
-    private <T extends EtherscanResponse> Supplier<ResponseEntity<T>> consumeThenExecute(
-        Class<T> responseEntity,
-        EtherscanRequest request) {
-        return () -> {
-            ResponseEntity<T> response = null;
-            int tries = 3;
-            while (tries > 0) {
-                tries--;
-                etherscanApiBucket.consumeUninterruptibly(2);
-                response = execute(responseEntity, request);
-                if (response != null) {
-                    T body = response.getBody();
-                    if (body != null && !body.getStatus().equals("0")) {
-                        break;
-                    }
-                }
-            }
-            return response;
-        };
+    private <T extends EtherscanResponse> Supplier<ResponseEntity<T>> retryExecute(
+        Class<T> responseEntity, EtherscanRequest request) {
+        return () -> Mono
+            .defer(() -> execute(responseEntity, request))
+            .retry(3)
+            .block();
     }
 
-    private <T extends EtherscanResponse> ResponseEntity<T> execute(
+    private <T extends EtherscanResponse> Mono<ResponseEntity<T>> execute(
         Class<T> responseEntity, EtherscanRequest request) {
         try {
-            return restTemplate
+            etherscanApiBucket.consumeUninterruptibly(2);
+            ResponseEntity<T> response = restTemplate
                 .getForEntity(request.toUrl(), responseEntity);
+            T body = response.getBody();
+            if (body != null) {
+                if (!body.getStatus().equals("0")) {
+                    return Mono.just(response);
+                }
+                return Mono
+                    .error(new Exception("Error message: " + body.getStatus()));
+            }
+            return Mono
+                .error(new ResponseStatusException(response.getStatusCode()));
         } catch (Exception exception) {
-            log
-                .error("Error occured during get: " + request.toUrl(),
-                    exception);
+            return Mono.error(exception);
         }
-        return null;
     }
 
 }
