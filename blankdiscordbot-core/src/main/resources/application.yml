@@ -10,13 +10,15 @@ spring:
 web3:
   wallet:
     verify:
-      baseUrl:  "https://testbot.test/verify"
-etherscan:
-  apiKey: ""
-nftsalestracker:
-  salesChannel: 934187617895997440
-  contractWatchList:
-    - "0x881d9c2f229323aad28a9c9045111e30e1f1eb25"
+      baseUrl: "https://testbot.test/verify"
+  provider:
+    url: https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}
+  etherscan:
+    apiKey: ${ETHERSCAN_APIKEY}
+  salestracker: 
+    salesChannel: 934187617895997440
+    contractWatchList:
+      0x881d9c2f229323aad28a9c9045111e30e1f1eb25: "Initializer"
 discord:
   authToken: ${DISCORD_AUTH_TOKEN}
   guildId: ${DISCORD_GUILD_ID}
@@ -167,19 +169,16 @@ games:
     displayName: Dice
     cooldownAmount: 2
     cooldownTimeUnit: SECONDS
-    metadataClass: null
     winningsMultiplier: 2
   rps:
     displayName: Rock paper scissors
     cooldownAmount: 10
     cooldownTimeUnit: MINUTES
-    metadataClass: null
     winningsMultiplier: 2
   roulette:
     displayName: Roulette
     cooldownAmount: 10
     cooldownTimeUnit: MINUTES
-    metadataClass: com.blank.humanity.discordbot.entities.game.RouletteMetadata
     winningsMultiplier: 1.2 # 1.2 is Fair = 0% House Edge
 messages:
   BALANCE_COMMAND_MESSAGE: "%(user) has %(balance)"

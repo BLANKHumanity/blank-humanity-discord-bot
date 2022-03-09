@@ -14,6 +14,8 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       DISCORD_AUTH_TOKEN: ${DISCORD_AUTH_TOKEN}
       DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
+      INFURA_PROJECT_ID: ${INFURA_PROJECT_ID}
+      ETHERSCAN_APIKEY: ${ETHERSCAN_APIKEY}
   mysql:
     image: "mariadb"
     environment:

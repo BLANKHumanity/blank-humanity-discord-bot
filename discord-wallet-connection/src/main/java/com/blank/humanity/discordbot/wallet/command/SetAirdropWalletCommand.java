@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.ens.EnsResolver;
 
 import com.blank.humanity.discordbot.commands.AbstractHiddenCommand;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
@@ -30,6 +31,9 @@ public class SetAirdropWalletCommand extends AbstractHiddenCommand {
 
     @Autowired
     private AirdropWalletService airdropWalletService;
+
+    @Autowired
+    private EnsResolver ens;
 
     @Override
     public String getCommandName() {
@@ -73,8 +77,19 @@ public class SetAirdropWalletCommand extends AbstractHiddenCommand {
         return Optional
             .ofNullable(mapping)
             .map(OptionMapping::getAsString)
+            .map(this::fromENS)
             .filter(address -> ethAddressRegex.matcher(address).matches())
             .map(Address::new);
+    }
+
+    private String fromENS(String ensName) {
+        try {
+            if (ensName.contains(".")) {
+                return ens.resolve(ensName);
+            }
+        } catch (Exception e) {
+        }
+        return ensName;
     }
 
 }

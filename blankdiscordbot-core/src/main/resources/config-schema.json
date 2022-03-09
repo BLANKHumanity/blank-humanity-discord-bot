@@ -89,6 +89,44 @@
 						"verify"
 					],
 					"additionalProperties": false
+				},
+				"provider": {
+					"type": "object",
+					"properties": {
+						"url": {
+							"type": "string",
+							"pattern": "https://.*\\..*",
+							"description": "Infura Web3 Provider Url"
+						}
+					},
+					"required": [
+						"url"
+					]
+				},
+				"etherscan": {
+					"type": "object",
+					"properties": {
+						"apiKey": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"apiKey"
+					]
+				},
+				"salestracker": {
+					"type": "object",
+					"properties": {
+						"salesChannel": {
+							"type": "number"
+						},
+						"contractWatchList": {
+							"type": "object",
+							"additionalProperties": {
+								"type": "string"
+							}
+						}
+					}
 				}
 			},
 			"required": [
@@ -626,8 +664,8 @@
 						"set-airdrop-wallet": {
 							"type": "object",
 							"$ref": "#/$defs/command",
-							"properties":{
-								"options":{
+							"properties": {
+								"options": {
 									"type": "object",
 									"properties": {
 										"wallet": {
@@ -635,7 +673,7 @@
 											"$ref": "#/$defs/argument"
 										}
 									}
-								}	
+								}
 							}
 						}
 					},
@@ -877,7 +915,7 @@
 					"$ref": "#/$defs/message"
 				},
 				"WALLET_VERIFY_DISPLAY_LINK": {
-        			"$ref": "#/$defs/message"
+					"$ref": "#/$defs/message"
 				},
 				"FUN_PLACE_SHOP_TITLE_MESSAGE": {
 					"$ref": "#/$defs/message"
@@ -964,7 +1002,7 @@
 				"SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR",
 				"SET_AIRDROP_WALLET_SUCCESS"
 			],
- 			"additionalProperties": false
+			"additionalProperties": false
 		},
 		"items": {
 			"type": "object",
