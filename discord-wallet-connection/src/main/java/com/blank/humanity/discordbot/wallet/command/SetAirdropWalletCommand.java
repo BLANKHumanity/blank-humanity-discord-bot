@@ -15,12 +15,14 @@ import com.blank.humanity.discordbot.wallet.messages.WalletMessageType;
 import com.blank.humanity.discordbot.wallet.service.AirdropWalletService;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
+@Slf4j
 @Component
 public class SetAirdropWalletCommand extends AbstractHiddenCommand {
 
@@ -88,6 +90,7 @@ public class SetAirdropWalletCommand extends AbstractHiddenCommand {
                 return ens.resolve(ensName);
             }
         } catch (Exception e) {
+            log.debug("ENS resolution failed", e);
         }
         return ensName;
     }

@@ -83,20 +83,17 @@ public class OpenSeaSalesRetrieverService implements NftSalesRetriever {
     private Predicate<? super TransactionLogEntry> doTradersMatch(String from,
         String to) {
         return log -> {
+            String taker = log.getTopics().get(1);
+            String maker = log.getTopics().get(2);
             if (log.getDataPoint(0).matches("0{64}")) {
                 // BuyHash empty => Taker is Seller
-                if (log.getTopics().get(1).contains(from)) {
-                    // Maker is Buyer
-                    return log.getTopics().get(2).contains(to);
-                }
+                // Maker is Buyer
+                return taker.contains(from) && maker.contains(to);
             } else {
                 // BuyHash exists => Maker is Seller
-                if (log.getTopics().get(2).contains(from)) {
-                    // Taker is Buyer
-                    return log.getTopics().get(1).contains(to);
-                }
+                // Taker is Buyer
+                return maker.contains(from) && taker.contains(to);
             }
-            return false;
         };
     }
 

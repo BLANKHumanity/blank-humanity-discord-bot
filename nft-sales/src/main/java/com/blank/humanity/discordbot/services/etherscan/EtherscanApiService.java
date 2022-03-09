@@ -94,21 +94,29 @@ public class EtherscanApiService {
             while (tries > 0) {
                 tries--;
                 etherscanApiBucket.consumeUninterruptibly(2);
-                try {
-                    response = restTemplate
-                        .getForEntity(request.toUrl(), responseEntity);
+                response = execute(responseEntity, request);
+                if (response != null) {
                     T body = response.getBody();
                     if (body != null && !body.getStatus().equals("0")) {
                         break;
                     }
-                } catch (Exception exception) {
-                    log
-                        .error("Error occured during get: " + request.toUrl(),
-                            exception);
                 }
             }
             return response;
         };
+    }
+
+    private <T extends EtherscanResponse> ResponseEntity<T> execute(
+        Class<T> responseEntity, EtherscanRequest request) {
+        try {
+            return restTemplate
+                .getForEntity(request.toUrl(), responseEntity);
+        } catch (Exception exception) {
+            log
+                .error("Error occured during get: " + request.toUrl(),
+                    exception);
+        }
+        return null;
     }
 
 }
