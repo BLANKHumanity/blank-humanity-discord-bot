@@ -18,7 +18,7 @@ web3:
   salestracker: 
     salesChannel: 934187617895997440
     contractWatchList:
-      0x881d9c2f229323aad28a9c9045111e30e1f1eb25: "Initializer"
+      "0x881d9c2f229323aad28a9c9045111e30e1f1eb25": "Initializer"
 discord:
   authToken: ${DISCORD_AUTH_TOKEN}
   guildId: ${DISCORD_GUILD_ID}

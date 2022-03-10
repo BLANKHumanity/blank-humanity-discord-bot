@@ -3,6 +3,7 @@ package com.blank.humanity.discordbot.entities.etherscan.trade;
 import java.util.List;
 
 import com.blank.humanity.discordbot.entities.etherscan.EtherscanResponse;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -15,6 +16,7 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class NftTokenTransferEventsResponse extends EtherscanResponse {
 
-    private List<NftTokenTransferEvent> result;
+    @JsonProperty(value = "result", required = true)
+    private List<NftTokenTransferEvent> tokenTransferEvents;
 
 }

@@ -43,7 +43,7 @@ public class OpenSeaSalesRetrieverService implements NftSalesRetriever {
         return etherscanApiService
             .fetchNftTokenTransferEvents(tokenContract, blockStart)
             .sequential()
-            .map(NftTokenTransferEventsResponse::getResult)
+            .map(NftTokenTransferEventsResponse::getTokenTransferEvents)
             .flatMap(List::stream)
             .filter(event -> !event.getFrom().substring(2).matches("0{40}"))
             .flatMap(this::mapTransferEventToTokenTrade)
@@ -64,7 +64,7 @@ public class OpenSeaSalesRetrieverService implements NftSalesRetriever {
 
         return etherscanApiService
             .fetchTransactionLogs(logsRequest)
-            .map(TransactionLogsResponse::getResult)
+            .map(TransactionLogsResponse::getTransactionLogs)
             .flatMap(List::stream)
             .filter(log -> log
                 .getTransactionHash()
