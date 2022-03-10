@@ -1,5 +1,7 @@
 package com.blank.humanity.discordbot.entities.etherscan;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
@@ -11,8 +13,12 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class EtherscanResponse {
 
+    protected static final ObjectMapper mapper = new ObjectMapper();
+
     private String status;
 
     private String message;
+
+    private Object result;
 
 }
