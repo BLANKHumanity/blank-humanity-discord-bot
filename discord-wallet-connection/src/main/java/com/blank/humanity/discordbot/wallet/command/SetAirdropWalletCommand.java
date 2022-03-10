@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.ens.EnsResolver;
 
 import com.blank.humanity.discordbot.commands.AbstractHiddenCommand;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
@@ -14,12 +15,14 @@ import com.blank.humanity.discordbot.wallet.messages.WalletMessageType;
 import com.blank.humanity.discordbot.wallet.service.AirdropWalletService;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
+@Slf4j
 @Component
 public class SetAirdropWalletCommand extends AbstractHiddenCommand {
 
@@ -30,6 +33,9 @@ public class SetAirdropWalletCommand extends AbstractHiddenCommand {
 
     @Autowired
     private AirdropWalletService airdropWalletService;
+
+    @Autowired
+    private EnsResolver ens;
 
     @Override
     public String getCommandName() {
@@ -73,8 +79,20 @@ public class SetAirdropWalletCommand extends AbstractHiddenCommand {
         return Optional
             .ofNullable(mapping)
             .map(OptionMapping::getAsString)
+            .map(this::fromENS)
             .filter(address -> ethAddressRegex.matcher(address).matches())
             .map(Address::new);
+    }
+
+    private String fromENS(String ensName) {
+        try {
+            if (ensName.contains(".")) {
+                return ens.resolve(ensName);
+            }
+        } catch (Exception e) {
+            log.debug("ENS resolution failed", e);
+        }
+        return ensName;
     }
 
 }
