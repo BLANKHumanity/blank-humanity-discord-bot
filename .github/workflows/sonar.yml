@@ -34,11 +34,6 @@ jobs:
               run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_NFT_SALES }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
-            - name: SonarCloud Scan blankdiscordbot-core
-              working-directory: blankdiscordbot-core            
-              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_BLANKDISCORDBOT_CORE }}
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: SonarCloud Scan discord-commands
               working-directory: discord-commands           
               run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_DISCORD_COMMANDS }}
@@ -49,4 +44,8 @@ jobs:
               run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_DISCORD_GAMES }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-             
+            - name: SonarCloud Scan blankdiscordbot-core
+              working-directory: blankdiscordbot-core            
+              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_BLANKDISCORDBOT_CORE }}
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
