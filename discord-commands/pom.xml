@@ -5,8 +5,7 @@
 		<artifactId>blankdiscordbot-parent</artifactId>
 		<version>1.3.2</version>
 	</parent>
-	<artifactId>nft-sales</artifactId>
-	<version>1.0.0</version>
+	<artifactId>discord-commands</artifactId>
 
 	<dependencies>
 		<dependency>

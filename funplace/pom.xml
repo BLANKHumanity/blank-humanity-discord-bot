@@ -13,7 +13,6 @@
 		<dependency>
 			<groupId>com.blank.humanity</groupId>
 			<artifactId>discord-library</artifactId>
-			<version>1.3.2</version>
 		</dependency>
 	</dependencies>
 </project>
