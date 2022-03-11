@@ -24,7 +24,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
-import com.blank.humanity.discordbot.config.messages.MessagesConfig;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.exceptions.command.OutsideOfCommandContextException;
 import com.blank.humanity.discordbot.services.BlankUserService;
@@ -53,9 +52,6 @@ class AbstractCommandTest {
 
     @Mock
     private BlankUserService blankUserService;
-
-    @Mock
-    private MessagesConfig messagesConfig;
 
     @Mock
     private TransactionExecutor transactionExecutor;
@@ -122,8 +118,6 @@ class AbstractCommandTest {
         ReflectionTestUtils
             .setField(abstractCommand, "blankUserService",
                 blankUserService);
-        ReflectionTestUtils
-            .setField(abstractCommand, "messagesConfig", messagesConfig);
         ReflectionTestUtils
             .setField(abstractCommand, "transactionExecutor",
                 transactionExecutor);

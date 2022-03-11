@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
-import com.blank.humanity.discordbot.config.messages.MessagesConfig;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.exceptions.command.OutsideOfCommandContextException;
 import com.blank.humanity.discordbot.services.BlankUserService;
@@ -61,9 +60,6 @@ public abstract class AbstractCommand {
 
     @Autowired
     protected BlankUserService blankUserService;
-
-    @Autowired
-    protected MessagesConfig messagesConfig;
 
     @Autowired
     private TransactionExecutor transactionExecutor;

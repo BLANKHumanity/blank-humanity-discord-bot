@@ -14,7 +14,35 @@ jobs:
               with:
                 java-version: '17'
                 distribution: 'temurin'
+            - name: Cache SonarCloud packages
+              uses: actions/cache@v1
+              with:
+                path: ~/.sonar/cache
+                key: ${{ runner.os }}-sonar
+                restore-keys: ${{ runner.os }}-sonar
+            - name: Cache Maven packages
+              uses: actions/cache@v1
+              with:
+                path: ~/.m2
+                key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+                restore-keys: ${{ runner.os }}-m2                
             - name: SonarCloud Scan
-              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              run: |
+                mvn clean verify install -Pcoverage
+                cd discord-library
+                mvn sonar:sonar -Pcoverage -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+                cd ../discord-commands
+                mvn sonar:sonar -Pcoverage -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+                cd ../discord-games
+                mvn sonar:sonar -Pcoverage -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+                cd ../discord-wallet-connection
+                mvn sonar:sonar -Pcoverage -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+                cd ../funplace
+                mvn sonar:sonar -Pcoverage -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+                cd ../nft-sales
+                mvn sonar:sonar -Pcoverage -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+                cd ../blankdiscordbot-core
+                mvn sonar:sonar -Pcoverage -Dsonar.login=${{ secrets.SONAR_TOKEN }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                
