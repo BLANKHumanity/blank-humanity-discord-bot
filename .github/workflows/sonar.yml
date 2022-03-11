@@ -16,37 +16,37 @@ jobs:
                 distribution: 'temurin'
             - name: SonarCloud Scan discord-library
               working-directory: discord-library
-              run: mvn -B clean verify -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_DISCORD_LIBRARY }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: SonarCloud Scan funplace
               working-directory: funplace
-              run: mvn -B clean verify -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_FUNPLACE }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: SonarCloud Scan discord-wallet-connection
               working-directory: discord-wallet-connection            
-              run: mvn -B clean verify -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_DISCORD_WALLET_CONNECTION }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: SonarCloud Scan nft-sales
               working-directory: nft-sales            
-              run: mvn -B clean verify -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_NFT_SALES }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
             - name: SonarCloud Scan blankdiscordbot-core
               working-directory: blankdiscordbot-core            
-              run: mvn -B clean verify -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_BLANKDISCORDBOT_CORE }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: SonarCloud Scan discord-commands
               working-directory: discord-commands           
-              run: mvn -B clean verify -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_DISCORD_COMMANDS }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: SonarCloud Scan discord-games
               working-directory: discord-games           
-              run: mvn -B clean verify -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN_DISCORD_GAMES }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
              
