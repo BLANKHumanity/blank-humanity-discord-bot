@@ -3,9 +3,8 @@ package com.blank.humanity.discordbot.exceptions.menu;
 import lombok.experimental.StandardException;
 
 @StandardException
-public class NonUniqueInteractionId extends Exception {/**
-     * 
-     */
+public class NonUniqueInteractionId extends RuntimeException {
+    
     private static final long serialVersionUID = -8823728070018744080L;
 
 }

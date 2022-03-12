@@ -140,7 +140,7 @@ public class ComponentMenu implements DiscordMenu {
     }
 
     @Override
-    public void buildMenu(JDA jda, Message message, MenuService menuService) {
+    public void buildMenu(JDA jda, Message message, MenuService menuService) throws ExecutionException {
         this.jda = jda;
         this.menuService = menuService;
 
@@ -149,23 +149,15 @@ public class ComponentMenu implements DiscordMenu {
             .submit();
 
         buttonActions.entrySet().forEach(entry -> {
-            try {
-                menuService
-                    .registerButtonInteraction(this, entry.getKey(),
-                        event -> wrapper(event, entry.getValue()));
-            } catch (NonUniqueInteractionId e) {
-                throw new RuntimeException(e);
-            }
+            menuService
+                .registerButtonInteraction(this, entry.getKey(),
+                    event -> wrapper(event, entry.getValue()));
         });
 
         selectMenuActions.entrySet().forEach(entry -> {
-            try {
-                menuService
-                    .registerSelectMenuInteraction(this, entry.getKey(),
-                        event -> wrapper(event, entry.getValue()));
-            } catch (NonUniqueInteractionId e) {
-                throw new RuntimeException(e);
-            }
+            menuService
+                .registerSelectMenuInteraction(this, entry.getKey(),
+                    event -> wrapper(event, entry.getValue()));
         });
 
         menuService.registerDiscordMenuTimeout(this, timeout);
@@ -174,8 +166,6 @@ public class ComponentMenu implements DiscordMenu {
             message = request.get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
         }
 
         this.channelId = message.getChannel().getIdLong();

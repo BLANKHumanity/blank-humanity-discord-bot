@@ -2,7 +2,9 @@ package com.blank.humanity.discordbot.commands;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -11,6 +13,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +26,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.support.TransactionCallback;
 
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
-import com.blank.humanity.discordbot.config.messages.MessagesConfig;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.exceptions.command.OutsideOfCommandContextException;
 import com.blank.humanity.discordbot.services.BlankUserService;
@@ -43,6 +48,7 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -53,9 +59,6 @@ class AbstractCommandTest {
 
     @Mock
     private BlankUserService blankUserService;
-
-    @Mock
-    private MessagesConfig messagesConfig;
 
     @Mock
     private TransactionExecutor transactionExecutor;
@@ -123,8 +126,6 @@ class AbstractCommandTest {
             .setField(abstractCommand, "blankUserService",
                 blankUserService);
         ReflectionTestUtils
-            .setField(abstractCommand, "messagesConfig", messagesConfig);
-        ReflectionTestUtils
             .setField(abstractCommand, "transactionExecutor",
                 transactionExecutor);
         ReflectionTestUtils
@@ -133,7 +134,7 @@ class AbstractCommandTest {
             .setField(abstractCommand, "messageService", messageService);
         ReflectionTestUtils
             .setField(abstractCommand, "commandService", commandService);
-        
+
     }
 
     @Test
@@ -195,7 +196,7 @@ class AbstractCommandTest {
     }
 
     @Test
-    void testReceiveCommandInteractionAll() {
+    void testReceiveCommandInteractionAll() throws ExecutionException {
 
         GenericCommandInteractionEvent event = mock(
             GenericCommandInteractionEvent.class);
@@ -393,6 +394,126 @@ class AbstractCommandTest {
     void testReplyMessageEmbedError() {
         assertThatCode(() -> this.abstractCommand.reply((MessageEmbed) null))
             .isInstanceOf(OutsideOfCommandContextException.class);
+    }
+
+    @Test
+    void testReceiveAutoCompleteInteractionFailed(
+        @Mock CommandAutoCompleteInteractionEvent autoCompleteInteractionEvent,
+        @Mock Member member, @Mock BlankUser user) {
+
+        when(autoCompleteInteractionEvent.getMember()).thenReturn(member);
+        when(blankUserService.getUser(member)).thenReturn(user);
+
+        doThrow(new RuntimeException("Test Error"))
+            .when(this.abstractCommand)
+            .onAutoComplete(autoCompleteInteractionEvent);
+
+        boolean validAutoComplete = this.abstractCommand
+            .receiveAutoCompleteInteraction(autoCompleteInteractionEvent);
+
+        assertThat(validAutoComplete).isFalse();
+        verify(localMember).set(member);
+        verify(localUser).set(user);
+        verify(this.abstractCommand).clearThreadLocals();
+    }
+
+    @Test
+    void testReceiveAutoCompleteInteraction(
+        @Mock CommandAutoCompleteInteractionEvent autoCompleteInteractionEvent,
+        @Mock Member member, @Mock BlankUser user) {
+
+        when(autoCompleteInteractionEvent.getMember()).thenReturn(member);
+        when(blankUserService.getUser(member)).thenReturn(user);
+
+        AutoCompleteCallbackAction callback = mock(
+            AutoCompleteCallbackAction.class);
+
+        when(autoCompleteInteractionEvent.replyChoices(Mockito.anyList()))
+            .thenReturn(callback);
+
+        boolean validAutoComplete = this.abstractCommand
+            .receiveAutoCompleteInteraction(autoCompleteInteractionEvent);
+
+        assertThat(validAutoComplete).isTrue();
+        verify(localMember).set(member);
+        verify(localUser).set(user);
+        verify(this.abstractCommand).clearThreadLocals();
+    }
+
+    @Test
+    void testAddMenu(@Mock DiscordMenu menu, @Mock BlankUser user) {
+        when(localUser.get()).thenReturn(user);
+
+        this.abstractCommand.addMenu(menu);
+
+        verify(localMenu).set(menu);
+    }
+
+    @Test
+    void testAddMenuFail(@Mock DiscordMenu menu) {
+        assertThatThrownBy(() -> this.abstractCommand.addMenu(menu))
+            .isInstanceOf(OutsideOfCommandContextException.class);
+    }
+
+    @Test
+    void testAddLongRunningTaskFail(@Mock Subtask task) {
+        assertThatThrownBy(() -> this.abstractCommand.addLongRunningTask(task))
+            .isInstanceOf(OutsideOfCommandContextException.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void testAddLongRunningTask(@Mock BlankUser user, @Mock Subtask task,
+        @Mock GenericCommandInteractionEvent event,
+        @Mock InteractionHook hook) {
+        ArgumentCaptor<Consumer<FormattingData[]>> captor = ArgumentCaptor
+            .forClass(Consumer.class);
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor
+            .forClass(Runnable.class);
+
+        when(localUser.get()).thenReturn(user);
+        when(commandEvent.get()).thenReturn(event);
+        when(event.getHook()).thenReturn(hook);
+        doNothing().when(task).accept(captor.capture());
+        doNothing().when(localCachedTasks).set(runnableCaptor.capture());
+
+        doAnswer(invocation -> {
+            invocation
+                .getArgument(0, TransactionCallback.class)
+                .doInTransaction(null);
+            return null;
+        })
+            .when(transactionExecutor)
+            .executeAsTransaction(Mockito.any(), Mockito.any(),
+                Mockito.any());
+
+        this.abstractCommand.addLongRunningTask(task);
+
+        verify(localCachedTasks).set(Mockito.any());
+
+        Runnable runnable = runnableCaptor.getValue();
+        assertThat(runnable).isNotNull();
+        runnable.run();
+
+        verify(transactionExecutor)
+            .executeAsTransaction(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(task).accept(Mockito.any());
+
+        // Check reply Consumer Behavior
+        WebhookMessageUpdateAction<Message> updateAction = mock(
+            WebhookMessageUpdateAction.class);
+        Consumer<FormattingData[]> replyConsumer = captor.getValue();
+        assertThat(replyConsumer).isNotNull();
+
+        when(messageService.format((FormattingData[]) Mockito.any()))
+            .thenReturn(new String[] { "Test Message" });
+        when(hook.editOriginalEmbeds(Mockito.anyList()))
+            .thenReturn(updateAction);
+
+        // Message Service is mocked to accept invalid data here
+        replyConsumer.accept(null);
+
+        verify(updateAction).queue();
     }
 
 }

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
-import com.blank.humanity.discordbot.config.messages.MessagesConfig;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.exceptions.command.OutsideOfCommandContextException;
 import com.blank.humanity.discordbot.services.BlankUserService;
@@ -63,9 +62,6 @@ public abstract class AbstractCommand {
     protected BlankUserService blankUserService;
 
     @Autowired
-    protected MessagesConfig messagesConfig;
-
-    @Autowired
     private TransactionExecutor transactionExecutor;
 
     @Autowired
@@ -96,14 +92,10 @@ public abstract class AbstractCommand {
     }
 
     /**
-     * Waits for JDA to get ready and then sets up and registers this command to
-     * Discord.<br>
-     * Will be called automatically via {@link PostConstruct}.
-     * 
-     * @throws InterruptedException If this thread is interrupted while waiting
+     * Registers command with the commandService
      */
     @PostConstruct
-    void setupCommand() throws InterruptedException {
+    void setupCommand() {
         commandService.registerCommand(this);
     }
 
@@ -120,8 +112,8 @@ public abstract class AbstractCommand {
      * Creates CommandData including subcommands and arguments etc. to be
      * registered.<br>
      * Descriptions can be fetched via
-     * {@linkplain #getCommandDefinition()}.{@linkplain CommandDefinition#getOptionDescription(String)
-     * getOptionDescription(String)}
+     * {@linkplain CommandDefinition#getOptionDescription(String)
+     * definition.getOptionDescription(String)}
      * 
      * @param commandData Already initialized CommandData Object. Command name
      *                    and description is already pre-filled.
@@ -132,26 +124,62 @@ public abstract class AbstractCommand {
     public abstract CommandData createCommandData(SlashCommandData commandData,
         CommandDefinition definition);
 
+    /**
+     * Sets the User of the thread-local execution environment.
+     * 
+     * @param newUser User to be set
+     */
     protected void setUser(BlankUser newUser) {
         localUser.set(newUser);
     }
 
+    /**
+     * Returns thread-local execution environments BlankUser
+     * 
+     * @return thread-local BlankUser
+     */
     protected BlankUser getUser() {
         return localUser.get();
     }
 
+    /**
+     * Returns thread-local execution environments
+     * {@linkplain GenericCommandInteractionEvent}<br>
+     * Can only be used during SlashCommand execution, i.e. inside of the
+     * {@link #onCommand(GenericCommandInteractionEvent)} method.
+     * 
+     * @return thread-local GenericCommandInteractionEvent
+     */
     protected GenericCommandInteractionEvent getCommandEvent() {
         return commandEvent.get();
     }
 
+    /**
+     * Returns thread-local execution environments
+     * {@linkplain CommandAutoCompleteInteractionEvent}<br>
+     * Can only be used during AutoComplete execution, i.e. inside of the
+     * {@link #onAutoComplete(CommandAutoCompleteInteractionEvent)} method.
+     * 
+     * @return thread-local CommandAutoCompleteInteractionEvent
+     */
     protected CommandAutoCompleteInteractionEvent getAutoCompleteEvent() {
         return autoCompleteEvent.get();
     }
 
+    /**
+     * Returns thread-local execution environments Discord Member
+     * 
+     * @return thread-local Discord Member
+     */
     protected Member getMember() {
         return localMember.get();
     }
 
+    /**
+     * Sets the Discord Member of the thread-local execution environment.
+     * 
+     * @param member Discord user to be set
+     */
     protected void setMember(Member member) {
         localMember.set(member);
     }
@@ -168,6 +196,9 @@ public abstract class AbstractCommand {
         return false;
     }
 
+    /**
+     * Clears thread-local execution environment
+     */
     protected void clearThreadLocals() {
         commandEvent.remove();
         autoCompleteEvent.remove();
@@ -178,6 +209,14 @@ public abstract class AbstractCommand {
         localMember.remove();
     }
 
+    /**
+     * Sets up command execution environment and calls
+     * {@linkplain #onCommand(GenericCommandInteractionEvent)}.<br>
+     * Also handles exceptions and sending of messages and menus.
+     * 
+     * @param interactionEvent Received Discord CommandInteractionEvent
+     * @return True if the command execution has executed successfully.
+     */
     public Boolean receiveCommandInteraction(
         GenericCommandInteractionEvent interactionEvent) {
         try {
@@ -198,6 +237,14 @@ public abstract class AbstractCommand {
         }
     }
 
+    /**
+     * Sets up autocomplete execution environment and calls
+     * {@linkplain #onAutoComplete(CommandAutoCompleteInteractionEvent)}.<br>
+     * Also handles replying to the AutoCompleteRequest.
+     * 
+     * @param interactionEvent Received Discord AutoCompleteEvent
+     * @return True if the autocomplete execution has executed successfully.
+     */
     public Boolean receiveAutoCompleteInteraction(
         CommandAutoCompleteInteractionEvent interactionEvent) {
         try {
@@ -236,18 +283,24 @@ public abstract class AbstractCommand {
             .getHook()
             .editOriginalEmbeds(localEmbedsToSend.get());
 
-        if (localMenu.get() != null) {
-            DiscordMenu newMenu = localMenu.get();
+        try {
+            if (localMenu.get() != null) {
+                DiscordMenu newMenu = localMenu.get();
 
-            Message message = messageUpdateAction.complete();
+                Message message = messageUpdateAction.complete();
 
-            newMenu.buildMenu(getJda(), message, menuService);
-        } else {
-            messageUpdateAction.complete();
-        }
+                newMenu.buildMenu(getJda(), message, menuService);
+            } else {
+                messageUpdateAction.complete();
+            }
 
-        if (localCachedTasks.get() != null) {
-            localCachedTasks.get().run();
+            if (localCachedTasks.get() != null) {
+                localCachedTasks.get().run();
+            }
+        } catch (Exception exc) {
+            log
+                .error("Error occured during CommandInteractionFinishHandler",
+                    exc);
         }
     }
 
@@ -379,7 +432,10 @@ public abstract class AbstractCommand {
                 .transactionCallback(Wrapper
                     .supplyOut(Wrapper.wrap(task, updateMessages),
                         null)),
-                Exception::printStackTrace, t -> {
+                exception -> log
+                    .error("Exception occured during Long running Task",
+                        exception),
+                t -> {
                 });
 
         localCachedTasks.set(run);
@@ -393,14 +449,22 @@ public abstract class AbstractCommand {
      * 
      * @param event The {@linkplain GenericCommandInteractionEvent} that caused
      *              this command invocation.
-     * @see #reply(SlashCommandEvent, FormattingData...)
-     * @see #sendErrorMessage(SlashCommandEvent, String)
-     * @see #addReactionMenu(SlashCommandEvent, MessageMenu)
-     * @see #addLongRunningTask(SlashCommandEvent, Subtask)
+     * @see #reply(FormattingData...)
+     * @see #sendErrorMessage(String)
+     * @see #addMenu(DiscordMenu)
+     * @see #addLongRunningTask(Subtask)
      */
     protected abstract void onCommand(
         @NonNull GenericCommandInteractionEvent event);
 
+    /**
+     * Enables implementing autocomplete behavior.
+     * 
+     * @param autoCompleteEvent The
+     *                          {@linkplain CommandAutoCompleteInteractionEvent}
+     *                          that caused this autocomplete resolution.
+     * @return A list of all selectable choices. Can be empty.
+     */
     @NonNull
     protected Collection<Command.Choice> onAutoComplete(
         @NonNull CommandAutoCompleteInteractionEvent autoCompleteEvent) {
