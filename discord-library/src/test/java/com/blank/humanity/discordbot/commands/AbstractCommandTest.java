@@ -214,6 +214,8 @@ class AbstractCommandTest {
         Runnable task = mock(Runnable.class);
 
         Message message = mock(Message.class);
+        
+        BlankUser user = mock(BlankUser.class);
 
         when(event.getHook()).thenReturn(hook);
         when(hook.editOriginalEmbeds(embeds)).thenReturn(updateAction);
@@ -222,6 +224,7 @@ class AbstractCommandTest {
         doNothing().when(abstractCommand).onCommand(event);
         doNothing().when(abstractCommand).clearThreadLocals();
 
+        doReturn(user).when(localUser).get();
         doReturn(event).when(commandEvent).get();
         doReturn(embeds).when(localEmbedsToSend).get();
         doReturn(menu).when(localMenu).get();
@@ -444,20 +447,20 @@ class AbstractCommandTest {
     void testAddMenu(@Mock DiscordMenu menu, @Mock BlankUser user) {
         when(localUser.get()).thenReturn(user);
 
-        this.abstractCommand.addMenu(menu);
+        this.abstractCommand.setMenu(menu);
 
         verify(localMenu).set(menu);
     }
 
     @Test
     void testAddMenuFail(@Mock DiscordMenu menu) {
-        assertThatThrownBy(() -> this.abstractCommand.addMenu(menu))
+        assertThatThrownBy(() -> this.abstractCommand.setMenu(menu))
             .isInstanceOf(OutsideOfCommandContextException.class);
     }
 
     @Test
     void testAddLongRunningTaskFail(@Mock Subtask task) {
-        assertThatThrownBy(() -> this.abstractCommand.addLongRunningTask(task))
+        assertThatThrownBy(() -> this.abstractCommand.setLongRunningTask(task))
             .isInstanceOf(OutsideOfCommandContextException.class);
     }
 
@@ -487,7 +490,7 @@ class AbstractCommandTest {
             .executeAsTransaction(Mockito.any(), Mockito.any(),
                 Mockito.any());
 
-        this.abstractCommand.addLongRunningTask(task);
+        this.abstractCommand.setLongRunningTask(task);
 
         verify(localCachedTasks).set(Mockito.any());
 

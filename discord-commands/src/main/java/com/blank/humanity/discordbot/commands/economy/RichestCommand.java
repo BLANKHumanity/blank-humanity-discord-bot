@@ -21,10 +21,13 @@ import com.blank.humanity.discordbot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class RichestCommand extends AbstractCommand {
+
+    private static final String PAGE = "page";
 
     @Override
     public String getCommandName() {
@@ -34,32 +37,23 @@ public class RichestCommand extends AbstractCommand {
     @Override
     public SlashCommandData createCommandData(SlashCommandData commandData,
         CommandDefinition definition) {
+        OptionData page = new OptionData(OptionType.INTEGER, PAGE,
+            definition.getOptionDescription(PAGE));
+        page.setMinValue(1);
         commandData
-            .addOption(OptionType.INTEGER, "page",
-                definition.getOptionDescription("page"));
+            .addOptions(page);
         return commandData;
     }
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {
-        long page = Optional
-            .ofNullable(event.getOption("page"))
-            .map(OptionMapping::getAsLong)
-            .orElse(1L);
+        int page = event
+            .getOption(PAGE, 1L, OptionMapping::getAsLong)
+            .intValue();
         BlankUser user = getUser();
 
-        if (page < 1) {
-            reply(blankUserService
-                .createFormattingData(user,
-                    GenericMessageType.ERROR_MESSAGE)
-                .dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
-                    "Page needs to be bigger than 0")
-                .build());
-            return;
-        }
-
         List<BlankUser> richestUsers = blankUserService
-            .listUsers(Sort.by(Direction.DESC, "balance"), (int) (page - 1))
+            .listUsers(Sort.by(Direction.DESC, "balance"), (page - 1))
             .toList();
 
         StringBuilder body = new StringBuilder();

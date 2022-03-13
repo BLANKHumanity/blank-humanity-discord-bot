@@ -80,7 +80,7 @@ public class ChannelChatSummary extends AbstractCommand {
         BlankUser user = getBlankUserService().getUser(event);
         reply(createLists(new LinkedHashMap<>(), true, channel, user)[0]);
 
-        addLongRunningTask(updateMessages -> retrieveMessages(channel,
+        setLongRunningTask(updateMessages -> retrieveMessages(channel,
             event.getUser().getIdLong(), hours, lastMessageID,
             updateMessages));
     }

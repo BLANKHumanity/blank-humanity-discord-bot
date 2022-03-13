@@ -87,7 +87,7 @@ public abstract class AbstractGame extends AbstractCommand {
             menu = onGameContinue(user, metadata, event.getOptions());
         }
         if (menu != null) {
-            addMenu(menu);
+            setMenu(menu);
         }
     }
 

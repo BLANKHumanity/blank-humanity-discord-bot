@@ -3,6 +3,7 @@ package com.blank.humanity.discordbot.commands;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -155,6 +156,15 @@ public abstract class AbstractCommand {
     }
 
     /**
+     * Sets the CommandEvent of the thread-local execution environment.
+     * 
+     * @param event {@linkplain GenericCommandInteractionEvent} to be set
+     */
+    protected void setCommandEvent(GenericCommandInteractionEvent event) {
+        commandEvent.set(event);
+    }
+
+    /**
      * Returns thread-local execution environments
      * {@linkplain CommandAutoCompleteInteractionEvent}<br>
      * Can only be used during AutoComplete execution, i.e. inside of the
@@ -164,6 +174,16 @@ public abstract class AbstractCommand {
      */
     protected CommandAutoCompleteInteractionEvent getAutoCompleteEvent() {
         return autoCompleteEvent.get();
+    }
+
+    /**
+     * Sets the AutoCompleteEvent of the thread-local execution environment.
+     * 
+     * @param event {@linkplain CommandAutoCompleteInteractionEvent} to be set
+     */
+    protected void setAutoCompleteEvent(
+        CommandAutoCompleteInteractionEvent event) {
+        autoCompleteEvent.set(event);
     }
 
     /**
@@ -284,19 +304,13 @@ public abstract class AbstractCommand {
             .editOriginalEmbeds(localEmbedsToSend.get());
 
         try {
-            if (localMenu.get() != null) {
-                DiscordMenu newMenu = localMenu.get();
-
-                Message message = messageUpdateAction.complete();
-
-                newMenu.buildMenu(getJda(), message, menuService);
-            } else {
-                messageUpdateAction.complete();
+            Message message = messageUpdateAction.complete();
+            Optional<DiscordMenu> menu = getMenu();
+            if (menu.isPresent()) {
+                menu.get().buildMenu(getJda(), message, getMenuService());
             }
 
-            if (localCachedTasks.get() != null) {
-                localCachedTasks.get().run();
-            }
+            getLongRunningTask().ifPresent(Runnable::run);
         } catch (Exception exc) {
             log
                 .error("Error occured during CommandInteractionFinishHandler",
@@ -382,8 +396,16 @@ public abstract class AbstractCommand {
         localEmbedsToSend.set(embeds);
     }
 
+    protected Optional<DiscordMenu> getMenu() {
+        if (getUser() == null)
+            throw new OutsideOfCommandContextException(
+                "getMenu() can only be called during Command Execution");
+
+        return Optional.ofNullable(localMenu.get());
+    }
+
     /**
-     * Adds a {@linkplain MessageMenu} that will be added to the message after
+     * Sets a {@linkplain DiscordMenu} that will be added to the message after
      * the command has finished execution.<br>
      * Notice: Calling this function twice will discard the earlier set
      * ReactionMenu.
@@ -392,7 +414,7 @@ public abstract class AbstractCommand {
      *                    ReactionMenu should be added to.
      * @param discordMenu The {@linkplain DiscordMenu} to be added.
      */
-    protected void addMenu(@NonNull DiscordMenu discordMenu) {
+    protected void setMenu(@NonNull DiscordMenu discordMenu) {
         if (getUser() == null)
             throw new OutsideOfCommandContextException(
                 "addMenu(DiscordMenu) can only be called during Command Execution");
@@ -400,8 +422,16 @@ public abstract class AbstractCommand {
         localMenu.set(discordMenu);
     }
 
+    protected Optional<Runnable> getLongRunningTask() {
+        if (getUser() == null)
+            throw new OutsideOfCommandContextException(
+                "getLongRunningTask() can only be called during Command Execution");
+
+        return Optional.ofNullable(localCachedTasks.get());
+    }
+
     /**
-     * Adds a Long Running Task to this command invocation that should be
+     * Sets a Long Running Task to this command invocation that should be
      * started, once the main command execution has finished.<br>
      * This is highly recommended for any Commands that could take longer than
      * 30 seconds to execute.<br>
@@ -413,7 +443,7 @@ public abstract class AbstractCommand {
      * 
      * @param task The {@linkplain Subtask} that should be executed.
      */
-    protected void addLongRunningTask(@NonNull Subtask task) {
+    protected void setLongRunningTask(@NonNull Subtask task) {
         if (getUser() == null)
             throw new OutsideOfCommandContextException(
                 "addLongRunningTask(Subtask) can only be called during Command Execution");
@@ -451,8 +481,8 @@ public abstract class AbstractCommand {
      *              this command invocation.
      * @see #reply(FormattingData...)
      * @see #sendErrorMessage(String)
-     * @see #addMenu(DiscordMenu)
-     * @see #addLongRunningTask(Subtask)
+     * @see #setMenu(DiscordMenu)
+     * @see #setLongRunningTask(Subtask)
      */
     protected abstract void onCommand(
         @NonNull GenericCommandInteractionEvent event);
