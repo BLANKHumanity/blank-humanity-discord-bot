@@ -13,7 +13,6 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
@@ -27,9 +26,7 @@ class BalanceCommandTest extends CommandUnitTest {
     protected void testCreateCommandData(SlashCommandData commandData) {
         assertThat(commandData.getOptions())
             .hasSize(1)
-            .anyMatch(optionData -> optionData.getType() == OptionType.USER
-                && optionData.getName().equals("user")
-                && !optionData.isRequired());
+            .anyMatch(hasOption("user", OptionType.USER, false));
     }
 
     @Test

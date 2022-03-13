@@ -3,7 +3,9 @@ package com.blank.humanity.discordbot.services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,11 +16,14 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
+import com.blank.humanity.discordbot.config.items.ItemConfiguration;
 import com.blank.humanity.discordbot.config.items.ShopItem;
 import com.blank.humanity.discordbot.database.BuyLogDao;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.service.ServiceIntegrationTest;
 import com.blank.humanity.discordbot.utils.item.ItemBuyStatus;
+
+import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 
 @Rollback(true)
 @Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD, value = "/standardTestData.sql")
@@ -33,6 +38,9 @@ class ShopServiceTest extends ServiceIntegrationTest {
 
     @Autowired
     private InventoryService inventoryService;
+
+    @Autowired
+    private ItemConfiguration itemConfiguration;
 
     @Autowired
     private BuyLogDao buyLogDao;
@@ -50,7 +58,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
         Mockito.reset(blankUserService);
         Mockito.reset(inventoryService);
     }
-    
+
     @Test
     void testAvailableItemAmountZeroBought() {
         int availableAtStart = 50;
@@ -160,7 +168,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void testBuyItemNotEnoughBalance() {        
+    void testBuyItemNotEnoughBalance() {
         BlankUser user = new BlankUser();
         user.setBalance(1234);
         user.setId(1l);
@@ -174,14 +182,15 @@ class ShopServiceTest extends ServiceIntegrationTest {
         ItemBuyStatus status = shopService.buyItem(user, item);
         assertThat(status).isEqualTo(ItemBuyStatus.NOT_ENOUGH_MONEY);
 
-        verify(blankUserService, never()).decreaseUserBalance(user, item.getPrice());
+        verify(blankUserService, never())
+            .decreaseUserBalance(user, item.getPrice());
         verify(inventoryService, never()).giveItem(user, item.getItemId(), 1);
 
         assertThat(buyLogDao.sumOfBoughtItems(item.getId())).isZero();
     }
-    
+
     @Test
-    void testBuyItemNoSupply() {        
+    void testBuyItemNoSupply() {
         BlankUser user = new BlankUser();
         user.setBalance(1234);
         user.setId(1l);
@@ -195,9 +204,40 @@ class ShopServiceTest extends ServiceIntegrationTest {
         ItemBuyStatus status = shopService.buyItem(user, item);
         assertThat(status).isEqualTo(ItemBuyStatus.NO_AVAILABLE_SUPPLY);
 
-        verify(blankUserService, never()).decreaseUserBalance(user, item.getPrice());
+        verify(blankUserService, never())
+            .decreaseUserBalance(user, item.getPrice());
         verify(inventoryService, never()).giveItem(user, item.getItemId(), 1);
 
         assertThat(buyLogDao.sumOfBoughtItems(item.getId())).isEqualTo(20);
+    }
+
+    @Test
+    void testAutoCompleteAll() {
+        when(inventoryService.getItemDefinition(Mockito.anyInt()))
+            .then(invocation -> itemConfiguration
+                .getItemDefinition(invocation.getArgument(0, Integer.class)));
+
+        Collection<Choice> choices = shopService.autoCompleteShopItems("");
+
+        assertThat(choices)
+            .isNotNull()
+            .doesNotContainNull()
+            .hasSize(5)
+            .anyMatch(choice -> choice.getName().equals("Kingpin"));
+    }
+
+    @Test
+    void testAutoCompleteFiltered() {
+        when(inventoryService.getItemDefinition(Mockito.anyInt()))
+            .then(invocation -> itemConfiguration
+                .getItemDefinition(invocation.getArgument(0, Integer.class)));
+
+        Collection<Choice> choices = shopService.autoCompleteShopItems("First");
+
+        assertThat(choices)
+            .isNotNull()
+            .doesNotContainNull()
+            .hasSize(1)
+            .allMatch(choice -> choice.getName().equals("First Class Ticket"));
     }
 }

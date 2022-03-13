@@ -55,7 +55,7 @@ public class RevealVoteCommand extends AbstractCommand {
                 .map(this::formatVotes)
                 .collect(Collectors.joining("\n")));
 
-        if (choiceBody.isEmpty()) {
+        if (votingCampaign.isEmpty() || choiceBody.isEmpty()) {
             reply(getBlankUserService()
                 .createFormattingData(user,
                     VotingMessageType.VOTE_CAMPAIGN_NOT_FOUND)

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.withSettings;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -43,7 +44,9 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.utils.data.DataObject;
 
 @ExtendWith(SpringExtension.class)
@@ -229,6 +232,40 @@ public abstract class CommandUnitTest {
         lenient().doReturn(resolvedValue).when(objectMap).get(any(Long.class));
 
         return new OptionMapping(object, objectMap);
+    }
+
+    @SafeVarargs
+    protected final Predicate<SubcommandData> hasSubcommand(String name,
+        Predicate<OptionData>... optionPredicates) {
+        return subcommandData -> subcommandData.getName().equals(name)
+            && subcommandData
+                .getOptions()
+                .stream()
+                .allMatch(option -> Stream
+                    .of(optionPredicates)
+                    .anyMatch(predicate -> predicate.test(option)));
+    }
+
+    protected Predicate<OptionData> hasOption(String name, OptionType type) {
+        return option -> option.getName().equals(name)
+            && option.getType() == type;
+    }
+
+    protected Predicate<OptionData> hasOption(String name,
+        OptionType type, boolean required) {
+        return option -> option.getName().equals(name)
+            && option.getType() == type && option.isRequired() == required;
+    }
+
+    protected Predicate<OptionData> hasOption(String name, OptionType type,
+        boolean required, boolean autocomplete) {
+        return option -> option.getName().equals(name)
+            && option.getType() == type && option.isRequired() == required
+            && option.isAutoComplete() == autocomplete;
+    }
+
+    protected Predicate<MessageEmbed> embedHasDescription(String name) {
+        return embed -> embed.getDescription().equals(name);
     }
 
 }

@@ -25,17 +25,8 @@ class GiveCoinsCommandTest extends CommandUnitTest {
     protected void testCreateCommandData(SlashCommandData commandData) {
         assertThat(commandData.getOptions())
             .hasSize(2)
-            .anySatisfy(option -> {
-                assertThat(option.getType())
-                    .isEqualTo(OptionType.USER);
-                assertThat(option.getName()).isEqualTo("user");
-                assertThat(option.isRequired()).isTrue();
-            })
-            .anySatisfy(option -> {
-                assertThat(option.getType()).isEqualTo(OptionType.INTEGER);
-                assertThat(option.getName()).isEqualTo("amount");
-                assertThat(option.isRequired()).isTrue();
-            });
+            .anyMatch(hasOption("user", OptionType.USER, true))
+            .anyMatch(hasOption("amount", OptionType.INTEGER, true));
     }
 
     @Test
