@@ -15,7 +15,7 @@ import com.blank.humanity.discordbot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-class WorkCommandTest extends CommandUnitTest {
+class WorkCommandTest extends CommandUnitTest<WorkCommand> {
 
     protected WorkCommandTest() {
         super(WorkCommand.class);

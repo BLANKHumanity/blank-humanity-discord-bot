@@ -28,7 +28,7 @@ public class DailyCommand extends AbstractCommand {
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {
-        FormattingData formattingData = blankUserService
+        FormattingData formattingData = getBlankUserService()
             .claimReward(getUser(), ClaimDataType.DAILY_CLAIM)
             .build();
 

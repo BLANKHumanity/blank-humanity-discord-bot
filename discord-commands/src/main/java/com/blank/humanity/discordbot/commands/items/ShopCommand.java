@@ -58,14 +58,14 @@ public class ShopCommand extends AbstractCommand {
             .intValue();
 
         if (page < 1 || page > shopService.amountShopPages()) {
-            reply(blankUserService
+            reply(getBlankUserService()
                 .createSimpleFormattingData(event,
                     ItemMessageType.SHOP_COMMAND_WRONG_PAGE));
             return;
         }
-        BlankUser blankUser = blankUserService.getUser(event);
+        BlankUser blankUser = getBlankUserService().getUser(event);
 
-        FormattingData.FormattingDataBuilder formatBuilder = blankUserService
+        FormattingData.FormattingDataBuilder formatBuilder = getBlankUserService()
             .createFormattingData(blankUser, null);
         formatBuilder.dataPairing(ItemFormatDataKey.SHOP_PAGE, page);
 

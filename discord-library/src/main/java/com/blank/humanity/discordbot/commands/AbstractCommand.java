@@ -28,6 +28,8 @@ import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -52,26 +54,27 @@ import net.dv8tion.jda.internal.utils.Checks;
  * @author zorro
  */
 @Component
+@Accessors(chain = true)
 @Getter
 @Slf4j
 public abstract class AbstractCommand {
 
-    @Autowired
-    protected JDA jda;
+    @Setter(onMethod = @__({ @Autowired }))
+    private JDA jda;
 
-    @Autowired
-    protected BlankUserService blankUserService;
+    @Setter(onMethod = @__({ @Autowired }))
+    private BlankUserService blankUserService;
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private TransactionExecutor transactionExecutor;
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private CommandService commandService;
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private MenuService menuService;
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private MessageService messageService;
 
     private static ThreadLocal<GenericCommandInteractionEvent> commandEvent = new ThreadLocal<>();

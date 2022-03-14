@@ -65,7 +65,7 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
             .intValue();
 
         if (shopItem.isEmpty()) {
-            FormattingData data = blankUserService
+            FormattingData data = getBlankUserService()
                 .createFormattingData(user,
                     FunPlaceMessageType.ITEM_NOT_EXISTS)
                 .dataPairing(FunPlaceFormatDataKey.ITEM_NAME,
@@ -84,7 +84,7 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
         case SUCCESS -> FunPlaceMessageType.BUY_ITEM_SUCCESS;
         };
 
-        FormattingData data = blankUserService
+        FormattingData data = getBlankUserService()
             .createFormattingData(user, messageType)
             .dataPairing(FunPlaceFormatDataKey.SHOP_ITEM_BUY_NAME,
                 item.getBuyName())

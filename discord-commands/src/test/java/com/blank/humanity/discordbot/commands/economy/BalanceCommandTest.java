@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-class BalanceCommandTest extends CommandUnitTest {
+class BalanceCommandTest extends CommandUnitTest<BalanceCommand> {
 
     protected BalanceCommandTest() {
         super(BalanceCommand.class);

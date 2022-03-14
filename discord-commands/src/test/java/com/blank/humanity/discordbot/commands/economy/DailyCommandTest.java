@@ -16,7 +16,7 @@ import com.blank.humanity.discordbot.utils.FormattingData;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-class DailyCommandTest extends CommandUnitTest {
+class DailyCommandTest extends CommandUnitTest<DailyCommand> {
 
     protected DailyCommandTest() {
         super(DailyCommand.class);

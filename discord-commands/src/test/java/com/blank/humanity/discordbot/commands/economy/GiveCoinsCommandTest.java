@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-class GiveCoinsCommandTest extends CommandUnitTest {
+class GiveCoinsCommandTest extends CommandUnitTest<GiveCoinsCommand> {
 
     protected GiveCoinsCommandTest() {
         super(GiveCoinsCommand.class);

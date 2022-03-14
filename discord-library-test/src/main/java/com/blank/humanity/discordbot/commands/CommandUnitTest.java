@@ -26,6 +26,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
+import com.blank.humanity.discordbot.config.messages.CustomFormatDataKey;
+import com.blank.humanity.discordbot.config.messages.CustomMessageType;
+import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.BlankUserService;
@@ -50,18 +53,17 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.utils.data.DataObject;
 
-@Slf4j
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
-public abstract class CommandUnitTest {
+public abstract class CommandUnitTest<C extends AbstractCommand> {
 
     private Map<MessageType, Integer> messageIndex = new HashMap<>();
 
     private Map<MessageType, String[]> messageFormats = new HashMap<>();
 
-    private Class<? extends AbstractCommand> commandClass;
+    private Class<C> commandClass;
 
-    protected AbstractCommand commandMock;
+    protected C commandMock;
 
     @Mock
     protected JDA jda;
@@ -81,7 +83,7 @@ public abstract class CommandUnitTest {
     @Mock
     protected CommandService commandService;
 
-    protected CommandUnitTest(Class<? extends AbstractCommand> commandClass) {
+    protected CommandUnitTest(Class<C> commandClass) {
         this.commandClass = commandClass;
     }
 
@@ -89,19 +91,13 @@ public abstract class CommandUnitTest {
     void setup() {
         commandMock = mock(commandClass,
             withSettings().defaultAnswer(CALLS_REAL_METHODS));
-        ReflectionTestUtils.setField(commandMock, "jda", jda);
-        ReflectionTestUtils
-            .setField(commandMock, "blankUserService",
-                blankUserService);
-        ReflectionTestUtils
-            .setField(commandMock, "transactionExecutor",
-                transactionExecutor);
-        ReflectionTestUtils
-            .setField(commandMock, "menuService", menuService);
-        ReflectionTestUtils
-            .setField(commandMock, "messageService", messageService);
-        ReflectionTestUtils
-            .setField(commandMock, "commandService", commandService);
+        commandMock
+            .setJda(jda)
+            .setBlankUserService(blankUserService)
+            .setTransactionExecutor(transactionExecutor)
+            .setMenuService(menuService)
+            .setMessageService(messageService)
+            .setCommandService(commandService);
 
         when(messageService.format(any(FormattingData.class)))
             .then(invocation -> {
@@ -215,7 +211,22 @@ public abstract class CommandUnitTest {
     protected void mockServiceCreateFormatting(BlankUser user,
         MessageType type) {
         when(blankUserService.createFormattingData(user, type))
-            .then(invocation -> FormattingData.builder().messageType(type));
+            .then(invocation -> {
+                FormattingData.FormattingDataBuilder builder = FormattingData
+                    .builder()
+                    .dataPairing(
+                        CustomFormatDataKey.key("balance"), user.getBalance())
+                    .messageType(type);
+                String username = blankUserService.getUsername(user);
+                if (username != null) {
+                    builder
+                        .dataPairing(GenericFormatDataKey.USER,
+                            blankUserService.getUsername(user))
+                        .dataPairing(GenericFormatDataKey.USER_MENTION,
+                            blankUserService.getUsername(user));
+                }
+                return builder;
+            });
     }
 
     @SuppressWarnings("unchecked")

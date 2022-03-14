@@ -72,7 +72,7 @@ public class BuyItemCommand extends AbstractCommand {
             .intValue();
 
         if (shopItem.isEmpty()) {
-            FormattingData data = blankUserService
+            FormattingData data = getBlankUserService()
                 .createFormattingData(user, ItemMessageType.ITEM_NOT_EXISTS)
                 .dataPairing(ItemFormatDataKey.ITEM_NAME,
                     event.getOption(ITEM, OptionMapping::getAsString))
@@ -90,7 +90,7 @@ public class BuyItemCommand extends AbstractCommand {
         case SUCCESS -> ItemMessageType.BUY_ITEM_SUCCESS;
         };
 
-        FormattingData data = blankUserService
+        FormattingData data = getBlankUserService()
             .createFormattingData(user, messageType)
             .dataPairing(ItemFormatDataKey.SHOP_ITEM_BUY_NAME,
                 item.getBuyName())

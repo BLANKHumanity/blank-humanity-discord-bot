@@ -36,11 +36,11 @@ public class BalanceCommand extends AbstractCommand {
         Member member = event
             .getOption("user", this::getMember, OptionMapping::getAsMember);
 
-        BlankUser blankUser = blankUserService
+        BlankUser blankUser = getBlankUserService()
             .getUser(member.getIdLong(), member.getGuild().getIdLong());
         int balance = blankUser.getBalance();
 
-        reply(blankUserService
+        reply(getBlankUserService()
             .createFormattingData(blankUser,
                 EconomyMessageType.BALANCE_COMMAND_MESSAGE)
             .dataPairing(EconomyFormatDataKey.BALANCE, balance)

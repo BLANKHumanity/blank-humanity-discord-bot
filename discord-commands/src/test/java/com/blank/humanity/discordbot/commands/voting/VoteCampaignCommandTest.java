@@ -17,7 +17,6 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.blank.humanity.discordbot.commands.CommandUnitTest;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingMessageType;
@@ -30,7 +29,7 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-class VoteCampaignCommandTest extends CommandUnitTest {
+class VoteCampaignCommandTest extends CommandUnitTest<VoteCampaignCommand> {
 
     @Mock
     private VotingService votingService;
@@ -41,8 +40,7 @@ class VoteCampaignCommandTest extends CommandUnitTest {
 
     @BeforeEach
     void setupVotingService() {
-        ReflectionTestUtils
-            .setField(commandMock, "votingService", votingService);
+        commandMock.setVotingService(votingService);
     }
 
     @Override

@@ -52,14 +52,14 @@ public class FunPlaceShopCommand extends AbstractCommand {
             .intValue();
 
         if (page < 1 || page > funPlaceShopService.amountShopPages()) {
-            reply(blankUserService
+            reply(getBlankUserService()
                 .createSimpleFormattingData(
                     event, FunPlaceMessageType.SHOP_COMMAND_WRONG_PAGE));
             return;
         }
         BlankUser blankUser = getUser();
 
-        FormattingData.FormattingDataBuilder formatBuilder = blankUserService
+        FormattingData.FormattingDataBuilder formatBuilder = getBlankUserService()
             .createFormattingData(blankUser, null);
         formatBuilder.dataPairing(FunPlaceFormatDataKey.SHOP_PAGE, page);
 

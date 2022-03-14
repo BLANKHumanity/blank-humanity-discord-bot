@@ -120,7 +120,7 @@ public class RemoveItemCommand extends AbstractCommand {
         Long userId = event.getOption(USER, OptionMapping::getAsLong);
 
         if (userId != null) {
-            BlankUser mentionedUser = blankUserService
+            BlankUser mentionedUser = getBlankUserService()
                 .getUser(userId, event.getGuild().getIdLong());
             return inventoryService
                 .autoCompleteUserItems(mentionedUser, itemName);
