@@ -256,7 +256,9 @@ class AbstractCommandTest {
         @SuppressWarnings("unchecked")
         WebhookMessageUpdateAction<Message> updateAction = mock(
             WebhookMessageUpdateAction.class);
+        BlankUser user = mock(BlankUser.class);
 
+        when(localUser.get()).thenReturn(user);
         when(event.getHook()).thenReturn(hook);
         when(hook.editOriginalEmbeds(Mockito.nullable(MessageEmbed[].class)))
             .thenReturn(updateAction);
