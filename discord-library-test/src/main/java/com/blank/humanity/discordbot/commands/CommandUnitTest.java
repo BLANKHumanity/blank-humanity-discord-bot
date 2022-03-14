@@ -37,6 +37,7 @@ import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.NamedFormatter;
 
 import gnu.trove.map.TLongObjectMap;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -49,6 +50,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.utils.data.DataObject;
 
+@Slf4j
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 public abstract class CommandUnitTest {
@@ -265,7 +267,14 @@ public abstract class CommandUnitTest {
     }
 
     protected Predicate<MessageEmbed> embedHasDescription(String name) {
-        return embed -> embed.getDescription().equals(name);
+        return embed -> {
+            if (embed.getDescription().equals(name)) {
+                return true;
+            }
+            throw new AssertionError(
+                "Expected embed to have following description: '" + name
+                    + "', but got: '" + embed.getDescription() + "'!");
+        };
     }
 
 }

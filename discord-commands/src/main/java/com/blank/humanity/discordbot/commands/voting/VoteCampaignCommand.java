@@ -191,7 +191,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
                         getUser(),
                         VotingMessageType.VOTE_CAMPAIGN_CHOICE_NOT_FOUND)
                     .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
-                        campaign)
+                        campaign.toLowerCase())
                     .dataPairing(VotingFormatDataKey.VOTE_CHOICE, choice)
                     .build());
                 return;
@@ -203,7 +203,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
                 .createFormattingData(getUser(),
                     VotingMessageType.VOTE_CAMPAIGN_CHOICE_REMOVED)
                 .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
-                    campaign)
+                    campaign.toLowerCase())
                 .dataPairing(VotingFormatDataKey.VOTE_CHOICE, choice)
                 .build());
         } else {
@@ -211,7 +211,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
                 .createFormattingData(getUser(),
                     VotingMessageType.VOTE_CAMPAIGN_NOT_FOUND)
                 .dataPairing(VotingFormatDataKey.VOTE_CAMPAIGN_NAME,
-                    campaign)
+                    campaign.toLowerCase())
                 .build());
         }
     }
