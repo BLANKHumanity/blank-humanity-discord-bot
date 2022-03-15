@@ -63,11 +63,11 @@ public class GiveItemCommand extends AbstractCommand {
         BlankUser user = getUser();
         BlankUser mentioned = getBlankUserService()
             .getUser(event.getOption(USER));
-        String itemName = event.getOption(ITEM).getAsString();
-        int amount = Optional
-            .ofNullable(event.getOption(AMOUNT))
-            .map(OptionMapping::getAsLong)
-            .orElse(1L)
+        
+        String itemName = event.getOption(ITEM, OptionMapping::getAsString);
+
+        int amount = event
+            .getOption(AMOUNT, 1L, OptionMapping::getAsLong)
             .intValue();
 
         Optional<ItemDefinition> item = inventoryService

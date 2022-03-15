@@ -26,8 +26,8 @@ import com.blank.humanity.discordbot.utils.item.ItemBuyStatus;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 
 @Rollback(true)
-@Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD, value = "/standardTestData.sql")
-@Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, value = "/clearTestData.sql")
+@Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD, value = "/shopServiceTestData.sql")
+@Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, value = "/clearShopServiceTestData.sql")
 class ShopServiceTest extends ServiceIntegrationTest {
 
     @Autowired

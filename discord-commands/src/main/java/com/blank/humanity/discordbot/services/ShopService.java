@@ -5,10 +5,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,22 +20,17 @@ import com.blank.humanity.discordbot.entities.item.BuyLogEntry;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.item.ItemBuyStatus;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 
 @Service
+@RequiredArgsConstructor
 public class ShopService {
 
-    @Autowired
-    private BlankUserService blankUserService;
-
-    @Autowired
-    private InventoryService inventoryService;
-
-    @Autowired
-    private ItemShopConfig itemShopConfig;
-
-    @Autowired
-    private BuyLogDao buyLogDao;
+    private final BlankUserService blankUserService;
+    private final InventoryService inventoryService;
+    private final ItemShopConfig itemShopConfig;
+    private final BuyLogDao buyLogDao;
 
     public long amountShopPages() {
         return (long) Math
@@ -72,6 +67,7 @@ public class ShopService {
     }
 
     @Transactional
+    @Nonnull
     public ItemBuyStatus buyItem(BlankUser user, ShopItem item, int amount) {
         if (user.getBalance() < item.getPrice() * amount) {
             return ItemBuyStatus.NOT_ENOUGH_MONEY;

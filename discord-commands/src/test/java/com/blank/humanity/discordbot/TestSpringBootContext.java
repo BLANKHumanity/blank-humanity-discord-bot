@@ -1,11 +1,9 @@
 package com.blank.humanity.discordbot;
 
-import static org.mockito.Mockito.mock;
-
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.AdviceMode;
-import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -23,34 +21,22 @@ import net.dv8tion.jda.api.JDA;
 @EnableScheduling
 public class TestSpringBootContext {
 
-    @Bean
-    public JDA jda() {
-        return mock(JDA.class);
-    }
+    @MockBean
+    public JDA jda;
     
-    @Bean
-    public BlankUserService blankUserService() {
-        return mock(BlankUserService.class);
-    }
+    @MockBean
+    public BlankUserService blankUserService;
     
-    @Bean
-    public CommandService commandService() {
-        return mock(CommandService.class);
-    }
+    @MockBean
+    public CommandService commandService;
     
-    @Bean
-    public MenuService menuService() {
-        return mock(MenuService.class);
-    }
+    @MockBean
+    public MenuService menuService;
     
-    @Bean
-    public MessageService messageService() {
-        return mock(MessageService.class);
-    }
+    @MockBean
+    public MessageService messageService;
     
-    @Bean
-    public InventoryService inventoryService() {
-        return mock(InventoryService.class);
-    }
+    @MockBean
+    public InventoryService inventoryService;
     
 }

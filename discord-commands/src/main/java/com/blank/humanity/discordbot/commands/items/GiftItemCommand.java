@@ -60,16 +60,13 @@ public class GiftItemCommand extends AbstractCommand {
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {
-        BlankUser user = getUser();
         BlankUser mentioned = getBlankUserService()
             .getUser(event.getOption(USER));
 
-        String itemName = event.getOption(ITEM).getAsString();
+        String itemName = event.getOption(ITEM, OptionMapping::getAsString);
 
-        int amount = Optional
-            .ofNullable(event.getOption(AMOUNT))
-            .map(OptionMapping::getAsLong)
-            .orElse(1L)
+        int amount = event
+            .getOption(AMOUNT, 1L, OptionMapping::getAsLong)
             .intValue();
 
         Optional<ItemDefinition> item = inventoryService
@@ -77,7 +74,8 @@ public class GiftItemCommand extends AbstractCommand {
 
         if (item.isEmpty()) {
             reply(getBlankUserService()
-                .createFormattingData(user, ItemMessageType.ITEM_NOT_EXISTS)
+                .createFormattingData(getUser(),
+                    ItemMessageType.ITEM_NOT_EXISTS)
                 .dataPairing(ItemFormatDataKey.ITEM_NAME, itemName)
                 .build());
             return;
@@ -88,7 +86,7 @@ public class GiftItemCommand extends AbstractCommand {
         FormattingData data = getBlankUserService()
             .addUserDetailsFormattingData(
                 getBlankUserService()
-                    .createFormattingData(user,
+                    .createFormattingData(getUser(),
                         ItemMessageType.ITEM_GIVE_SUCCESS),
                 mentioned, GenericFormatDataKey.RECEIVING_USER,
                 GenericFormatDataKey.RECEIVING_USER_MENTION)

@@ -1,6 +1,7 @@
 package com.blank.humanity.discordbot.commands.items;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +18,12 @@ import com.blank.humanity.discordbot.config.items.ShopItem;
 import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.ShopService;
+import com.blank.humanity.discordbot.services.VotingService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.item.ItemBuyStatus;
 
 import lombok.NonNull;
+import lombok.Setter;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -35,10 +38,10 @@ public class BuyItemCommand extends AbstractCommand {
     private static final String AMOUNT = "amount";
     private static final String ITEM = "item";
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private ShopService shopService;
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private ItemConfiguration itemConfiguration;
 
     @Override
@@ -83,7 +86,7 @@ public class BuyItemCommand extends AbstractCommand {
 
         ShopItem item = shopItem.get();
         ItemBuyStatus status = shopService.buyItem(user, item, amount);
-
+        
         MessageType messageType = switch (status) {
         case NO_AVAILABLE_SUPPLY -> ItemMessageType.BUY_ITEM_NO_SUPPLY;
         case NOT_ENOUGH_MONEY -> ItemMessageType.BUY_ITEM_NOT_ENOUGH_MONEY;
@@ -99,7 +102,6 @@ public class BuyItemCommand extends AbstractCommand {
             .dataPairing(ItemFormatDataKey.SHOP_ITEM_AVAILABLE_AMOUNT,
                 shopService.getAvailableItemAmount(item))
             .dataPairing(ItemFormatDataKey.ITEM_AMOUNT, amount)
-            .dataPairing(EconomyFormatDataKey.BALANCE, user.getBalance())
             .dataPairing(ItemFormatDataKey.ITEM_NAME,
                 itemConfiguration
                     .getItemDefinition(item.getItemId())
@@ -113,9 +115,9 @@ public class BuyItemCommand extends AbstractCommand {
     @Override
     @NonNull
     protected Collection<Command.Choice> onAutoComplete(
-        @NonNull CommandAutoCompleteInteractionEvent event) {
+        CommandAutoCompleteInteractionEvent event) {
         String itemName = event
-            .getOption(ITEM, () -> "", OptionMapping::getAsString)
+            .getOption(ITEM, "", OptionMapping::getAsString)
             .toLowerCase();
 
         return shopService

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +24,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.messages.CustomFormatDataKey;
-import com.blank.humanity.discordbot.config.messages.CustomMessageType;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
@@ -40,11 +39,12 @@ import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.NamedFormatter;
 
 import gnu.trove.map.TLongObjectMap;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -202,6 +202,37 @@ public abstract class CommandUnitTest<C extends AbstractCommand> {
             .isNotNull()
             .hasAtLeastOneElementOfType(MessageEmbed.class);
         return commandMock.getUnsentReply();
+    }
+
+    protected CommandAutoCompleteInteractionEvent mockAutocompleteEvent(
+        OptionMapping... arguments) {
+        return mockAutocompleteEvent(mock(BlankUser.class), arguments);
+    }
+
+    protected CommandAutoCompleteInteractionEvent mockAutocompleteEvent(
+        BlankUser user, OptionMapping... arguments) {
+        return mockAutocompleteEvent(user, mock(Member.class), arguments);
+    }
+
+    protected CommandAutoCompleteInteractionEvent mockAutocompleteEvent(
+        BlankUser user, Member member, OptionMapping... arguments) {
+        CommandAutoCompleteInteractionEvent event = mock(
+            CommandAutoCompleteInteractionEvent.class,
+            withSettings().defaultAnswer(CALLS_REAL_METHODS).lenient());
+
+        doReturn(member).when(event).getMember();
+        doReturn(List.of(arguments)).when(event).getOptions();
+
+        commandMock.setMember(member);
+        commandMock.setUser(user);
+
+        return event;
+    }
+
+    protected Collection<Command.Choice> callAutocomplete(
+        CommandAutoCompleteInteractionEvent event) {
+        commandMock.setAutoCompleteEvent(event);
+        return commandMock.onAutoComplete(event);
     }
 
     protected void executeLongRunningTask() {
