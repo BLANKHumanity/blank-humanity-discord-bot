@@ -7,6 +7,8 @@ import org.springframework.context.annotation.AdviceMode;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import com.blank.humanity.discordbot.config.items.ItemConfiguration;
+import com.blank.humanity.discordbot.config.items.ItemShopConfig;
 import com.blank.humanity.discordbot.services.BlankUserService;
 import com.blank.humanity.discordbot.services.CommandService;
 import com.blank.humanity.discordbot.services.InventoryService;

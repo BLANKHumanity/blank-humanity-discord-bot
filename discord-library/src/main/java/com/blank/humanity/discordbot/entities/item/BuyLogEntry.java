@@ -11,14 +11,14 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
+@Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class BuyLogEntry {
 
     @Id
@@ -27,7 +27,7 @@ public class BuyLogEntry {
 
     @NotNull
     private int shopId;
-    
+
     @NotNull
     private int amount;
 

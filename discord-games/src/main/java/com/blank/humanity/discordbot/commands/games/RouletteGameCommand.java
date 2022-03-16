@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.commands.games;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,11 +56,8 @@ public class RouletteGameCommand extends AbstractGame {
         GameMetadata metadata) {
         int betAmount = (int) event.getOption("bet").getAsLong();
 
-        RouletteMetadata roulette = RouletteMetadata
-            .builder()
-            .betAmount(betAmount)
-            .round(1)
-            .build();
+        RouletteMetadata roulette = new RouletteMetadata(betAmount, 1,
+            Collections.emptyList());
 
         metadata.setMetadata(roulette);
 

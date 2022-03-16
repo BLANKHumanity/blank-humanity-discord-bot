@@ -303,25 +303,25 @@ shop:
       itemId: 1
       buyName: "firstClassTicket"
       price: 50
-      amountAvailable: 100
+      amountAvailable: 50
       order: 5
     - id: 2
       itemId: 2
       buyName: "highRollerRole"
       price: 100
-      amountAvailable: 5
+      amountAvailable: 20
       order: 4
     - id: 3
       itemId: 3
       buyName: "kingpin"
       price: 200
-      amountAvailable: 1
+      amountAvailable: -1
       order: 3
     - id: 4
       itemId: 4
       buyName: "pointOneEth"
       price: 1000
-      amountAvailable: 1
+      amountAvailable: 50
       order: 2
     - id: 5
       itemId: 5

@@ -17,6 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 import com.blank.humanity.discordbot.config.items.ItemConfiguration;
+import com.blank.humanity.discordbot.config.items.ItemShopConfig;
 import com.blank.humanity.discordbot.config.items.ShopItem;
 import com.blank.humanity.discordbot.database.BuyLogDao;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
@@ -34,6 +35,9 @@ class ShopServiceTest extends ServiceIntegrationTest {
     private ShopService shopService;
 
     @Autowired
+    private ItemShopConfig itemShopConfig;
+
+    @Autowired
     private BlankUserService blankUserService;
 
     @Autowired
@@ -45,13 +49,15 @@ class ShopServiceTest extends ServiceIntegrationTest {
     @Autowired
     private BuyLogDao buyLogDao;
 
-    private double SHOP_ITEMS = 5;
+    private final double SHOP_ITEMS = 5;
 
-    private double ITEMS_PER_PAGE = 2;
+    private final double ITEMS_PER_PAGE = 2;
 
-    private int SOME_BOUGHT_SHOP_ID = 1;
+    private final int SOME_BOUGHT_SHOP_ID = 1;
 
-    private int ALL_BOUGHT_SHOP_ID = 2;
+    private final int ALL_BOUGHT_SHOP_ID = 2;
+
+    private final int NONE_BOUGHT_SHOP_ID = 3;
 
     @BeforeEach
     void resetMocks() {
@@ -63,9 +69,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
     void testAvailableItemAmountZeroBought() {
         int availableAtStart = 50;
 
-        ShopItem item = new ShopItem();
-        item.setId(3);
-        item.setAmountAvailable(availableAtStart);
+        ShopItem item = itemShopConfig.getShopItem(4).get();
 
         int available = shopService.getAvailableItemAmount(item);
         assertThat(available).isEqualTo(availableAtStart);
@@ -75,9 +79,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
     void testAvailableItemAmountSomeBought() {
         int availableAtStart = 50;
 
-        ShopItem item = new ShopItem();
-        item.setId(SOME_BOUGHT_SHOP_ID);
-        item.setAmountAvailable(availableAtStart);
+        ShopItem item = itemShopConfig.getShopItem(SOME_BOUGHT_SHOP_ID).get();
 
         int available = shopService.getAvailableItemAmount(item);
         assertThat(available).isEqualTo(availableAtStart - 3);
@@ -85,11 +87,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
 
     @Test
     void testAvailableItemAmountAllBought() {
-        int availableAtStart = 20;
-
-        ShopItem item = new ShopItem();
-        item.setId(ALL_BOUGHT_SHOP_ID);
-        item.setAmountAvailable(availableAtStart);
+        ShopItem item = itemShopConfig.getShopItem(ALL_BOUGHT_SHOP_ID).get();
 
         int available = shopService.getAvailableItemAmount(item);
         assertThat(available).isZero();
@@ -97,14 +95,10 @@ class ShopServiceTest extends ServiceIntegrationTest {
 
     @Test
     void testAvailableItemAmountUnlimited() {
-        int availableAtStart = -1;
-
-        ShopItem item = new ShopItem();
-        item.setId(SOME_BOUGHT_SHOP_ID);
-        item.setAmountAvailable(availableAtStart);
+        ShopItem item = itemShopConfig.getShopItem(NONE_BOUGHT_SHOP_ID).get();
 
         int available = shopService.getAvailableItemAmount(item);
-        assertThat(available).isEqualTo(availableAtStart);
+        assertThat(available).isEqualTo(-1);
     }
 
     @Test
@@ -128,11 +122,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
         user.setBalance(1234);
         user.setId(1l);
 
-        ShopItem item = new ShopItem();
-        item.setPrice(100);
-        item.setId(3);
-        item.setItemId(5);
-        item.setAmountAvailable(50);
+        ShopItem item = itemShopConfig.getShopItem(NONE_BOUGHT_SHOP_ID).get();
 
         ItemBuyStatus status = shopService.buyItem(user, item);
         assertThat(status).isEqualTo(ItemBuyStatus.SUCCESS);
@@ -151,11 +141,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
         user.setBalance(1234);
         user.setId(1l);
 
-        ShopItem item = new ShopItem();
-        item.setPrice(100);
-        item.setId(3);
-        item.setItemId(5);
-        item.setAmountAvailable(50);
+        ShopItem item = itemShopConfig.getShopItem(NONE_BOUGHT_SHOP_ID).get();
 
         ItemBuyStatus status = shopService.buyItem(user, item, amount);
         assertThat(status).isEqualTo(ItemBuyStatus.SUCCESS);
@@ -170,14 +156,10 @@ class ShopServiceTest extends ServiceIntegrationTest {
     @Test
     void testBuyItemNotEnoughBalance() {
         BlankUser user = new BlankUser();
-        user.setBalance(1234);
+        user.setBalance(50);
         user.setId(1l);
 
-        ShopItem item = new ShopItem();
-        item.setPrice(51354);
-        item.setId(3);
-        item.setItemId(5);
-        item.setAmountAvailable(50);
+        ShopItem item = itemShopConfig.getShopItem(NONE_BOUGHT_SHOP_ID).get();
 
         ItemBuyStatus status = shopService.buyItem(user, item);
         assertThat(status).isEqualTo(ItemBuyStatus.NOT_ENOUGH_MONEY);
@@ -195,11 +177,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
         user.setBalance(1234);
         user.setId(1l);
 
-        ShopItem item = new ShopItem();
-        item.setPrice(100);
-        item.setId(ALL_BOUGHT_SHOP_ID);
-        item.setItemId(5);
-        item.setAmountAvailable(20);
+        ShopItem item = itemShopConfig.getShopItem(ALL_BOUGHT_SHOP_ID).get();
 
         ItemBuyStatus status = shopService.buyItem(user, item);
         assertThat(status).isEqualTo(ItemBuyStatus.NO_AVAILABLE_SUPPLY);

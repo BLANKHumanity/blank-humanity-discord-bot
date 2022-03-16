@@ -19,13 +19,14 @@ import org.springframework.validation.annotation.Validated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
 @Builder
 @Validated
 public class UserClaimData {
@@ -43,20 +44,22 @@ public class UserClaimData {
     private ClaimDataType type;
 
     @Nullable
+    @Setter
     private LocalDateTime lastClaimTime;
 
     @NotNull
     @Column(nullable = false)
     @Min(0)
     @Default
+    @Setter
     private int claimStreak = 0;
 
     public long getMilliSecondsSinceLastClaim() {
-	if (getLastClaimTime() == null) {
-	    return Long.MAX_VALUE;
-	}
-	return ChronoUnit.MILLIS
-		.between(getLastClaimTime(), LocalDateTime.now());
+        if (getLastClaimTime() == null) {
+            return Long.MAX_VALUE;
+        }
+        return ChronoUnit.MILLIS
+            .between(getLastClaimTime(), LocalDateTime.now());
     }
 
 }

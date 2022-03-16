@@ -4,11 +4,11 @@ import com.blank.humanity.discordbot.utils.FormatDataKey;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Builder
-@Data
+@Getter
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class CustomFormatDataKey implements FormatDataKey {

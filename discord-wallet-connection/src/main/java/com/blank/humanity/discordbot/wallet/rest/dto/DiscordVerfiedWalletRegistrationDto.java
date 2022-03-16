@@ -1,11 +1,11 @@
 package com.blank.humanity.discordbot.wallet.rest.dto;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.jackson.Jacksonized;
 
-@Data
+@Getter
 @Builder
 @Jacksonized
 public class DiscordVerfiedWalletRegistrationDto {
