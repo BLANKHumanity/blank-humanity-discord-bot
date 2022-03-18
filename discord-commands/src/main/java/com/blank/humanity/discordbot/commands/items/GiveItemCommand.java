@@ -16,6 +16,7 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.InventoryService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
+import lombok.Setter;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -36,7 +37,7 @@ public class GiveItemCommand extends AbstractCommand {
         return "give";
     }
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private InventoryService inventoryService;
 
     @Override
@@ -63,7 +64,7 @@ public class GiveItemCommand extends AbstractCommand {
         BlankUser user = getUser();
         BlankUser mentioned = getBlankUserService()
             .getUser(event.getOption(USER));
-        
+
         String itemName = event.getOption(ITEM, OptionMapping::getAsString);
 
         int amount = event

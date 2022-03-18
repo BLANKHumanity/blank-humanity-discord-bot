@@ -16,6 +16,7 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.InventoryService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
+import lombok.Setter;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -31,7 +32,7 @@ public class GiftItemCommand extends AbstractCommand {
     private static final String ITEM = "item";
     private static final String AMOUNT = "amount";
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private InventoryService inventoryService;
 
     @Override
@@ -60,9 +61,6 @@ public class GiftItemCommand extends AbstractCommand {
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {
-        BlankUser mentioned = getBlankUserService()
-            .getUser(event.getOption(USER));
-
         String itemName = event.getOption(ITEM, OptionMapping::getAsString);
 
         int amount = event
@@ -81,15 +79,18 @@ public class GiftItemCommand extends AbstractCommand {
             return;
         }
 
+        BlankUser mentioned = event
+            .getOption(USER, getBlankUserService()::getUser);
+
         inventoryService.giveItem(mentioned, item.get().getId(), amount);
 
-        FormattingData data = getBlankUserService()
-            .addUserDetailsFormattingData(
-                getBlankUserService()
-                    .createFormattingData(getUser(),
-                        ItemMessageType.ITEM_GIVE_SUCCESS),
-                mentioned, GenericFormatDataKey.RECEIVING_USER,
-                GenericFormatDataKey.RECEIVING_USER_MENTION)
+        FormattingData.FormattingDataBuilder builder = getBlankUserService()
+            .createFormattingData(getUser(), ItemMessageType.ITEM_GIVE_SUCCESS);
+        builder = getBlankUserService()
+            .addUserDetailsFormattingData(builder, mentioned,
+                GenericFormatDataKey.RECEIVING_USER,
+                GenericFormatDataKey.RECEIVING_USER_MENTION);
+        FormattingData data = builder
             .dataPairing(ItemFormatDataKey.ITEM_ID, item.get().getId())
             .dataPairing(ItemFormatDataKey.ITEM_NAME, item.get().getName())
             .dataPairing(ItemFormatDataKey.ITEM_AMOUNT, amount)

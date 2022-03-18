@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import com.blank.humanity.discordbot.commands.CommandUnitTest;
-import com.blank.humanity.discordbot.commands.items.GiftItemCommand;
+import com.blank.humanity.discordbot.commands.items.GiveItemCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
@@ -33,13 +33,13 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-class GiftItemCommandTest extends CommandUnitTest<GiftItemCommand> {
+class GiveItemCommandTest extends CommandUnitTest<GiveItemCommand> {
 
     @Mock
     private InventoryService inventoryService;
 
-    protected GiftItemCommandTest() {
-        super(GiftItemCommand.class);
+    protected GiveItemCommandTest() {
+        super(GiveItemCommand.class);
     }
 
     @BeforeEach
@@ -57,7 +57,7 @@ class GiftItemCommandTest extends CommandUnitTest<GiftItemCommand> {
     }
 
     @Test
-    void testGiftSingleItem(@Mock BlankUser user, @Mock Member receiver,
+    void testGiveSingleItem(@Mock BlankUser user, @Mock Member receiver,
         @Mock BlankUser receiverUser, @Mock ItemDefinition itemDefinition) {
         String itemName = "testItem";
         int itemId = 34;
@@ -66,6 +66,7 @@ class GiftItemCommandTest extends CommandUnitTest<GiftItemCommand> {
         when(itemDefinition.getName()).thenReturn(itemName);
         when(inventoryService.getItemDefinition(itemName))
             .thenReturn(Optional.of(itemDefinition));
+        when(inventoryService.removeItem(user, itemId, 1)).thenReturn(true);
 
         mockReceivingUser(receiver, receiverUser);
 
@@ -87,7 +88,7 @@ class GiftItemCommandTest extends CommandUnitTest<GiftItemCommand> {
     }
 
     @Test
-    void testGiftMultipleItems(@Mock BlankUser user, @Mock Member receiver,
+    void testGiveMultipleItems(@Mock BlankUser user, @Mock Member receiver,
         @Mock BlankUser receiverUser, @Mock ItemDefinition itemDefinition) {
         String itemName = "testItem";
         int itemId = 34;
@@ -97,6 +98,8 @@ class GiftItemCommandTest extends CommandUnitTest<GiftItemCommand> {
         when(itemDefinition.getName()).thenReturn(itemName);
         when(inventoryService.getItemDefinition(itemName))
             .thenReturn(Optional.of(itemDefinition));
+        when(inventoryService.removeItem(user, itemId, amount))
+            .thenReturn(true);
 
         mockReceivingUser(receiver, receiverUser);
 
@@ -120,7 +123,7 @@ class GiftItemCommandTest extends CommandUnitTest<GiftItemCommand> {
     }
 
     @Test
-    void testGiftUnknownItem(@Mock BlankUser user) {
+    void testGiveUnknownItem(@Mock BlankUser user) {
         String itemName = "testItem";
 
         when(inventoryService.getItemDefinition(itemName))
@@ -143,15 +146,17 @@ class GiftItemCommandTest extends CommandUnitTest<GiftItemCommand> {
     }
 
     @Test
-    void testAutocomplete() {
+    void testAutocomplete(@Mock BlankUser user) {
         String itemName = "testIt";
 
         List<Command.Choice> list = new LinkedList<>();
 
-        CommandAutoCompleteInteractionEvent event = mockAutocompleteEvent(
+        CommandAutoCompleteInteractionEvent event = mockAutocompleteEvent(user,
             optionMapping(OptionType.STRING, "item", itemName));
 
-        when(inventoryService.autoCompleteItems(itemName.toLowerCase())).thenReturn(list);
+        when(inventoryService
+            .autoCompleteUserItems(user, itemName.toLowerCase()))
+                .thenReturn(list);
 
         assertThat(callAutocomplete(event)).isEqualTo(list);
     }
@@ -176,5 +181,4 @@ class GiftItemCommandTest extends CommandUnitTest<GiftItemCommand> {
                 return null;
             });
     }
-
 }
