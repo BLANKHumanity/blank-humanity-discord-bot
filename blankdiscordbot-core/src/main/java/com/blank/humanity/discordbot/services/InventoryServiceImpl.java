@@ -23,10 +23,8 @@ import com.blank.humanity.discordbot.itemActions.ItemActionStatus;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;
 
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 
-@Slf4j
 @Service
 public class InventoryServiceImpl implements InventoryService {
 

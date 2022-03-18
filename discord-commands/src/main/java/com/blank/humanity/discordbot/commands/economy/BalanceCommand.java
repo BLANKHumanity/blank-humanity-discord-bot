@@ -3,7 +3,6 @@ package com.blank.humanity.discordbot.commands.economy;
 import org.springframework.stereotype.Component;
 
 import com.blank.humanity.discordbot.commands.AbstractCommand;
-import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyMessageType;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.entities.user.BlankUser;

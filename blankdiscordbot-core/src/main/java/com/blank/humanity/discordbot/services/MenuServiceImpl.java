@@ -21,7 +21,6 @@ import com.blank.humanity.discordbot.utils.Wrapper;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -29,7 +28,6 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 
-@Slf4j
 @Service
 public class MenuServiceImpl implements MenuService, EventListener {
 

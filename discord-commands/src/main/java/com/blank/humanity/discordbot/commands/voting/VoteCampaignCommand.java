@@ -6,18 +6,15 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.AbstractHiddenCommand;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingFormatDataKey;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingMessageType;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
-import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.voting.VotingCampaign;
 import com.blank.humanity.discordbot.services.VotingService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
 import lombok.Setter;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
