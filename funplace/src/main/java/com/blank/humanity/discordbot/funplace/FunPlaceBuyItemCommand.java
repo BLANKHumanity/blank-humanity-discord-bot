@@ -15,6 +15,7 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
 import lombok.NonNull;
+import lombok.Setter;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -29,10 +30,10 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
     private static final String AMOUNT = "amount";
     private static final String ITEM = "item";
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private FunPlaceShopService shopService;
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private ItemConfiguration itemConfiguration;
 
     @Override
