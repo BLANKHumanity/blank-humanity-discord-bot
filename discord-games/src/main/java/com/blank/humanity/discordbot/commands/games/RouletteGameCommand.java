@@ -17,6 +17,7 @@ import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.game.RouletteMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.economy.NotEnoughBalanceException;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
@@ -109,7 +110,9 @@ public class RouletteGameCommand extends AbstractGame {
 
         int betAmount = roulette.getBetAmount();
 
-        if (user.getBalance() < betAmount) {
+        try {
+            getBlankUserService().decreaseUserBalance(user, betAmount);
+        } catch (NotEnoughBalanceException e) {
             if (roulette.getRound() == 1) {
                 abort(metadata);
             } else {
@@ -123,7 +126,6 @@ public class RouletteGameCommand extends AbstractGame {
                     getGameDefinition().getDisplayName())
                 .build();
         }
-        getBlankUserService().decreaseUserBalance(user, betAmount);
 
         int randomNumber = random.nextInt(6);
         boolean success = randomNumber != 0;

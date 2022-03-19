@@ -18,6 +18,7 @@ import com.blank.humanity.discordbot.config.items.ShopItem;
 import com.blank.humanity.discordbot.database.BuyLogDao;
 import com.blank.humanity.discordbot.entities.item.BuyLogEntry;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.economy.NotEnoughBalanceException;
 import com.blank.humanity.discordbot.utils.item.ItemBuyStatus;
 
 import lombok.RequiredArgsConstructor;
@@ -78,7 +79,12 @@ public class ShopService {
             return ItemBuyStatus.NO_AVAILABLE_SUPPLY;
         }
 
-        blankUserService.decreaseUserBalance(user, item.getPrice() * amount);
+        try {
+            blankUserService
+                .decreaseUserBalance(user, item.getPrice() * amount);
+        } catch (NotEnoughBalanceException e) {
+            return ItemBuyStatus.NOT_ENOUGH_MONEY;
+        }
         inventoryService.giveItem(user, item.getItemId(), amount);
         buyLogDao
             .save(BuyLogEntry

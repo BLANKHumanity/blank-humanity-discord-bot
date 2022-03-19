@@ -21,6 +21,7 @@ import com.blank.humanity.discordbot.config.items.ItemShopConfig;
 import com.blank.humanity.discordbot.config.items.ShopItem;
 import com.blank.humanity.discordbot.database.BuyLogDao;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.economy.NotEnoughBalanceException;
 import com.blank.humanity.discordbot.service.ServiceIntegrationTest;
 import com.blank.humanity.discordbot.utils.item.ItemBuyStatus;
 
@@ -117,7 +118,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void testBuyItemSingle() {
+    void testBuyItemSingle() throws NotEnoughBalanceException {
         BlankUser user = new BlankUser();
         user.setBalance(1234);
         user.setId(1l);
@@ -134,7 +135,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void testBuyItemMultiple() {
+    void testBuyItemMultiple() throws NotEnoughBalanceException {
         int amount = 6;
 
         BlankUser user = new BlankUser();
@@ -154,7 +155,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void testBuyItemNotEnoughBalance() {
+    void testBuyItemNotEnoughBalance() throws NotEnoughBalanceException {
         BlankUser user = new BlankUser();
         user.setBalance(50);
         user.setId(1l);
@@ -172,7 +173,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void testBuyItemNoSupply() {
+    void testBuyItemNoSupply() throws NotEnoughBalanceException {
         BlankUser user = new BlankUser();
         user.setBalance(1234);
         user.setId(1l);

@@ -11,6 +11,7 @@ import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.user.ClaimDataType;
 import com.blank.humanity.discordbot.entities.user.UserClaimData;
+import com.blank.humanity.discordbot.exceptions.economy.NotEnoughBalanceException;
 import com.blank.humanity.discordbot.utils.FormatDataKey;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
@@ -40,10 +41,12 @@ public interface BlankUserService {
     public void increaseUserBalance(BlankUser user, int money);
 
     @Transactional
-    public boolean decreaseUserBalance(long discordId, long guildId, int money);
+    public boolean decreaseUserBalance(long discordId, long guildId, int money)
+        throws NotEnoughBalanceException;
 
     @Transactional
-    public boolean decreaseUserBalance(BlankUser user, int money);
+    public boolean decreaseUserBalance(BlankUser user, int money)
+        throws NotEnoughBalanceException;
 
     public UserClaimData fetchClaimData(BlankUser blankUser,
         ClaimDataType claimDataType);

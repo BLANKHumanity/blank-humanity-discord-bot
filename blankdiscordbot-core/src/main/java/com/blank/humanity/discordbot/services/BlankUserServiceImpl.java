@@ -25,6 +25,7 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.entities.user.ClaimDataType;
 import com.blank.humanity.discordbot.entities.user.UserClaimData;
 import com.blank.humanity.discordbot.entities.user.fake.FakeUserType;
+import com.blank.humanity.discordbot.exceptions.economy.NotEnoughBalanceException;
 import com.blank.humanity.discordbot.utils.FormatDataKey;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
@@ -99,14 +100,15 @@ public class BlankUserServiceImpl implements BlankUserService {
 
     @Transactional
     public boolean decreaseUserBalance(long discordId, long guildId,
-        int money) {
+        int money) throws NotEnoughBalanceException {
         return decreaseUserBalance(getUser(discordId, guildId), money);
     }
 
     @Transactional
-    public boolean decreaseUserBalance(BlankUser user, int money) {
+    public boolean decreaseUserBalance(BlankUser user, int money)
+        throws NotEnoughBalanceException {
         if (user.getBalance() < money) {
-            throw new RuntimeException("User " + user.getDiscordId()
+            throw new NotEnoughBalanceException("User " + user.getDiscordId()
                 + " does not have enough money (Has: " + user.getBalance()
                 + ", Needs: " + money + ")");
         }
