@@ -246,12 +246,12 @@ public abstract class CommandUnitTest<C extends AbstractCommand> {
     protected void mockServiceCreateFormatting(BlankUser user,
         MessageType type) {
         when(blankUserService.createFormattingData(user, type))
-            .then(invocation -> mockedCreateFormattingData(invocation, user,
+            .then(invocation -> mockedCreateFormattingData(user,
                 type));
     }
 
     private FormattingData.FormattingDataBuilder mockedCreateFormattingData(
-        InvocationOnMock invocation, BlankUser user, MessageType type) {
+        BlankUser user, MessageType type) {
         FormattingData.FormattingDataBuilder builder = FormattingData
             .builder()
             .dataPairing(
