@@ -39,7 +39,7 @@ public class VoteCommand extends AbstractHiddenCommand {
 
         VotingCampaign campaign = votingService
             .getVotingCampaign(event.getSubcommandName())
-            .get();
+            .orElseThrow();
 
         String choice = event.getOption("choice").getAsString();
 

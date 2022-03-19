@@ -13,7 +13,6 @@ import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.item.actions.ItemActionStatus;
 import com.blank.humanity.discordbot.item.actions.messages.ItemActionMessageType;
 import com.blank.humanity.discordbot.services.BlankUserService;
 import com.blank.humanity.discordbot.utils.FormattingData;

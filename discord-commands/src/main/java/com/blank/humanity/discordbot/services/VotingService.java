@@ -26,72 +26,72 @@ public class VotingService {
 
     @Transactional
     public List<SubcommandData> createVoteSubcommands() {
-	return votingCampaignDao
-		.findByIsRunning(true)
-		.stream()
-		.map(this::subcommandFromVotingCampaign)
-		.toList();
+        return votingCampaignDao
+            .findByIsRunning(true)
+            .stream()
+            .map(this::subcommandFromVotingCampaign)
+            .toList();
     }
 
     @Transactional
     private SubcommandData subcommandFromVotingCampaign(
-	    VotingCampaign votingCampaign) {
-	SubcommandData subcommandData = new SubcommandData(
-		votingCampaign.getName(), votingCampaign.getDescription());
+        VotingCampaign votingCampaign) {
+        SubcommandData subcommandData = new SubcommandData(
+            votingCampaign.getName(), votingCampaign.getDescription());
 
-	OptionData choiceData = new OptionData(OptionType.STRING, "choice",
-		"Your Voting Choice", true);
+        OptionData choiceData = new OptionData(OptionType.STRING, "choice",
+            "Your Voting Choice", true);
 
-	votingCampaign
-		.getChoices()
-		.stream()
-		.map(VoteChoice::getValue)
-		.forEach(str -> choiceData.addChoice(str, str));
+        votingCampaign
+            .getChoices()
+            .stream()
+            .map(VoteChoice::getValue)
+            .forEach(str -> choiceData.addChoice(str, str));
 
-	subcommandData.addOptions(choiceData);
+        subcommandData.addOptions(choiceData);
 
-	return subcommandData;
+        return subcommandData;
     }
 
     public boolean votingCampaignExists(String campaign) {
-	return votingCampaignDao.existsByName(campaign.toLowerCase());
+        return votingCampaignDao.existsByName(campaign.toLowerCase());
     }
 
     @Transactional
     public VotingCampaign createVotingCampaign(String campaign,
-	    String description) {
-	VotingCampaign votingCampaign = new VotingCampaign();
-	votingCampaign.setName(campaign.toLowerCase());
-	votingCampaign.setDescription(description);
-	return votingCampaignDao.save(votingCampaign);
+        String description) {
+        VotingCampaign votingCampaign = new VotingCampaign();
+        votingCampaign.setName(campaign.toLowerCase());
+        votingCampaign.setDescription(description);
+        return votingCampaignDao.save(votingCampaign);
     }
 
     @Transactional
     public Optional<VotingCampaign> getVotingCampaign(String campaign) {
-	return votingCampaignDao.findByName(campaign.toLowerCase());
+        return votingCampaignDao.findByName(campaign.toLowerCase());
     }
 
     public boolean hasUserVoted(VotingCampaign campaign, BlankUser user) {
-	return campaign
-		.getChoices()
-		.stream()
-		.flatMap(choice -> choice.getVotes().stream())
-		.anyMatch((Vote vote) -> vote.getUserId() == user.getId());
+        return campaign
+            .getChoices()
+            .stream()
+            .flatMap(choice -> choice.getVotes().stream())
+            .anyMatch((Vote vote) -> vote.getUserId() == user.getId());
     }
 
     @Transactional
     public void vote(BlankUser user, VotingCampaign campaign, String choice) {
-	VoteChoice voteChoice = campaign
-		.getChoices()
-		.stream()
-		.filter(vote -> vote.getValue().equalsIgnoreCase(choice))
-		.findAny()
-		.get();
-	voteChoice.getVotes().add(new Vote(voteChoice, user.getId()));
+        VoteChoice voteChoice = campaign
+            .getChoices()
+            .stream()
+            .filter(vote -> vote.getValue().equalsIgnoreCase(choice))
+            .findAny()
+            .orElseThrow();
+        voteChoice.getVotes().add(new Vote(voteChoice, user.getId()));
     }
 
     public List<VotingCampaign> getVotingCampaigns() {
-	return votingCampaignDao.findAll();
+        return votingCampaignDao.findAll();
     }
 
 }

@@ -11,7 +11,6 @@ import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.item.actions.ItemActionStatus;
 import com.blank.humanity.discordbot.item.actions.messages.ItemActionFormatDataKey;
 import com.blank.humanity.discordbot.item.actions.messages.ItemActionMessageType;
 import com.blank.humanity.discordbot.services.BlankUserService;
