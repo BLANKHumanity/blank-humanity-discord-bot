@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -100,25 +101,7 @@ public abstract class CommandUnitTest<C extends AbstractCommand> {
             .setCommandService(commandService);
 
         when(messageService.format(any(FormattingData.class)))
-            .then(invocation -> {
-                FormattingData data = invocation
-                    .getArgument(0, FormattingData.class);
-                int index = messageIndex
-                    .compute(data.messageType(),
-                        (key, val) -> val == null ? 0 : val + 1);
-                assertThat(messageFormats.get(data.messageType()))
-                    .as("MessageType %s has not been mocked for Formatting",
-                        data
-                            .messageType()
-                            .toString())
-                    .isNotNull()
-                    .as("MessageType %s has been formatted more than the available Mocks allow (current: %d",
-                        data.messageType().toString(), index)
-                    .hasSizeGreaterThan(index);
-                return NamedFormatter
-                    .namedFormat(messageFormats.get(data.messageType())[index],
-                        data.getDataPairings());
-            });
+            .then(this::formatMockedInvocation);
         when(messageService.format(any(FormattingData[].class)))
             .then(invocation -> Stream
                 .of(invocation.getArgument(0, FormattingData[].class))
@@ -143,6 +126,26 @@ public abstract class CommandUnitTest<C extends AbstractCommand> {
         commandData = (SlashCommandData) commandMock
             .createCommandData(commandData, definition);
         testCreateCommandData(commandData);
+    }
+
+    private String formatMockedInvocation(InvocationOnMock invocation) {
+        FormattingData data = invocation
+            .getArgument(0, FormattingData.class);
+        int index = messageIndex
+            .compute(data.messageType(),
+                (key, val) -> val == null ? 0 : val + 1);
+        assertThat(messageFormats.get(data.messageType()))
+            .as("MessageType %s has not been mocked for Formatting",
+                data
+                    .messageType()
+                    .toString())
+            .isNotNull()
+            .as("MessageType %s has been formatted more than the available Mocks allow (current: %d",
+                data.messageType().toString(), index)
+            .hasSizeGreaterThan(index);
+        return NamedFormatter
+            .namedFormat(messageFormats.get(data.messageType())[index],
+                data.getDataPairings());
     }
 
     /**
@@ -243,22 +246,26 @@ public abstract class CommandUnitTest<C extends AbstractCommand> {
     protected void mockServiceCreateFormatting(BlankUser user,
         MessageType type) {
         when(blankUserService.createFormattingData(user, type))
-            .then(invocation -> {
-                FormattingData.FormattingDataBuilder builder = FormattingData
-                    .builder()
-                    .dataPairing(
-                        CustomFormatDataKey.key("balance"), user.getBalance())
-                    .messageType(type);
-                String username = blankUserService.getUsername(user);
-                if (username != null) {
-                    builder
-                        .dataPairing(GenericFormatDataKey.USER,
-                            blankUserService.getUsername(user))
-                        .dataPairing(GenericFormatDataKey.USER_MENTION,
-                            blankUserService.getUsername(user));
-                }
-                return builder;
-            });
+            .then(invocation -> mockedCreateFormattingData(invocation, user,
+                type));
+    }
+
+    private FormattingData.FormattingDataBuilder mockedCreateFormattingData(
+        InvocationOnMock invocation, BlankUser user, MessageType type) {
+        FormattingData.FormattingDataBuilder builder = FormattingData
+            .builder()
+            .dataPairing(
+                CustomFormatDataKey.key("balance"), user.getBalance())
+            .messageType(type);
+        String username = blankUserService.getUsername(user);
+        if (username != null) {
+            builder
+                .dataPairing(GenericFormatDataKey.USER,
+                    blankUserService.getUsername(user))
+                .dataPairing(GenericFormatDataKey.USER_MENTION,
+                    blankUserService.getUsername(user));
+        }
+        return builder;
     }
 
     @SuppressWarnings("unchecked")
