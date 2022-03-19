@@ -1,7 +1,8 @@
-package com.blank.humanity.discordbot.itemActions;
+package com.blank.humanity.discordbot.item.actions;
 
 import javax.validation.constraints.NotNull;
 
+import com.blank.humanity.discordbot.itemActions.ItemAction;
 import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;
 
 import lombok.AllArgsConstructor;
