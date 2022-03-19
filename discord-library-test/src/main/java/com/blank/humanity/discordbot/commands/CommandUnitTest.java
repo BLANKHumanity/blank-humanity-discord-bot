@@ -199,6 +199,7 @@ public abstract class CommandUnitTest<C extends AbstractCommand> {
         commandMock.setCommandEvent(event);
         commandMock.onCommand(event);
         assertThat(commandMock.getUnsentReply())
+            .as("Command has not issued any Reply")
             .isNotNull()
             .hasAtLeastOneElementOfType(MessageEmbed.class);
         return commandMock.getUnsentReply();

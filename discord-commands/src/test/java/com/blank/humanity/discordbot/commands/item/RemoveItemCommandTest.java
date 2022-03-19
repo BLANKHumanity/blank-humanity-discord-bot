@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import com.blank.humanity.discordbot.commands.CommandUnitTest;
-import com.blank.humanity.discordbot.commands.items.GiveItemCommand;
+import com.blank.humanity.discordbot.commands.items.RemoveItemCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
@@ -33,13 +34,13 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-class GiveItemCommandTest extends CommandUnitTest<GiveItemCommand> {
+class RemoveItemCommandTest extends CommandUnitTest<RemoveItemCommand> {
 
     @Mock
     private InventoryService inventoryService;
 
-    protected GiveItemCommandTest() {
-        super(GiveItemCommand.class);
+    protected RemoveItemCommandTest() {
+        super(RemoveItemCommand.class);
     }
 
     @BeforeEach
@@ -57,7 +58,7 @@ class GiveItemCommandTest extends CommandUnitTest<GiveItemCommand> {
     }
 
     @Test
-    void testGiveSingleItem(@Mock BlankUser user, @Mock Member receiver,
+    void testRemoveSingleItem(@Mock BlankUser user, @Mock Member receiver,
         @Mock BlankUser receiverUser, @Mock ItemDefinition itemDefinition) {
         String itemName = "testItem";
         int itemId = 34;
@@ -66,13 +67,14 @@ class GiveItemCommandTest extends CommandUnitTest<GiveItemCommand> {
         when(itemDefinition.getName()).thenReturn(itemName);
         when(inventoryService.getItemDefinition(itemName))
             .thenReturn(Optional.of(itemDefinition));
-        when(inventoryService.removeItem(user, itemId, 1)).thenReturn(true);
+        when(inventoryService.removeItem(receiverUser, itemId, 1))
+            .thenReturn(true);
 
         mockReceivingUser(receiver, receiverUser);
 
-        mockServiceCreateFormatting(user, ItemMessageType.ITEM_GIVE_SUCCESS);
+        mockServiceCreateFormatting(user, ItemMessageType.ITEM_REMOVE_SUCCESS);
 
-        mockMessageFormats(ItemMessageType.ITEM_GIVE_SUCCESS,
+        mockMessageFormats(ItemMessageType.ITEM_REMOVE_SUCCESS,
             "%(itemName):%(itemId):%(itemAmount)");
 
         GenericCommandInteractionEvent event = mockCommandEvent(user,
@@ -83,12 +85,11 @@ class GiveItemCommandTest extends CommandUnitTest<GiveItemCommand> {
             .hasSize(1)
             .anyMatch(embedHasDescription(itemName + ":" + itemId + ":1"));
 
-        verify(inventoryService)
-            .giveItem(receiverUser, itemDefinition.getId(), 1);
+        verify(inventoryService).removeItem(receiverUser, itemId, 1);
     }
 
     @Test
-    void testGiveMultipleItems(@Mock BlankUser user, @Mock Member receiver,
+    void testRemoveMultipleItems(@Mock BlankUser user, @Mock Member receiver,
         @Mock BlankUser receiverUser, @Mock ItemDefinition itemDefinition) {
         String itemName = "testItem";
         int itemId = 34;
@@ -98,14 +99,14 @@ class GiveItemCommandTest extends CommandUnitTest<GiveItemCommand> {
         when(itemDefinition.getName()).thenReturn(itemName);
         when(inventoryService.getItemDefinition(itemName))
             .thenReturn(Optional.of(itemDefinition));
-        when(inventoryService.removeItem(user, itemId, amount))
+        when(inventoryService.removeItem(receiverUser, itemId, amount))
             .thenReturn(true);
 
         mockReceivingUser(receiver, receiverUser);
 
-        mockServiceCreateFormatting(user, ItemMessageType.ITEM_GIVE_SUCCESS);
+        mockServiceCreateFormatting(user, ItemMessageType.ITEM_REMOVE_SUCCESS);
 
-        mockMessageFormats(ItemMessageType.ITEM_GIVE_SUCCESS,
+        mockMessageFormats(ItemMessageType.ITEM_REMOVE_SUCCESS,
             "%(itemName):%(itemId):%(itemAmount)");
 
         GenericCommandInteractionEvent event = mockCommandEvent(user,
@@ -118,23 +119,24 @@ class GiveItemCommandTest extends CommandUnitTest<GiveItemCommand> {
             .anyMatch(
                 embedHasDescription(itemName + ":" + itemId + ":" + amount));
 
-        verify(inventoryService)
-            .giveItem(receiverUser, itemDefinition.getId(), amount);
+        verify(inventoryService).removeItem(receiverUser, itemId, amount);
     }
 
     @Test
-    void testGiveItemNotOwned(@Mock BlankUser user, @Mock Member receiver,
+    void testRemoveItemNotOwned(@Mock BlankUser user, @Mock Member receiver,
         @Mock BlankUser receiverUser, @Mock ItemDefinition itemDefinition) {
         String itemName = "testItem";
         int itemId = 34;
 
         when(itemDefinition.getId()).thenReturn(itemId);
-        when(itemDefinition.getName()).thenReturn(itemName);
         when(inventoryService.getItemDefinition(itemName))
             .thenReturn(Optional.of(itemDefinition));
-        when(inventoryService.removeItem(user, itemId, 1)).thenReturn(false);
+        when(inventoryService.removeItem(receiverUser, itemId, 1))
+            .thenReturn(false);
 
-        mockServiceCreateFormatting(user,
+        mockReceivingUser(receiver, receiverUser);
+
+        mockServiceCreateFormatting(receiverUser,
             ItemMessageType.ITEM_GIVE_NOT_ENOUGH_OWNED);
 
         mockMessageFormats(ItemMessageType.ITEM_GIVE_NOT_ENOUGH_OWNED,
@@ -147,13 +149,10 @@ class GiveItemCommandTest extends CommandUnitTest<GiveItemCommand> {
         assertThat(callCommand(event))
             .hasSize(1)
             .anyMatch(embedHasDescription(itemName + ":" + itemId + ":1"));
-
-        verify(inventoryService, never())
-            .giveItem(any(), anyInt(), anyInt());
     }
 
     @Test
-    void testGiveUnknownItem(@Mock BlankUser user) {
+    void testRemoveUnknownItem(@Mock BlankUser user) {
         String itemName = "testItem";
 
         when(inventoryService.getItemDefinition(itemName))
@@ -185,22 +184,47 @@ class GiveItemCommandTest extends CommandUnitTest<GiveItemCommand> {
             optionMapping(OptionType.STRING, "item", itemName));
 
         when(inventoryService
-            .autoCompleteUserItems(user, itemName.toLowerCase()))
+            .autoCompleteItems(itemName.toLowerCase()))
+                .thenReturn(list);
+
+        assertThat(callAutocomplete(event)).isEqualTo(list);
+    }
+
+    @Test
+    void testAutocompleteUser(@Mock BlankUser user, @Mock Member member,
+        @Mock BlankUser receiver) {
+        String itemName = "testIt";
+
+        List<Command.Choice> list = new LinkedList<>();
+
+        CommandAutoCompleteInteractionEvent event = mockAutocompleteEvent(user,
+            optionMapping(OptionType.STRING, "item", itemName),
+            optionMapping(OptionType.USER, "user", member));
+
+        mockReceivingUser(member, receiver);
+
+        when(inventoryService
+            .autoCompleteUserItems(receiver, itemName.toLowerCase()))
                 .thenReturn(list);
 
         assertThat(callAutocomplete(event)).isEqualTo(list);
     }
 
     private void mockReceivingUser(Member receiver, BlankUser receiverUser) {
-        when(blankUserService
-            .addUserDetailsFormattingData(any(), eq(receiverUser),
-                eq(GenericFormatDataKey.RECEIVING_USER),
-                eq(GenericFormatDataKey.RECEIVING_USER_MENTION)))
-                    .then(invocation -> invocation
-                        .getArgument(0,
-                            FormattingData.FormattingDataBuilder.class));
+        lenient()
+            .when(blankUserService
+                .addUserDetailsFormattingData(any(), eq(receiverUser),
+                    eq(GenericFormatDataKey.RECEIVING_USER),
+                    eq(GenericFormatDataKey.RECEIVING_USER_MENTION)))
+            .then(invocation -> invocation
+                .getArgument(0,
+                    FormattingData.FormattingDataBuilder.class));
 
-        when(blankUserService.getUser(any(OptionMapping.class)))
+        lenient()
+            .when(blankUserService.getUser(receiver))
+            .thenReturn(receiverUser);
+        lenient()
+            .when(blankUserService.getUser(any(OptionMapping.class)))
             .then(invocation -> {
                 if (invocation
                     .getArgument(0, OptionMapping.class)

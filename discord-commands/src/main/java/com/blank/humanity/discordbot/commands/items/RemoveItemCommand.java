@@ -16,6 +16,8 @@ import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.InventoryService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
+import lombok.Setter;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -31,7 +33,7 @@ public class RemoveItemCommand extends AbstractCommand {
     private static final String ITEM = "item";
     private static final String AMOUNT = "amount";
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private InventoryService inventoryService;
 
     @Override
@@ -117,11 +119,10 @@ public class RemoveItemCommand extends AbstractCommand {
             .getOption(ITEM, () -> "", OptionMapping::getAsString)
             .toLowerCase();
 
-        Long userId = event.getOption(USER, OptionMapping::getAsLong);
+        Member member = event.getOption(USER, OptionMapping::getAsMember);
 
-        if (userId != null) {
-            BlankUser mentionedUser = getBlankUserService()
-                .getUser(userId, event.getGuild().getIdLong());
+        if (member != null) {
+            BlankUser mentionedUser = getBlankUserService().getUser(member);
             return inventoryService
                 .autoCompleteUserItems(mentionedUser, itemName);
         } else {
