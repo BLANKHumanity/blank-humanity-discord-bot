@@ -3,61 +3,27 @@ package com.blank.humanity.discordbot.commands.items;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
-import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.services.InventoryService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
-import lombok.Setter;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
-public class RemoveItemCommand extends AbstractCommand {
-
-    private static final String USER = "user";
-    private static final String ITEM = "item";
-    private static final String AMOUNT = "amount";
-
-    @Setter(onMethod = @__({ @Autowired }))
-    private InventoryService inventoryService;
+public class RemoveItemCommand extends ItemInteractionCommand {
 
     @Override
     public String getCommandName() {
         return "remove-item";
-    }
-
-    @Override
-    public SlashCommandData createCommandData(SlashCommandData commandData,
-        CommandDefinition definition) {
-        commandData
-            .addOption(OptionType.USER, USER,
-                definition.getOptionDescription(USER),
-                true);
-        commandData
-            .addOption(OptionType.STRING, ITEM,
-                definition.getOptionDescription(ITEM),
-                true, true);
-        OptionData data = new OptionData(OptionType.INTEGER, AMOUNT,
-            definition.getOptionDescription(AMOUNT), false);
-        data.setMinValue(1);
-        commandData.addOptions(data);
-
-        return commandData;
     }
 
     @Override

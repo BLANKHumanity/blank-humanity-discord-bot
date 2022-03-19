@@ -61,8 +61,7 @@ public class MenuServiceImpl implements MenuService, EventListener {
         @NonNull Consumer<ButtonInteractionEvent> eventConsumer)
         throws NonUniqueInteractionId {
         if (buttonListeners.containsKey(uniqueId)) {
-            throw new NonUniqueInteractionId(
-                "Interaction Id '" + uniqueId + "' already exists!");
+            throw new NonUniqueInteractionId(uniqueId);
         }
         addIdToMenuMap(menu, uniqueId);
         buttonListeners.put(uniqueId, eventConsumer);
@@ -74,8 +73,7 @@ public class MenuServiceImpl implements MenuService, EventListener {
         @NonNull Consumer<SelectMenuInteractionEvent> eventConsumer)
         throws NonUniqueInteractionId {
         if (selectMenuListeners.containsKey(uniqueId)) {
-            throw new NonUniqueInteractionId(
-                "Interaction Id '" + uniqueId + "' already exists!");
+            throw new NonUniqueInteractionId(uniqueId);
         }
         addIdToMenuMap(menu, uniqueId);
         selectMenuListeners.put(uniqueId, eventConsumer);
@@ -87,8 +85,7 @@ public class MenuServiceImpl implements MenuService, EventListener {
         @NonNull Consumer<MessageReactionAddEvent> eventConsumer)
         throws NonUniqueInteractionId {
         if (reactionAddListeners.containsKey(messageId)) {
-            throw new NonUniqueInteractionId(
-                "Interaction Listener Id '" + messageId + "' already exists!");
+            throw new NonUniqueInteractionId(String.valueOf(messageId));
         }
         addIdToMenuMap(menu, messageId);
         reactionAddListeners.put(messageId, eventConsumer);

@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.itemActions;
+package com.blank.humanity.discordbot.item.actions;
 
 import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;
 

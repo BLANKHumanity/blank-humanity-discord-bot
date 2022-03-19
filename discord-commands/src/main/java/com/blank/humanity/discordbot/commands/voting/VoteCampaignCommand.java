@@ -117,7 +117,8 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
         case START -> start(event);
         case STOP -> stop(event);
         case LIST -> list();
-        default -> throw new RuntimeException("Unknown Subcommand");
+        default -> throw new UnsupportedOperationException(
+            "Unknown Subcommand");
         }
     }
 

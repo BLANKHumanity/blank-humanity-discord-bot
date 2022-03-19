@@ -13,7 +13,7 @@ import lombok.Data;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix="items")
+@ConfigurationProperties(prefix = "items")
 public class ItemConfiguration {
 
     @NotNull
@@ -21,10 +21,10 @@ public class ItemConfiguration {
     private List<ItemDefinition> definitions;
 
     public Optional<ItemDefinition> getItemDefinition(int id) {
-	return definitions
-		.stream()
-		.filter((item) -> item.getId() == id)
-		.findFirst();
+        return definitions
+            .stream()
+            .filter(item -> item.getId() == id)
+            .findFirst();
     }
 
 }
