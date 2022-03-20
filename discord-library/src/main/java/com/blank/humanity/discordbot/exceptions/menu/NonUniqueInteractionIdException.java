@@ -3,9 +3,9 @@ package com.blank.humanity.discordbot.exceptions.menu;
 import lombok.experimental.StandardException;
 
 @StandardException
-public class NonUniqueInteractionId extends RuntimeException {
+public class NonUniqueInteractionIdException extends RuntimeException {
 
-    public NonUniqueInteractionId(String duplicateId) {
+    public NonUniqueInteractionIdException(String duplicateId) {
         super("Interaction Id '" + duplicateId + "' already exists!");
     }
 

@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
-import com.blank.humanity.discordbot.exceptions.menu.NonUniqueInteractionId;
+import com.blank.humanity.discordbot.exceptions.menu.NonUniqueInteractionIdException;
 import com.blank.humanity.discordbot.utils.Wrapper;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
@@ -59,9 +59,9 @@ public class MenuServiceImpl implements MenuService, EventListener {
     public void registerButtonInteraction(@NonNull DiscordMenu menu,
         String uniqueId,
         @NonNull Consumer<ButtonInteractionEvent> eventConsumer)
-        throws NonUniqueInteractionId {
+        throws NonUniqueInteractionIdException {
         if (buttonListeners.containsKey(uniqueId)) {
-            throw new NonUniqueInteractionId(uniqueId);
+            throw new NonUniqueInteractionIdException(uniqueId);
         }
         addIdToMenuMap(menu, uniqueId);
         buttonListeners.put(uniqueId, eventConsumer);
@@ -71,9 +71,9 @@ public class MenuServiceImpl implements MenuService, EventListener {
     public void registerSelectMenuInteraction(@NonNull DiscordMenu menu,
         String uniqueId,
         @NonNull Consumer<SelectMenuInteractionEvent> eventConsumer)
-        throws NonUniqueInteractionId {
+        throws NonUniqueInteractionIdException {
         if (selectMenuListeners.containsKey(uniqueId)) {
-            throw new NonUniqueInteractionId(uniqueId);
+            throw new NonUniqueInteractionIdException(uniqueId);
         }
         addIdToMenuMap(menu, uniqueId);
         selectMenuListeners.put(uniqueId, eventConsumer);
@@ -83,9 +83,9 @@ public class MenuServiceImpl implements MenuService, EventListener {
     public void registerReactionAddInteraction(@NonNull DiscordMenu menu,
         long messageId,
         @NonNull Consumer<MessageReactionAddEvent> eventConsumer)
-        throws NonUniqueInteractionId {
+        throws NonUniqueInteractionIdException {
         if (reactionAddListeners.containsKey(messageId)) {
-            throw new NonUniqueInteractionId(String.valueOf(messageId));
+            throw new NonUniqueInteractionIdException(String.valueOf(messageId));
         }
         addIdToMenuMap(menu, messageId);
         reactionAddListeners.put(messageId, eventConsumer);
