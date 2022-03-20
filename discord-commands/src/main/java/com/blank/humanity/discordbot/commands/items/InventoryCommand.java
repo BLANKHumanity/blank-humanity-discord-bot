@@ -45,7 +45,7 @@ public class InventoryCommand extends AbstractCommand {
         BlankUser user = event
             .getOption("user", this::getUser, getBlankUserService()::getUser);
 
-        FormattingData.FormattingDataBuilder builder = blankUserService
+        FormattingData.FormattingDataBuilder builder = getBlankUserService()
             .createFormattingData(user, null);
 
         String inventoryDisplay = user
@@ -54,7 +54,7 @@ public class InventoryCommand extends AbstractCommand {
             .map(item -> generateItemDescription(item, builder))
             .collect(Collectors.joining("\n"));
 
-        FormattingData inventoryViewer = blankUserService
+        FormattingData inventoryViewer = getBlankUserService()
             .createFormattingData(user, ItemMessageType.INVENTORY_DISPLAY)
             .dataPairing(ItemFormatDataKey.INVENTORY_BODY, inventoryDisplay)
             .build();

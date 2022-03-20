@@ -16,6 +16,10 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 @Component
 public class GiveCoinsCommand extends AbstractCommand {
 
+    private static final String USER = "user";
+
+    private static final String AMOUNT = "amount";
+
     @Override
     public String getCommandName() {
         return "give-coins";
@@ -25,22 +29,22 @@ public class GiveCoinsCommand extends AbstractCommand {
     public SlashCommandData createCommandData(SlashCommandData commandData,
         CommandDefinition definition) {
         commandData
-            .addOption(OptionType.USER, "user",
-                definition.getOptionDescription("user"),
+            .addOption(OptionType.USER, USER,
+                definition.getOptionDescription(USER),
                 true);
         commandData
-            .addOption(OptionType.INTEGER, "amount",
-                definition.getOptionDescription("amount"),
+            .addOption(OptionType.INTEGER, AMOUNT,
+                definition.getOptionDescription(AMOUNT),
                 true);
         return commandData;
     }
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {
-        Member receiver = event.getOption("user").getAsMember();
+        Member receiver = event.getOption(USER).getAsMember();
         BlankUser receivingUser = getBlankUserService().getUser(receiver);
 
-        int amount = (int) event.getOption("amount").getAsLong();
+        int amount = (int) event.getOption(AMOUNT).getAsLong();
 
         getBlankUserService().increaseUserBalance(receivingUser, amount);
         reply(getBlankUserService()

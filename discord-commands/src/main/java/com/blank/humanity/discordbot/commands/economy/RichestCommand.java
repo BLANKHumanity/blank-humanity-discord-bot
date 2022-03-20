@@ -1,30 +1,34 @@
 package com.blank.humanity.discordbot.commands.economy;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.validation.constraints.Min;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.util.Pair;
+import org.springframework.data.util.StreamUtils;
 import org.springframework.stereotype.Component;
 
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyMessageType;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
-import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
-import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class RichestCommand extends AbstractCommand {
+
+    private static final String PAGE = "page";
 
     @Override
     public String getCommandName() {
@@ -34,50 +38,31 @@ public class RichestCommand extends AbstractCommand {
     @Override
     public SlashCommandData createCommandData(SlashCommandData commandData,
         CommandDefinition definition) {
+        OptionData page = new OptionData(OptionType.INTEGER, PAGE,
+            definition.getOptionDescription(PAGE));
+        page.setMinValue(1);
         commandData
-            .addOption(OptionType.INTEGER, "page",
-                definition.getOptionDescription("page"));
+            .addOptions(page);
         return commandData;
     }
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {
-        long page = Optional
-            .ofNullable(event.getOption("page"))
-            .map(OptionMapping::getAsLong)
-            .orElse(1L);
-        BlankUser user = getUser();
+        int page = event
+            .getOption(PAGE, 1L, OptionMapping::getAsLong)
+            .intValue();
 
-        if (page < 1) {
-            reply(blankUserService
-                .createFormattingData(user,
-                    GenericMessageType.ERROR_MESSAGE)
-                .dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
-                    "Page needs to be bigger than 0")
-                .build());
-            return;
-        }
+        Stream<BlankUser> richestUsers = getBlankUserService()
+            .listUsers(Sort.by(Direction.DESC, "balance"), (page - 1))
+            .stream();
 
-        List<BlankUser> richestUsers = blankUserService
-            .listUsers(Sort.by(Direction.DESC, "balance"), (int) (page - 1))
-            .toList();
+        String body = zipWithIndex(richestUsers)
+            .map(pair -> formatLeaderboardEntry(pair, page))
+            .collect(Collectors.joining("\n"));
 
-        StringBuilder body = new StringBuilder();
-
-        for (int i = 0; i < richestUsers.size(); i++) {
-            body
-                .append(getMessageService()
-                    .format(blankUserService
-                        .createFormattingData(richestUsers.get(i),
-                            EconomyMessageType.RICHEST_COMMAND_ENTRY)
-                        .dataPairing(EconomyFormatDataKey.LEADERBOARD_PLACE,
-                            getLeaderboardRanking(page, i))
-                        .build()));
-            body.append("\n");
-        }
-
-        FormattingData data = blankUserService
-            .createFormattingData(user, EconomyMessageType.RICHEST_COMMAND)
+        FormattingData data = FormattingData
+            .builder()
+            .messageType(EconomyMessageType.RICHEST_COMMAND)
             .dataPairing(EconomyFormatDataKey.RICHEST_LIST_PAGE, page)
             .dataPairing(EconomyFormatDataKey.RICHEST_COMMAND_BODY, body)
             .build();
@@ -85,9 +70,26 @@ public class RichestCommand extends AbstractCommand {
         reply(data);
     }
 
-    public long getLeaderboardRanking(@Min(1) long page, @Min(0) int index) {
-        return (page - 1) * blankUserService.getUserListPageSize()
+    private String formatLeaderboardEntry(Pair<BlankUser, Integer> userAndIndex,
+        int page) {
+        return getMessageService()
+            .format(getBlankUserService()
+                .createFormattingData(userAndIndex.getFirst(),
+                    EconomyMessageType.RICHEST_COMMAND_ENTRY)
+                .dataPairing(EconomyFormatDataKey.LEADERBOARD_PLACE,
+                    getLeaderboardRanking(page, userAndIndex.getSecond()))
+                .build());
+    }
+
+    private long getLeaderboardRanking(@Min(1) long page, @Min(0) int index) {
+        return (page - 1) * getBlankUserService().getUserListPageSize()
             + (index + 1);
+    }
+
+    private Stream<Pair<BlankUser, Integer>> zipWithIndex(
+        Stream<BlankUser> users) {
+        return StreamUtils
+            .zip(users, IntStream.iterate(0, i -> i + 1).boxed(), Pair::of);
     }
 
 }

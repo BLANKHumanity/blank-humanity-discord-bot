@@ -10,6 +10,7 @@ import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.services.InventoryService;
 
+import lombok.Setter;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -24,7 +25,7 @@ public class ItemUseCommand extends AbstractCommand {
     private static final String ITEM = "item";
     private static final String AMOUNT = "amount";
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private InventoryService inventoryService;
 
     @Override
@@ -48,16 +49,14 @@ public class ItemUseCommand extends AbstractCommand {
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {
-        OptionMapping item = event.getOption(ITEM);
+        String item = event.getOption(ITEM, OptionMapping::getAsString);
 
-        int amount = Optional
-            .ofNullable(event.getOption(AMOUNT))
-            .map(OptionMapping::getAsLong)
-            .orElse(1l)
+        int amount = event
+            .getOption(AMOUNT, 1l, OptionMapping::getAsLong)
             .intValue();
 
         inventoryService
-            .useItem(getUser(), item.getAsString(), amount, this::reply);
+            .useItem(getUser(), item, amount, this::reply);
     }
 
     @Override

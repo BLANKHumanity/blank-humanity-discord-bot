@@ -43,28 +43,28 @@ public class VotingCampaign {
 
     @NotNull
     @OneToMany(mappedBy = "votingCampaign", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<VoteChoice> choices = new ArrayList<VoteChoice>();
+    private List<VoteChoice> choices = new ArrayList<>();
 
     public void addChoice(String choice) {
-	VoteChoice voteChoice = new VoteChoice();
-	voteChoice.setVotingCampaign(this);
-	voteChoice.setValue(choice);
-	choices.add(voteChoice);
+        VoteChoice voteChoice = new VoteChoice();
+        voteChoice.setVotingCampaign(this);
+        voteChoice.setValue(choice);
+        choices.add(voteChoice);
     }
 
     @Transactional
     public boolean removeChoice(String choice) {
-	Optional<VoteChoice> foundChoice = choices
-		.stream()
-		.filter(voteChoice -> voteChoice
-			.getValue()
-			.equalsIgnoreCase(choice))
-		.findAny();
-	if (foundChoice.isEmpty()) {
-	    return false;
-	}
-	choices.remove(foundChoice.get());
-	return true;
+        Optional<VoteChoice> foundChoice = choices
+            .stream()
+            .filter(voteChoice -> voteChoice
+                .getValue()
+                .equalsIgnoreCase(choice))
+            .findAny();
+        if (foundChoice.isEmpty()) {
+            return false;
+        }
+        choices.remove(foundChoice.get());
+        return true;
     }
 
 }

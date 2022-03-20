@@ -10,6 +10,7 @@ import com.blank.humanity.discordbot.commands.games.messages.GameMessageType;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.economy.NotEnoughBalanceException;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
@@ -55,33 +56,35 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
         BlankUser user,
         GameMetadata metadata) {
         int betAmount = (int) event.getOption("bet").getAsLong();
-        if (betAmount > user.getBalance()) {
+
+        try {
+            getBlankUserService().decreaseUserBalance(getUser(), betAmount);
+        } catch (NotEnoughBalanceException e) {
             reply(getBlankUserService()
                 .createFormattingData(user,
                     GameMessageType.GAME_BET_NOT_ENOUGH_MONEY)
                 .dataPairing(GameFormatDataKey.BET_AMOUNT, betAmount)
                 .build());
             abort(metadata);
-        } else {
-
-            int opponentRoll = random.nextInt(3);
-
-            int userSelection = selectionToInt(
-                event.getOption(CHOICE).getAsString());
-
-            char result = resultMap[opponentRoll][userSelection];
-
-            switch (result) {
-            case 't' -> tie(betAmount, userSelection, opponentRoll);
-            case 'w' -> win(betAmount, userSelection, opponentRoll);
-            case 'l' -> loss(betAmount, userSelection, opponentRoll);
-            default -> throw new IllegalArgumentException(
-                "RPS Result can only be 't', 'w', or 'l', but it is '" + result
-                    + "'!");
-            }
-
-            finish(metadata);
         }
+
+        int opponentRoll = random.nextInt(3);
+
+        int userSelection = selectionToInt(
+            event.getOption(CHOICE).getAsString());
+
+        char result = resultMap[opponentRoll][userSelection];
+
+        switch (result) {
+        case 't' -> tie(betAmount, userSelection, opponentRoll);
+        case 'w' -> win(betAmount, userSelection, opponentRoll);
+        case 'l' -> loss(betAmount, userSelection, opponentRoll);
+        default -> throw new IllegalArgumentException(
+            "RPS Result can only be 't', 'w', or 'l', but it is '" + result
+                + "'!");
+        }
+
+        finish(metadata);
         return null;
     }
 
@@ -106,8 +109,6 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
     }
 
     private void loss(int betAmount, int userSel, int botSel) {
-        getBlankUserService().decreaseUserBalance(getUser(), betAmount);
-
         FormattingData result = getBlankUserService()
             .createFormattingData(getUser(),
                 GameMessageType.ROCK_PAPER_SCISSORS_LOSS)
@@ -123,7 +124,7 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
     private void win(int betAmount, int userSel, int botSel) {
         int reward = calculateWinnings(betAmount);
         getBlankUserService()
-            .increaseUserBalance(getUser(), reward - betAmount);
+            .increaseUserBalance(getUser(), reward);
 
         FormattingData result = getBlankUserService()
             .createFormattingData(getUser(),
@@ -139,6 +140,9 @@ public class RockPaperScissorsGameCommand extends AbstractGame {
     }
 
     private void tie(int betAmount, int userSel, int botSel) {
+        getBlankUserService()
+            .increaseUserBalance(getUser(), betAmount);
+
         FormattingData result = getBlankUserService()
             .createFormattingData(getUser(),
                 GameMessageType.ROCK_PAPER_SCISSORS_TIE)

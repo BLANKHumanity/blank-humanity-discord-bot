@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.economy.NotEnoughBalanceException;
 import com.blank.humanity.discordbot.services.BlankUserService;
 import com.blank.humanity.discordbot.services.InventoryService;
 
@@ -80,7 +81,12 @@ public class FunPlaceShopService {
             return ItemBuyStatus.NO_AVAILABLE_SUPPLY;
         }
 
-        blankUserService.decreaseUserBalance(user, item.getPrice() * amount);
+        try {
+            blankUserService
+                .decreaseUserBalance(user, item.getPrice() * amount);
+        } catch (NotEnoughBalanceException e) {
+            return ItemBuyStatus.NOT_ENOUGH_MONEY;
+        }
         inventoryService.giveItem(user, item.getItemId(), amount);
         buyLogDao
             .save(FunPlaceBuyLogEntry

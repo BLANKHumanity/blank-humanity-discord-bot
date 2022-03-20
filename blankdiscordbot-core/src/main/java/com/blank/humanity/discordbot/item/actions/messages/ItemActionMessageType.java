@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.itemActions.messages;
+package com.blank.humanity.discordbot.item.actions.messages;
 
 import java.util.Optional;
 

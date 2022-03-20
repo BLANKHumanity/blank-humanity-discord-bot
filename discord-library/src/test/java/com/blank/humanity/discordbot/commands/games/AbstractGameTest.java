@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -20,6 +21,7 @@ import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,11 +29,16 @@ import org.slf4j.Logger;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.blank.humanity.discordbot.commands.games.messages.GenericGameMessageType;
 import com.blank.humanity.discordbot.config.commands.games.GameConfig;
 import com.blank.humanity.discordbot.config.commands.games.GameDefinition;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.game.UnknownGameIdException;
+import com.blank.humanity.discordbot.services.BlankUserService;
 import com.blank.humanity.discordbot.services.GameService;
+import com.blank.humanity.discordbot.services.MessageService;
+import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
@@ -41,6 +48,9 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 class AbstractGameTest {
 
     @Mock
+    private BlankUserService blankUserService;
+
+    @Mock
     private GameConfig gameConfig;
 
     @Mock
@@ -48,6 +58,9 @@ class AbstractGameTest {
 
     @Mock
     private Logger log;
+
+    @Mock
+    private MessageService messageService;
 
     private AbstractGame game;
 
@@ -60,6 +73,10 @@ class AbstractGameTest {
             .setField(game, "gameService", gameService, GameService.class);
         ReflectionTestUtils
             .setField(game, "gameConfig", gameConfig, GameConfig.class);
+        ReflectionTestUtils
+            .setField(game, "blankUserService", blankUserService);
+        ReflectionTestUtils
+            .setField(game, "messageService", messageService);
     }
 
     @Test
@@ -113,14 +130,48 @@ class AbstractGameTest {
             .when(game)
             .onGameStart(Mockito.any(), Mockito.any(), Mockito.any());
 
-        ReflectionTestUtils.invokeMethod(game, "onCommand", event);
+        game.onCommand(event);
 
         verify(game).onGameStart(event, user, metadata);
         verify(localMenu).set(menu);
     }
 
     @Test
-    void retrieveGameMetadataNewTest() {
+    void testOnCommandNotAbleToPlay(@Mock BlankUser user,
+        @Mock GameMetadata metadata,
+        @Mock GenericCommandInteractionEvent event) {
+        GameDefinition gameDefinition = new GameDefinition();
+        gameDefinition.setCooldownAmount(1l);
+        gameDefinition.setCooldownTimeUnit(ChronoUnit.HOURS);
+
+        ArgumentCaptor<FormattingData> cooldownMessage = captureSingularReply();
+
+        setUser(user);
+        setGameDefinition(gameDefinition);
+        doReturn(Optional.of(metadata))
+            .when(gameService)
+            .getGameMetadata(Mockito.any(), Mockito.any());
+
+        when(metadata.getLastPlayed()).thenReturn(LocalDateTime.MAX);
+
+        when(blankUserService
+            .createFormattingData(user,
+                GenericGameMessageType.GAME_ON_COOLDOWN))
+                    .thenReturn(FormattingData
+                        .builder()
+                        .messageType(GenericGameMessageType.GAME_ON_COOLDOWN));
+
+        game.onCommand(event);
+
+        FormattingData cooldownMessageData = cooldownMessage.getValue();
+        assertThat(cooldownMessageData)
+            .isNotNull()
+            .matches(data -> data
+                .messageType() == GenericGameMessageType.GAME_ON_COOLDOWN);
+    }
+
+    @Test
+    void testRetrieveGameMetadataNewTest() {
         String commandName = "commandtest";
         setCommandName(commandName);
         BlankUser user = mock(BlankUser.class);
@@ -142,7 +193,7 @@ class AbstractGameTest {
     }
 
     @Test
-    void retrieveGameMetadataExistingTest() {
+    void testRetrieveGameMetadataExistingTest() {
         String commandName = "commandtest";
         setCommandName(commandName);
         BlankUser user = mock(BlankUser.class);
@@ -160,6 +211,65 @@ class AbstractGameTest {
         assertThat(metadata).isEqualTo(existingMetadata);
     }
 
+    @Test
+    void testCalculateWinnings() {
+        GameDefinition def = new GameDefinition();
+        def.setWinningsMultiplier(3.5d);
+
+        setGameDefinition(def);
+
+        assertThat(game.calculateWinnings(100)).isEqualTo(350);
+    }
+
+    @Test
+    void testAbortGame(@Mock GameMetadata metadata) {
+        game.abort(metadata);
+
+        verify(metadata).clearMetadata();
+        verify(metadata).setGameFinished(true);
+        verify(gameService).saveGameMetadata(metadata);
+    }
+
+    @Test
+    void testFinishGame() {
+        LocalDateTime startTime = LocalDateTime.now();
+
+        GameMetadata metadata = new GameMetadata();
+        metadata.setMetadata("Test");
+
+        game.finish(metadata);
+
+        assertThat(metadata.getMetadata()).isNull();
+        assertThat(metadata.isGameFinished()).isTrue();
+        assertThat(metadata.getLastPlayed())
+            .isBetween(startTime, LocalDateTime.now());
+        verify(gameService).saveGameMetadata(metadata);
+    }
+
+    @Test
+    void testFinishGameViaId(@Mock GameMetadata metadata) {
+        long id = 5;
+
+        doNothing().when(game).finish(Mockito.any(GameMetadata.class));
+        when(gameService.getGameMetadataById(id))
+            .thenReturn(Optional.of(metadata));
+
+        game.finish(id);
+
+        verify(game).finish(metadata);
+    }
+
+    @Test
+    void testFinishGameViaIdError(@Mock GameMetadata metadata) {
+        long id = 5;
+
+        when(gameService.getGameMetadataById(id))
+            .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> game.finish(id))
+            .isInstanceOf(UnknownGameIdException.class);
+    }
+
     private void setCommandName(String commandName) {
         doReturn(commandName).when(game).getCommandName();
     }
@@ -173,6 +283,16 @@ class AbstractGameTest {
 
     private void setGameDefinition(GameDefinition gameDefinition) {
         ReflectionTestUtils.setField(game, "gameDefinition", gameDefinition);
+    }
+
+    private ArgumentCaptor<FormattingData> captureSingularReply() {
+        ArgumentCaptor<FormattingData> captor = ArgumentCaptor
+            .forClass(FormattingData.class);
+
+        when(messageService.format(captor.capture()))
+            .thenReturn("TestText");
+
+        return captor;
     }
 
 }

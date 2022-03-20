@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 
-import com.blank.humanity.discordbot.exceptions.menu.NonUniqueInteractionId;
+import com.blank.humanity.discordbot.exceptions.menu.NonUniqueInteractionIdException;
 import com.blank.humanity.discordbot.services.MenuService;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
@@ -67,7 +67,8 @@ public class ReactionMenu implements DiscordMenu {
         this.menuActions.put(emoji, action);
     }
 
-    public void buildMenu(JDA jda, Message message, MenuService menuService) {
+    public void buildMenu(JDA jda, Message message, MenuService menuService)
+        throws NonUniqueInteractionIdException {
         this.jda = jda;
         this.messageId = message.getIdLong();
         this.guildChannelId = message.getChannel().getIdLong();
@@ -79,17 +80,9 @@ public class ReactionMenu implements DiscordMenu {
             .map(message::addReaction)
             .forEach(RestAction::complete);
 
-        try {
-            this.menuService
-                .registerReactionAddInteraction(this, messageId,
-                    this::onMessageReactionAdd);
-        } catch (NonUniqueInteractionId e) {
-            log
-                .error(
-                    "An Exception occured during reaction interaction registration",
-                    e);
-            throw new RuntimeException(e);
-        }
+        this.menuService
+            .registerReactionAddInteraction(this, messageId,
+                this::onMessageReactionAdd);
 
         this.menuService.registerDiscordMenuTimeout(this, timeout);
     }

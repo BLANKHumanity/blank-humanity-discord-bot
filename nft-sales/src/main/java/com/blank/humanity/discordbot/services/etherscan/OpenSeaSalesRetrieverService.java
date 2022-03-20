@@ -18,9 +18,6 @@ import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTrade;
 import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTransferEvent;
 import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTransferEventsResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Service
 public class OpenSeaSalesRetrieverService implements NftSalesRetriever {
 

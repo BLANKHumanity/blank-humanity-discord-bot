@@ -12,7 +12,6 @@ import lombok.Builder.Default;
 import lombok.Data;
 import lombok.Singular;
 import lombok.experimental.Accessors;
-import lombok.experimental.Delegate;
 
 @Data
 @Builder
@@ -23,7 +22,6 @@ public class FormattingData {
     @NotNull
     private MessageType messageType;
 
-    @Delegate
     @Singular
     private Map<FormatDataKey, Object> dataPairings;
 
@@ -31,12 +29,20 @@ public class FormattingData {
     private boolean success = false;
 
     public Map<String, Object> getDataPairings() {
-	return dataPairings
-		.entrySet()
-		.stream()
-		.collect(Collectors
-			.toMap(entry -> entry.getKey().getKey(),
-				Map.Entry::getValue));
+        return dataPairings
+            .entrySet()
+            .stream()
+            .collect(Collectors
+                .toMap(entry -> entry.getKey().getKey(),
+                    Map.Entry::getValue));
+    }
+
+    public boolean containsKey(FormatDataKey key) {
+        return dataPairings.containsKey(key);
+    }
+
+    public Object get(FormatDataKey key) {
+        return dataPairings.get(key);
     }
 
 }

@@ -86,7 +86,7 @@ public class CommandServiceImpl implements CommandService, EventListener {
             .slash(commandName, commandDefinition.getDescription());
         case USER -> new CommandDataImpl(Type.USER, commandName);
         case MESSAGE -> new CommandDataImpl(Type.MESSAGE, commandName);
-        case UNKNOWN -> throw new RuntimeException(
+        case UNKNOWN -> throw new UnsupportedOperationException(
             "Unknown Command Type specified for Command '" + commandName + "'");
         };
 

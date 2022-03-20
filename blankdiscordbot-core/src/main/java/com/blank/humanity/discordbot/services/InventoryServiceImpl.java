@@ -17,16 +17,14 @@ import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.database.ItemDao;
 import com.blank.humanity.discordbot.entities.item.Item;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.itemActions.ItemAction;
-import com.blank.humanity.discordbot.itemActions.ItemActionImpl;
-import com.blank.humanity.discordbot.itemActions.ItemActionStatus;
+import com.blank.humanity.discordbot.item.actions.ItemAction;
+import com.blank.humanity.discordbot.item.actions.ItemActionImpl;
+import com.blank.humanity.discordbot.item.actions.ItemActionStatus;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;
 
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 
-@Slf4j
 @Service
 public class InventoryServiceImpl implements InventoryService {
 

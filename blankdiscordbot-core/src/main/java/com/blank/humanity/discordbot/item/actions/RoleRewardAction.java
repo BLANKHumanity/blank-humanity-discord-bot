@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.itemActions;
+package com.blank.humanity.discordbot.item.actions;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -11,8 +11,8 @@ import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.itemActions.messages.ItemActionFormatDataKey;
-import com.blank.humanity.discordbot.itemActions.messages.ItemActionMessageType;
+import com.blank.humanity.discordbot.item.actions.messages.ItemActionFormatDataKey;
+import com.blank.humanity.discordbot.item.actions.messages.ItemActionMessageType;
 import com.blank.humanity.discordbot.services.BlankUserService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;

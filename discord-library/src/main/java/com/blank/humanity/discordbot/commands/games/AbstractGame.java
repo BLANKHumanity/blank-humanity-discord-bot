@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -18,6 +19,7 @@ import com.blank.humanity.discordbot.config.commands.games.GameConfig;
 import com.blank.humanity.discordbot.config.commands.games.GameDefinition;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.game.UnknownGameIdException;
 import com.blank.humanity.discordbot.services.GameService;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 import com.blank.humanity.discordbot.utils.menu.impl.ComponentMenuBuilder;
@@ -47,6 +49,9 @@ public abstract class AbstractGame extends AbstractCommand {
 
     private GameDefinition gameDefinition;
 
+    /**
+     * Loads gameDefinition automatically from the {@linkplain GameConfig}
+     */
     @PostConstruct
     private void loadGameDefinition() {
         this.gameDefinition = gameConfig.getGames().get(getCommandName());
@@ -82,10 +87,17 @@ public abstract class AbstractGame extends AbstractCommand {
             menu = onGameContinue(user, metadata, event.getOptions());
         }
         if (menu != null) {
-            addMenu(menu);
+            setMenu(menu);
         }
     }
 
+    /**
+     * Sends a message of type
+     * {@linkplain GenericGameMessageType#GAME_ON_COOLDOWN} for the current
+     * game.
+     * 
+     * @param metadata GameMetadata of currently executing game.
+     */
     private void sendCooldownResponse(GameMetadata metadata) {
         long seconds = ChronoUnit.SECONDS
             .between(getEarliestPossibleTimeToHavePlayedLast(),
@@ -106,6 +118,12 @@ public abstract class AbstractGame extends AbstractCommand {
             .build());
     }
 
+    /**
+     * Retrieves or creates GameMetadata for Game execution
+     * 
+     * @return New GameMetadata Entity if one doesn't exist for the current
+     *         user.
+     */
     private GameMetadata retrieveGameMetadata() {
         Optional<GameMetadata> gameMetadata = gameService
             .getGameMetadata(getUser(), getCommandName());
@@ -122,6 +140,13 @@ public abstract class AbstractGame extends AbstractCommand {
         }
     }
 
+    /**
+     * Checks if User is able to start playing a new Game based on the Game's
+     * Cooldown.
+     * 
+     * @param metadata GameMetadata for current User
+     * @return True if user is allowed to play.
+     */
     private boolean isAbleToPlay(GameMetadata metadata) {
         return metadata
             .getLastPlayed()
@@ -135,6 +160,12 @@ public abstract class AbstractGame extends AbstractCommand {
                 getGameDefinition().getCooldownTimeUnit());
     }
 
+    /**
+     * Creates a ComponentMenuBuilder that allows creating a modern Component
+     * (Buttons, SelectMenu, etc.) Menu.
+     * 
+     * @return The configured ComponentMenuBuilder
+     */
     protected ComponentMenuBuilder componentMenu() {
         ComponentMenuBuilder builder = componentMenuBuilderProvider.getObject();
         builder
@@ -144,19 +175,60 @@ public abstract class AbstractGame extends AbstractCommand {
         return builder;
     }
 
+    /**
+     * Is called when a new Game is started by a Player. Always caused by a
+     * SlashCommand.<br>
+     * Implementation can be done similarly to
+     * {@linkplain AbstractCommand#onCommand(GenericCommandInteractionEvent)}.
+     * 
+     * @param event    {@linkplain GenericCommandInteractionEvent}
+     * @param user     The Player '{@linkplain BlankUser}'
+     * @param metadata GameMetadata for current game/user
+     * @see AbstractCommand#onCommand
+     * @return A DiscordMenu if one should be added to the reply. Can be null.
+     */
+    @Nullable
     protected abstract DiscordMenu onGameStart(
         GenericCommandInteractionEvent event,
         BlankUser user, GameMetadata metadata);
 
+    /**
+     * Is called when a running Game is continued by a Player. May be invoked by
+     * a SlashCommand or other interactions like a menu.<br>
+     * Most protected methods like
+     * {@link #reply(com.blank.humanity.discordbot.utils.FormattingData...)}
+     * etc. will work, however execution-specific getters like
+     * {@linkplain #getCommandEvent()} are not guaranteed to work.
+     * 
+     * @param user     The Player '{@linkplain BlankUser}'
+     * @param metadata GameMetadata for current game/user
+     * @param argument Argument object for interactions. Usually a string, can
+     *                 be a List for SlashCommands({@linkplain OptionMapping})
+     *                 or SelectMenu interactions
+     * @return
+     */
     protected abstract DiscordMenu onGameContinue(BlankUser user,
         GameMetadata metadata, Object argument);
 
+    /**
+     * Aborts the execution of a game. LastPlayed is not set, so the player can
+     * immediately retry.
+     * 
+     * @param metadata GameMetadata for current game/user
+     */
     protected void abort(GameMetadata metadata) {
         metadata.clearMetadata();
         metadata.setGameFinished(true);
         gameService.saveGameMetadata(metadata);
     }
 
+    /**
+     * Finishes a game. Clears up remaining Metadata and sets LastPlayed to
+     * current time.<br>
+     * Important: Must not be used inside a long running task / menu timeoutTask!
+     * 
+     * @param metadata GameMetadata for current game/user
+     */
     protected void finish(GameMetadata metadata) {
         metadata.clearMetadata();
         metadata.setGameFinished(true);
@@ -164,11 +236,19 @@ public abstract class AbstractGame extends AbstractCommand {
         gameService.saveGameMetadata(metadata);
     }
 
+    /**
+     * Finishes a game. Clears up remaining Metadata and sets LastPlayed to
+     * current time.<br>
+     * Uses gameId to fetch the GameMetadata on execution. Allowing finishing
+     * games within long running tasks.
+     * 
+     * @param gameId GameMetadata for current game/user
+     */
     protected void finish(long gameId) {
         Optional<GameMetadata> metadataGetter = gameService
             .getGameMetadataById(gameId);
         if (metadataGetter.isEmpty()) {
-            throw new RuntimeException(
+            throw new UnknownGameIdException(
                 "No Game with ID '" + gameId + "' found!");
         }
         GameMetadata metadata = metadataGetter.get();
@@ -200,7 +280,7 @@ public abstract class AbstractGame extends AbstractCommand {
      * Expects that the betAmount was previously taken from the player.
      * 
      * @param betAmount
-     * @return
+     * @return Win Amount
      */
     protected int calculateWinnings(long betAmount) {
         return (int) Math

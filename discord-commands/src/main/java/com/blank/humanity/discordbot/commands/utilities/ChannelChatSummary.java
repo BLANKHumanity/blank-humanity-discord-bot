@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -36,6 +35,10 @@ import net.dv8tion.jda.api.utils.TimeUtil;
 @Component
 public class ChannelChatSummary extends AbstractCommand {
 
+    private static final String CHANNEL = "channel";
+    private static final String HOURS = "hours";
+    private static final String START_MESSAGE_ID = "startmessageid";
+
     @Override
     public String getCommandName() {
         return "chatsummary";
@@ -45,16 +48,16 @@ public class ChannelChatSummary extends AbstractCommand {
     public SlashCommandData createCommandData(SlashCommandData commandData,
         CommandDefinition definition) {
         commandData
-            .addOption(OptionType.CHANNEL, "channel",
-                definition.getOptionDescription("channel"),
+            .addOption(OptionType.CHANNEL, CHANNEL,
+                definition.getOptionDescription(CHANNEL),
                 true);
-        OptionData hours = new OptionData(OptionType.INTEGER, "hours",
-            definition.getOptionDescription("hours"));
+        OptionData hours = new OptionData(OptionType.INTEGER, HOURS,
+            definition.getOptionDescription(HOURS));
         hours.setMinValue(1);
         hours.setMaxValue(480);
         OptionData startingMessage = new OptionData(OptionType.STRING,
-            "startmessageid",
-            definition.getOptionDescription("startmessageid"));
+            START_MESSAGE_ID,
+            definition.getOptionDescription(START_MESSAGE_ID));
         commandData.addOptions(hours, startingMessage);
         return commandData;
     }
@@ -62,25 +65,20 @@ public class ChannelChatSummary extends AbstractCommand {
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {
         TextChannel channel = (TextChannel) event
-            .getOption("channel")
+            .getOption(CHANNEL)
             .getAsGuildChannel();
 
-        int hours = Optional
-            .ofNullable(event.getOption("hours"))
-            .map(OptionMapping::getAsLong)
-            .orElse(24l)
+        int hours = event
+            .getOption(HOURS, 24l, OptionMapping::getAsLong)
             .intValue();
 
-        Long lastMessageID = Optional
-            .ofNullable(event.getOption("startmessageid"))
-            .map(OptionMapping::getAsString)
-            .map(Long::valueOf)
-            .orElse(-1l);
+        Long lastMessageID = event
+            .getOption(START_MESSAGE_ID, -1l, OptionMapping::getAsLong);
 
         BlankUser user = getBlankUserService().getUser(event);
         reply(createLists(new LinkedHashMap<>(), true, channel, user)[0]);
 
-        addLongRunningTask(updateMessages -> retrieveMessages(channel,
+        setLongRunningTask(updateMessages -> retrieveMessages(channel,
             event.getUser().getIdLong(), hours, lastMessageID,
             updateMessages));
     }

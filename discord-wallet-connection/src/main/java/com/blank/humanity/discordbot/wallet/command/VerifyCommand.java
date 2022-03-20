@@ -42,12 +42,12 @@ public class VerifyCommand extends AbstractHiddenCommand {
 
         String salt = discordWalletService.createVerifyWalletSalt(user);
 
-        reply(blankUserService
-                .createFormattingData(user,
-                        WalletMessageType.WALLET_VERIFY_DISPLAY_LINK)
-                .dataPairing(WalletFormatDataKey.WALLET_VERIFY_LINK,
-                        walletVerifyConfig.getBaseUrl() + "?salt=" + salt)
-                .build());
+        reply(getBlankUserService()
+            .createFormattingData(user,
+                WalletMessageType.WALLET_VERIFY_DISPLAY_LINK)
+            .dataPairing(WalletFormatDataKey.WALLET_VERIFY_LINK,
+                walletVerifyConfig.getBaseUrl() + "?salt=" + salt)
+            .build());
     }
 
 }

@@ -2,16 +2,21 @@ package com.blank.humanity.discordbot.commands.games;
 
 import java.util.Optional;
 
+import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
+import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenuActionWrapper;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenuInteraction;
 import com.blank.humanity.discordbot.utils.menu.WrapperChain;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 
 @Slf4j
@@ -69,6 +74,22 @@ public class GameInteractionEventExecutor<E extends GenericComponentInteractionC
                             game.getMenuService());
                 }
             }
+        } catch (Exception exc) {
+            log.error("Error occured during Game Interaction", exc);
+
+            FormattingData errorData = game
+                .getBlankUserService()
+                .createFormattingData(user, GenericMessageType.ERROR_MESSAGE)
+                .dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
+                    exc.getMessage())
+                .build();
+            String errorMessage = game
+                .getMessageService()
+                .format(errorData);
+            MessageEmbed errorEmbed = new EmbedBuilder()
+                .setDescription(errorMessage)
+                .build();
+            message.getTextChannel().sendMessageEmbeds(errorEmbed).complete();
         } finally {
             game.clearThreadLocals();
         }

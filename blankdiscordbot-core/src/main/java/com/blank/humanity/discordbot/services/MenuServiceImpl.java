@@ -16,12 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
-import com.blank.humanity.discordbot.exceptions.menu.NonUniqueInteractionId;
+import com.blank.humanity.discordbot.exceptions.menu.NonUniqueInteractionIdException;
 import com.blank.humanity.discordbot.utils.Wrapper;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -29,7 +28,6 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 
-@Slf4j
 @Service
 public class MenuServiceImpl implements MenuService, EventListener {
 
@@ -61,10 +59,9 @@ public class MenuServiceImpl implements MenuService, EventListener {
     public void registerButtonInteraction(@NonNull DiscordMenu menu,
         String uniqueId,
         @NonNull Consumer<ButtonInteractionEvent> eventConsumer)
-        throws NonUniqueInteractionId {
+        throws NonUniqueInteractionIdException {
         if (buttonListeners.containsKey(uniqueId)) {
-            throw new NonUniqueInteractionId(
-                "Interaction Id '" + uniqueId + "' already exists!");
+            throw new NonUniqueInteractionIdException(uniqueId);
         }
         addIdToMenuMap(menu, uniqueId);
         buttonListeners.put(uniqueId, eventConsumer);
@@ -74,10 +71,9 @@ public class MenuServiceImpl implements MenuService, EventListener {
     public void registerSelectMenuInteraction(@NonNull DiscordMenu menu,
         String uniqueId,
         @NonNull Consumer<SelectMenuInteractionEvent> eventConsumer)
-        throws NonUniqueInteractionId {
+        throws NonUniqueInteractionIdException {
         if (selectMenuListeners.containsKey(uniqueId)) {
-            throw new NonUniqueInteractionId(
-                "Interaction Id '" + uniqueId + "' already exists!");
+            throw new NonUniqueInteractionIdException(uniqueId);
         }
         addIdToMenuMap(menu, uniqueId);
         selectMenuListeners.put(uniqueId, eventConsumer);
@@ -87,10 +83,9 @@ public class MenuServiceImpl implements MenuService, EventListener {
     public void registerReactionAddInteraction(@NonNull DiscordMenu menu,
         long messageId,
         @NonNull Consumer<MessageReactionAddEvent> eventConsumer)
-        throws NonUniqueInteractionId {
+        throws NonUniqueInteractionIdException {
         if (reactionAddListeners.containsKey(messageId)) {
-            throw new NonUniqueInteractionId(
-                "Interaction Listener Id '" + messageId + "' already exists!");
+            throw new NonUniqueInteractionIdException(String.valueOf(messageId));
         }
         addIdToMenuMap(menu, messageId);
         reactionAddListeners.put(messageId, eventConsumer);

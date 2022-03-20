@@ -5,11 +5,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,11 +38,9 @@ public class ShopItem {
     private int amountAvailable;
 
     @NotNull
-    @Builder.Default
     private boolean displayed = true;
 
     @NotNull
-    @Builder.Default
     private int order = Integer.MAX_VALUE;
 
 }

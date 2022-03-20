@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.commands.games;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
 import com.blank.humanity.discordbot.entities.game.RouletteMetadata;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
+import com.blank.humanity.discordbot.exceptions.economy.NotEnoughBalanceException;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.menu.DiscordMenu;
 
@@ -55,11 +57,8 @@ public class RouletteGameCommand extends AbstractGame {
         GameMetadata metadata) {
         int betAmount = (int) event.getOption("bet").getAsLong();
 
-        RouletteMetadata roulette = RouletteMetadata
-            .builder()
-            .betAmount(betAmount)
-            .round(1)
-            .build();
+        RouletteMetadata roulette = new RouletteMetadata(betAmount, 1,
+            Collections.emptyList());
 
         metadata.setMetadata(roulette);
 
@@ -111,7 +110,9 @@ public class RouletteGameCommand extends AbstractGame {
 
         int betAmount = roulette.getBetAmount();
 
-        if (user.getBalance() < betAmount) {
+        try {
+            getBlankUserService().decreaseUserBalance(user, betAmount);
+        } catch (NotEnoughBalanceException e) {
             if (roulette.getRound() == 1) {
                 abort(metadata);
             } else {
@@ -125,7 +126,6 @@ public class RouletteGameCommand extends AbstractGame {
                     getGameDefinition().getDisplayName())
                 .build();
         }
-        getBlankUserService().decreaseUserBalance(user, betAmount);
 
         int randomNumber = random.nextInt(6);
         boolean success = randomNumber != 0;
