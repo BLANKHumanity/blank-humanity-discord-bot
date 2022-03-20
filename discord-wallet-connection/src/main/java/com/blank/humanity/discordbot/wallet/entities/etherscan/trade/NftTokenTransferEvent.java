@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.entities.etherscan.trade;
+package com.blank.humanity.discordbot.wallet.entities.etherscan.trade;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

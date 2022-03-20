@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.entities.etherscan.trade;
+package com.blank.humanity.discordbot.wallet.entities.etherscan.trade;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,7 +8,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-import com.blank.humanity.discordbot.entities.etherscan.logs.TransactionLogEntry;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.logs.TransactionLogEntry;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

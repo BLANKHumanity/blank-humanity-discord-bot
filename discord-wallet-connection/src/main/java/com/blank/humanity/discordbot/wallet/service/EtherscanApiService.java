@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.services.etherscan;
+package com.blank.humanity.discordbot.wallet.service;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.blank.humanity.discordbot.config.EtherscanApiConfig;
-import com.blank.humanity.discordbot.entities.etherscan.EtherscanRequest;
-import com.blank.humanity.discordbot.entities.etherscan.EtherscanResponse;
-import com.blank.humanity.discordbot.entities.etherscan.logs.TransactionLogsRequest;
-import com.blank.humanity.discordbot.entities.etherscan.logs.TransactionLogsResponse;
-import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTransferEventsRequest;
-import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTransferEventsResponse;
+import com.blank.humanity.discordbot.wallet.config.EtherscanApiConfig;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.EtherscanRequest;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.EtherscanResponse;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.logs.TransactionLogsRequest;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.logs.TransactionLogsResponse;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTransferEventsRequest;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTransferEventsResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

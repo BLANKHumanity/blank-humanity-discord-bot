@@ -13,5 +13,9 @@
 			<groupId>com.blank.humanity</groupId>
 			<artifactId>discord-library</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.blank.humanity</groupId>
+			<artifactId>discord-wallet-connection</artifactId>
+		</dependency>
 	</dependencies>
 </project>

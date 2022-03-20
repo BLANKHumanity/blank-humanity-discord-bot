@@ -1,13 +1,13 @@
-package com.blank.humanity.discordbot.entities.etherscan.trade;
+package com.blank.humanity.discordbot.wallet.entities.etherscan.trade;
 
 import java.util.Optional;
 
 import javax.validation.constraints.Min;
 
-import com.blank.humanity.discordbot.entities.etherscan.EtherscanApiAction;
-import com.blank.humanity.discordbot.entities.etherscan.EtherscanApiModule;
-import com.blank.humanity.discordbot.entities.etherscan.EtherscanRequest;
-import com.blank.humanity.discordbot.entities.etherscan.EtherscanSort;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.EtherscanApiAction;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.EtherscanApiModule;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.EtherscanRequest;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.EtherscanSort;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

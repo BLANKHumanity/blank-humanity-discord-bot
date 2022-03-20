@@ -1,8 +1,8 @@
-package com.blank.humanity.discordbot.entities.etherscan.logs;
+package com.blank.humanity.discordbot.wallet.entities.etherscan.logs;
 
-import com.blank.humanity.discordbot.entities.etherscan.EtherscanApiAction;
-import com.blank.humanity.discordbot.entities.etherscan.EtherscanApiModule;
-import com.blank.humanity.discordbot.entities.etherscan.EtherscanRequest;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.EtherscanApiAction;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.EtherscanApiModule;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.EtherscanRequest;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

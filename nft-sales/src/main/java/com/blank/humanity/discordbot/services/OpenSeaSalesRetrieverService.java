@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.services.etherscan;
+package com.blank.humanity.discordbot.services;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,12 +11,13 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import com.blank.humanity.discordbot.database.NftTokenTradeDao;
-import com.blank.humanity.discordbot.entities.etherscan.logs.TransactionLogEntry;
-import com.blank.humanity.discordbot.entities.etherscan.logs.TransactionLogsRequest;
-import com.blank.humanity.discordbot.entities.etherscan.logs.TransactionLogsResponse;
-import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTrade;
-import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTransferEvent;
-import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTransferEventsResponse;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.logs.TransactionLogEntry;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.logs.TransactionLogsRequest;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.logs.TransactionLogsResponse;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTrade;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTransferEvent;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTransferEventsResponse;
+import com.blank.humanity.discordbot.wallet.service.EtherscanApiService;
 
 @Service
 public class OpenSeaSalesRetrieverService implements NftSalesRetriever {

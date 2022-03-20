@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.config;
+package com.blank.humanity.discordbot.wallet.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

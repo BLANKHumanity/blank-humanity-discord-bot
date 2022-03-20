@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.entities.etherscan;
+package com.blank.humanity.discordbot.wallet.entities.etherscan;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
-import com.blank.humanity.discordbot.exceptions.etherscan.MissingArgumentException;
+import com.blank.humanity.discordbot.wallet.exceptions.etherscan.MissingArgumentException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.exceptions.etherscan;
+package com.blank.humanity.discordbot.wallet.exceptions.etherscan;
 
 import lombok.experimental.StandardException;
 

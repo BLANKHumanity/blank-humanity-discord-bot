@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.services.etherscan;
+package com.blank.humanity.discordbot.services;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.blank.humanity.discordbot.database.NftTokenTradeDao;
-import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTrade;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTrade;
 
 @Service
 public class NftSalesService {

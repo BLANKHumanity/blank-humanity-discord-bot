@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.entities.etherscan;
+package com.blank.humanity.discordbot.wallet.entities.etherscan;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

@@ -1,4 +1,4 @@
-package com.blank.humanity.discordbot.entities.etherscan.logs;
+package com.blank.humanity.discordbot.wallet.entities.etherscan.logs;
 
 import java.util.List;
 

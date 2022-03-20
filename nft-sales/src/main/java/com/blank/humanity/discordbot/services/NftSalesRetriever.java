@@ -1,8 +1,8 @@
-package com.blank.humanity.discordbot.services.etherscan;
+package com.blank.humanity.discordbot.services;
 
 import java.util.stream.Stream;
 
-import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTrade;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTrade;
 
 public interface NftSalesRetriever {
 
