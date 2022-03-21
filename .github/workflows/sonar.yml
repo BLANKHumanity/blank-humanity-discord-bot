@@ -6,7 +6,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
               with:
                 fetch-depth: '0'
             - name: Set up JDK 17
@@ -15,6 +15,6 @@ jobs:
                 java-version: '17'
                 distribution: 'temurin'
             - name: SonarCloud Scan
-              run: mvn -B clean verify -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+              run: mvn -B clean verify install -Pcoverage -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

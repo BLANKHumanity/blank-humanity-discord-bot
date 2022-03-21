@@ -1,68 +1,78 @@
 package com.blank.humanity.discordbot.funplace;
 
+import java.util.Collection;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.blank.humanity.discordbot.commands.AbstractCommand;
+import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.items.ItemConfiguration;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+
+import lombok.NonNull;
+import lombok.Setter;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 @Component
 public class FunPlaceBuyItemCommand extends AbstractCommand {
 
-    @Override
-    protected String getCommandName() {
-        return "funbuy";
-    }
+    private static final String AMOUNT = "amount";
+    private static final String ITEM = "item";
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private FunPlaceShopService shopService;
 
-    @Autowired
+    @Setter(onMethod = @__({ @Autowired }))
     private ItemConfiguration itemConfiguration;
 
     @Override
-    protected CommandData createCommandData(CommandData commandData) {
+    public String getCommandName() {
+        return "funbuy";
+    }
+
+    @Override
+    public SlashCommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition) {
         commandData
-            .addOption(OptionType.STRING, "item",
-                getCommandDefinition().getOptionDescription("item"),
-                true);
-        OptionData amount = new OptionData(OptionType.INTEGER, "amount",
-            getCommandDefinition().getOptionDescription("amount"));
+            .addOption(OptionType.STRING, ITEM,
+                definition.getOptionDescription(ITEM), true, true);
+        OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
+            definition.getOptionDescription(AMOUNT));
         amount.setMinValue(1);
         commandData.addOptions(amount);
         return commandData;
     }
 
     @Override
-    protected void onCommand(SlashCommandEvent event) {
-        BlankUser user = blankUserService.getUser(event);
+    protected void onCommand(GenericCommandInteractionEvent event) {
+        BlankUser user = getUser();
 
         Optional<ShopItem> shopItem = shopService
-            .getShopItem(event.getOption("item").getAsString());
+            .getShopItem(event.getOption(ITEM, OptionMapping::getAsString));
 
-        int amount = Optional
-            .ofNullable(event.getOption("amount"))
-            .map(OptionMapping::getAsLong)
-            .orElse(1L)
+        int amount = event
+            .getOption(AMOUNT, () -> 1l, OptionMapping::getAsLong)
             .intValue();
 
         if (shopItem.isEmpty()) {
-            FormattingData data = blankUserService
+            FormattingData data = getBlankUserService()
                 .createFormattingData(user,
                     FunPlaceMessageType.ITEM_NOT_EXISTS)
                 .dataPairing(FunPlaceFormatDataKey.ITEM_NAME,
                     event.getOption("item").getAsString())
                 .build();
-            reply(event, data);
+            reply(data);
             return;
         }
 
@@ -75,7 +85,7 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
         case SUCCESS -> FunPlaceMessageType.BUY_ITEM_SUCCESS;
         };
 
-        FormattingData data = blankUserService
+        FormattingData data = getBlankUserService()
             .createFormattingData(user, messageType)
             .dataPairing(FunPlaceFormatDataKey.SHOP_ITEM_BUY_NAME,
                 item.getBuyName())
@@ -93,7 +103,19 @@ public class FunPlaceBuyItemCommand extends AbstractCommand {
                     .orElse("NAME_ERROR"))
             .build();
 
-        reply(event, data);
+        reply(data);
+    }
+
+    @Override
+    @NonNull
+    protected Collection<Command.Choice> onAutoComplete(
+        @NonNull CommandAutoCompleteInteractionEvent event) {
+        String itemName = event
+            .getOption(ITEM, () -> "", OptionMapping::getAsString)
+            .toLowerCase();
+
+        return shopService
+            .autoCompleteShopItems(itemName);
     }
 
 }

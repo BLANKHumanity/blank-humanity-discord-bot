@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.entities.game;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,15 +11,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
+
 import org.hibernate.validator.internal.util.stereotypes.Lazy;
+
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.exceptions.game.GameMetadataIOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Entity
 @Data
+@Accessors(chain = true)
 public class GameMetadata {
 
     @Id

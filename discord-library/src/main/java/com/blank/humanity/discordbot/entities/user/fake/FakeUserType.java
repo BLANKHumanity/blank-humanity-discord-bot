@@ -1,6 +1,7 @@
 package com.blank.humanity.discordbot.entities.user.fake;
 
 import com.blank.humanity.discordbot.services.BlankUserService;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

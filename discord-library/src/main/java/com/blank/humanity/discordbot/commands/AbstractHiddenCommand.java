@@ -1,10 +1,13 @@
 package com.blank.humanity.discordbot.commands;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public abstract class AbstractHiddenCommand extends AbstractCommand {
 
     @Override
-    protected boolean isEphemeral() {
-	return true;
+    public boolean isEphemeral() {
+        return true;
     }
 
 }

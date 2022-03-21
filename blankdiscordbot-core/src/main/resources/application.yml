@@ -7,6 +7,18 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: update
+web3:
+  wallet:
+    verify:
+      baseUrl: "https://testbot.test/verify"
+  provider:
+    url: https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}
+  etherscan:
+    apiKey: ${ETHERSCAN_APIKEY}
+  salestracker: 
+    salesChannel: 934187617895997440
+    contractWatchList:
+      "0x881d9c2f229323aad28a9c9045111e30e1f1eb25": "Initializer"
 discord:
   authToken: ${DISCORD_AUTH_TOKEN}
   guildId: ${DISCORD_GUILD_ID}
@@ -143,24 +155,30 @@ discord:
         channel: "Which channel should be summarised?"
         hours: "How many hours back should be summarised?"
         startmessageid: "Id of last message to count"
+    verify:
+      description: "Verify your Wallet"
+      roleRestricted: true
+      allowedRoles:
+        - 123542  # Invalid role, effectively disables command for everyone
+    set-airdrop-wallet:
+      description: "Set your airdrop wallet"
+      options:
+        wallet: "Your ethereum wallet"
 games:
   dice:
     displayName: Dice
     cooldownAmount: 2
     cooldownTimeUnit: SECONDS
-    metadataClass: null
     winningsMultiplier: 2
   rps:
     displayName: Rock paper scissors
-    cooldownAmount: 2
-    cooldownTimeUnit: SECONDS
-    metadataClass: null
+    cooldownAmount: 10
+    cooldownTimeUnit: MINUTES
     winningsMultiplier: 2
   roulette:
     displayName: Roulette
-    cooldownAmount: 2
-    cooldownTimeUnit: SECONDS
-    metadataClass: com.blank.humanity.discordbot.entities.game.RouletteMetadata
+    cooldownAmount: 10
+    cooldownTimeUnit: MINUTES
     winningsMultiplier: 1.2 # 1.2 is Fair = 0% House Edge
 messages:
   BALANCE_COMMAND_MESSAGE: "%(user) has %(balance)"
@@ -247,6 +265,9 @@ messages:
   CHAT_SUMMARY_ENTRY: "%(user): %(messageCount) messages"
   CHAT_SUMMARY_PENDING: "Messages are still counted, please wait!"
   ITEM_REMOVE_SUCCESS: "You have removed %(itemAmount) x %(itemName) from %(user)'s inventory"
+  WALLET_VERIFY_DISPLAY_LINK: "Please connect your web3 wallet [here](%(walletVerifyLink))"
+  SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR: "The specified wallet address has an invalid format. Are you using an ethereum address?"
+  SET_AIRDROP_WALLET_SUCCESS: "Your airdrop wallet was sucessfully set to '%(airdropWallet)'!"
 items:
   definitions:
     - id: 1
@@ -266,6 +287,7 @@ items:
     - id: 3
       name: "Kingpin"
       description: "Become the Kingpin"
+      useName: "kingpin"
     - id: 4
       name: ".1 ETH"
       description: "Redeemable for 0.1 ETH after Bitizen Mint"
@@ -278,6 +300,7 @@ items:
         messageSendChannel: 797928031229444116
     - id: 5
       name: ".2 ETH"
+      useName: "dotTwoEth"
       description: "Redeemable for 0.2 ETH after Bitizen Mint"
 shop:
   itemsPerPage: 8
