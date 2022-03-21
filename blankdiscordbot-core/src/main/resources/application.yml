@@ -7,6 +7,9 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: update
+  cache:
+    jcache:
+      config: classpath:ehcache.xml
 web3:
   wallet:
     verify:
@@ -19,6 +22,11 @@ web3:
     salesChannel: 934187617895997440
     contractWatchList:
       "0x881d9c2f229323aad28a9c9045111e30e1f1eb25": "Initializer"
+emotes:
+  initializers:
+    GM:
+      caption: 'Initializer #%(number) says "GM"'
+      emoteImage: https://app.blankhumanity.com/GM.png
 discord:
   authToken: ${DISCORD_AUTH_TOKEN}
   guildId: ${DISCORD_GUILD_ID}
@@ -164,6 +172,11 @@ discord:
       description: "Set your airdrop wallet"
       options:
         wallet: "Your ethereum wallet"
+    emote:
+      description: "Temporary"
+      options:
+        initializer: "Temporary"
+        emote: "Temporary"
 games:
   dice:
     displayName: Dice

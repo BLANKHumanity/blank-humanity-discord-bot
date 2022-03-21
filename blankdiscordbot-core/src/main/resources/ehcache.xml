@@ -1,7 +1,7 @@
 <config xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://www.ehcache.org/v3' xsi:schemaLocation="
             http://www.ehcache.org/v3 
             http://www.ehcache.org/schema/ehcache-core-3.7.xsd">
-	<persistence directory="spring-boot-ehcache/cache" />
+	<persistence directory="/blankbot/cache" />
 	<cache-template name="default">
 		<expiry>
 			<ttl unit="seconds">30</ttl>
@@ -12,10 +12,9 @@
 			<disk persistent="true" unit="MB">10</disk>
 		</resources>
 	</cache-template>
-	<cache-template name="nftImages">
+	<cache-template name="medium">
 		<expiry>
 			<ttl unit="hours">24</ttl>
-			<tti unit="hours">12</tti>
 		</expiry>
 		<resources>
 			<heap>1000</heap>
@@ -23,15 +22,23 @@
 			<disk persistent="true" unit="MB">50</disk>
 		</resources>
 	</cache-template>
-	<cache-template name="nftOwners">
+	<cache-template name="longlived">
 		<expiry>
-			<ttl unit="hours">48</ttl>
-			<tti unit="hours">24</tti
+			<ttl unit="hours">168</ttl>
 		</expiry>
 		<resources>
 			<heap>1000</heap>
-			<offheap unit="MB">10</offheap>
-			<disk persistent="true" unit="MB">20</disk>
+			<offheap unit="MB">20</offheap>
+			<disk persistent="true" unit="MB">100</disk>
 		</resources>
 	</cache-template>
+
+	<cache alias="nftImages" uses-template="longlived">
+		<key-type>java.lang.String</key-type>
+		<value-type>[B</value-type>
+	</cache>
+	<cache alias="nftOwners" uses-template="medium">
+		<key-type>java.lang.String</key-type>
+		<value-type>org.web3j.abi.datatypes.Address</value-type>
+	</cache>
 </config>

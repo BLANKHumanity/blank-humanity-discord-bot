@@ -1,6 +1,11 @@
 package com.blank.humanity.discordbot.wallet.entities;
 
-import java.net.URI;
+import java.net.URL;
 
-public record EmoteDefinition(URI emoteImage, String caption) {
+import lombok.Data;
+
+@Data
+public class EmoteDefinition {
+    private URL emoteImage;
+    private String caption;
 }

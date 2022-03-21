@@ -24,7 +24,7 @@ public class DiscordVerifiedWallet {
 
     @NonNull
     @OneToOne
-    @JoinColumn(name = "userId", nullable = false, unique = true, referencedColumnName = "id")
+    @JoinColumn(name = "userId", nullable = false, unique = false, referencedColumnName = "id")
     private BlankUser user;
 
     @NonNull

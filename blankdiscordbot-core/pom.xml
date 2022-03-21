@@ -33,7 +33,6 @@
 		<dependency>
 			<groupId>com.blank.humanity</groupId>
 			<artifactId>discord-wallet-connection</artifactId>
-			<version>0.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.blank.humanity</groupId>

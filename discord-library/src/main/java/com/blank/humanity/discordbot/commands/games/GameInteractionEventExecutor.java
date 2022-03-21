@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.commands.games;
 
 import java.util.Optional;
 
+import com.blank.humanity.discordbot.commands.FileSendRequest;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
 import com.blank.humanity.discordbot.entities.game.GameMetadata;
@@ -18,6 +19,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction;
 
 @Slf4j
 public class GameInteractionEventExecutor<E extends GenericComponentInteractionCreateEvent, M extends DiscordMenu>
@@ -63,7 +65,7 @@ public class GameInteractionEventExecutor<E extends GenericComponentInteractionC
             newMenu = game
                 .onGameContinue(user, metadata, interaction.argument());
             if (game.getUnsentReply() != null) {
-                message.editMessageEmbeds(game.getUnsentReply()).complete();
+                message = prepareMessageUpdateAction(event).complete();
             }
 
             if (newMenu != null || metadata.isGameFinished()) {
@@ -94,6 +96,19 @@ public class GameInteractionEventExecutor<E extends GenericComponentInteractionC
             game.clearThreadLocals();
         }
         return true;
+    }
+
+    private WebhookMessageUpdateAction<Message> prepareMessageUpdateAction(
+        E event) {
+        WebhookMessageUpdateAction<Message> updateAction = event
+            .getHook()
+            .editOriginalEmbeds(game.getUnsentReply());
+        for (FileSendRequest file : game.getUnsentFiles()) {
+            updateAction = updateAction
+                .addFile(file.data(), file.name(),
+                    file.attachmentOptions());
+        }
+        return updateAction;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.blank.humanity.discordbot.wallet.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.blank.humanity.discordbot.entities.user.BlankUser;
@@ -12,6 +13,8 @@ public interface DiscordWalletService {
     public Optional<DiscordVerifiedWallet> registerVerifiedWallet(String sigData,
 	    String salt);
 
-    public Optional<DiscordVerifiedWallet> getWallet(BlankUser user);
+    public List<DiscordVerifiedWallet> getWallets(BlankUser user);
+
+    public Optional<BlankUser> findUserByWallet(String address);
 
 }

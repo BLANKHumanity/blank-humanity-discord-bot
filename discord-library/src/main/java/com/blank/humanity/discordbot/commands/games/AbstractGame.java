@@ -2,6 +2,7 @@ package com.blank.humanity.discordbot.commands.games;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.blank.humanity.discordbot.commands.AbstractCommand;
+import com.blank.humanity.discordbot.commands.FileSendRequest;
 import com.blank.humanity.discordbot.commands.games.messages.GenericGameFormatDataKey;
 import com.blank.humanity.discordbot.commands.games.messages.GenericGameMessageType;
 import com.blank.humanity.discordbot.config.commands.CommandConfig;
@@ -30,6 +32,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 @Slf4j
 @Getter
@@ -268,6 +271,11 @@ public abstract class AbstractGame extends AbstractCommand {
     @Override
     protected final MessageEmbed[] getUnsentReply() {
         return super.getUnsentReply();
+    }
+    
+    @Override
+    protected final List<FileSendRequest> getUnsentFiles(){
+        return super.getUnsentFiles();
     }
 
     @Override
