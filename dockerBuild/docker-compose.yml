@@ -41,16 +41,26 @@ services:
       - zookeeper
     ports:
       - 29092:29092
+<<<<<<< HEAD
      environment:
       KAFKA_BROKER_ID: 1
       KAFKA_LOG_DIRS: /kafka/logs
+=======
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG_DIRS: /blankbot/kafka
+>>>>>>> 4e9ef454b8b5536696e58adcced8f722a5d0f345
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
+<<<<<<< HEAD
      - /blankbot/kafka/logs:/kafka/logs
+=======
+     - blankBotKafka:/blankbot/kafka
+>>>>>>> 4e9ef454b8b5536696e58adcced8f722a5d0f345
     networks:
      - blank-bot-bridge
 networks:
@@ -59,6 +69,10 @@ networks:
 volumes:
   blankBotMysqlData:
   blankBotConfig:
+<<<<<<< HEAD
   blankBotKafka:
 
   
+=======
+  blankBotKafka:
+>>>>>>> 4e9ef454b8b5536696e58adcced8f722a5d0f345
