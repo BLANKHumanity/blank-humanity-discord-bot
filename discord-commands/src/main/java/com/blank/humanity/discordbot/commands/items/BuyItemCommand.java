@@ -83,7 +83,7 @@ public class BuyItemCommand extends AbstractCommand {
 
         ShopItem item = shopItem.get();
         ItemBuyStatus status = shopService.buyItem(user, item, amount);
-        
+
         MessageType messageType = switch (status) {
         case NO_AVAILABLE_SUPPLY -> ItemMessageType.BUY_ITEM_NO_SUPPLY;
         case NOT_ENOUGH_MONEY -> ItemMessageType.BUY_ITEM_NOT_ENOUGH_MONEY;
@@ -95,7 +95,8 @@ public class BuyItemCommand extends AbstractCommand {
             .dataPairing(ItemFormatDataKey.SHOP_ITEM_BUY_NAME,
                 item.getBuyName())
             .dataPairing(ItemFormatDataKey.SHOP_ITEM_ID, item.getItemId())
-            .dataPairing(ItemFormatDataKey.SHOP_ITEM_PRICE, item.getPrice())
+            .dataPairing(ItemFormatDataKey.SHOP_ITEM_PRICE,
+                item.getPrice() * amount)
             .dataPairing(ItemFormatDataKey.SHOP_ITEM_AVAILABLE_AMOUNT,
                 shopService.getAvailableItemAmount(item))
             .dataPairing(ItemFormatDataKey.ITEM_AMOUNT, amount)

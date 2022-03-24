@@ -25,9 +25,6 @@ public interface InventoryService {
 
     public boolean removeItem(BlankUser user, int itemId);
 
-    public ItemActionStatus useItem(BlankUser user, String useName, int amount,
-        Consumer<FormattingData> reply);
-
     public Optional<ItemDefinition> getItemDefinition(int itemId);
 
     public Optional<ItemDefinition> getItemDefinition(String itemName);

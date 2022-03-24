@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +15,7 @@ import org.mockito.Mockito;
 import com.blank.humanity.discordbot.commands.CommandUnitTest;
 import com.blank.humanity.discordbot.commands.items.BuyItemCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
+import com.blank.humanity.discordbot.config.items.ItemActionDefinition;
 import com.blank.humanity.discordbot.config.items.ItemConfiguration;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.items.ShopItem;
@@ -38,7 +38,7 @@ class BuyItemCommandTest extends CommandUnitTest<BuyItemCommand> {
     private ItemConfiguration itemConfiguration;
 
     private ItemDefinition testItemDefinition = new ItemDefinition(2,
-        "Test Example Item", "desc", "use", "action", Map.of());
+        "Test Example Item", "desc", "use", new ItemActionDefinition[0]);
 
     protected BuyItemCommandTest() {
         super(BuyItemCommand.class);
@@ -90,7 +90,7 @@ class BuyItemCommandTest extends CommandUnitTest<BuyItemCommand> {
         String itemName = "testExampleItem";
         int amount = 6;
         ItemDefinition itemDefinition = new ItemDefinition(2,
-            "Test Example Item", "desc", "use", "action", Map.of());
+            "Test Example Item", "desc", "use", new ItemActionDefinition[0]);
         ShopItem item = new ShopItem(1, 2, itemName, 312, 21, true, 1);
 
         when(shopService.getShopItem(itemName)).thenReturn(Optional.of(item));

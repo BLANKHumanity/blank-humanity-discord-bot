@@ -3,25 +3,16 @@ package com.blank.humanity.discordbot.services;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
-import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
 import com.blank.humanity.discordbot.config.items.ItemConfiguration;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.database.ItemDao;
 import com.blank.humanity.discordbot.entities.item.Item;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.item.actions.ItemAction;
-import com.blank.humanity.discordbot.item.actions.ItemActionImpl;
-import com.blank.humanity.discordbot.item.actions.ItemActionStatus;
-import com.blank.humanity.discordbot.utils.FormattingData;
-import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;
 
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 
@@ -33,12 +24,6 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Autowired
     private ItemConfiguration itemConfiguration;
-
-    @Autowired
-    private BlankUserService blankUserService;
-
-    @Autowired
-    private ApplicationContext applicationContext;
 
     @Transactional
     public Optional<Item> getItem(BlankUser user, int itemId) {
@@ -87,63 +72,6 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public boolean removeItem(BlankUser user, int itemId) {
         return removeItem(user, itemId, 1);
-    }
-
-    @Transactional
-    public ItemActionStatus useItem(BlankUser user, String useName, int amount,
-        Consumer<FormattingData> reply) {
-        Optional<ItemDefinition> itemDefinition = getItemDefinition(useName);
-
-        Optional<ExecutableItemAction> action = itemDefinition
-            .map(ItemDefinition::getAction)
-            .map(ItemActionImpl::valueOf)
-            .map(ItemAction::getExecutableItemAction)
-            .map(applicationContext::getBean);
-
-        if (itemDefinition.isEmpty()) {
-            FormattingData data = blankUserService
-                .createFormattingData(user, ItemMessageType.ITEM_NOT_EXISTS)
-                .dataPairing(ItemFormatDataKey.ITEM_NAME, useName)
-                .build();
-            reply.accept(data);
-            return ItemActionStatus.ITEM_CONFIGURATION_ERROR;
-        }
-
-        ItemDefinition resolvedItemDefinition = itemDefinition.get();
-        int itemId = resolvedItemDefinition.getId();
-
-        if (action.isEmpty()) {
-            FormattingData data = blankUserService
-                .createFormattingData(user,
-                    ItemMessageType.ITEM_USE_ACTION_UNDEFINED)
-                .dataPairing(ItemFormatDataKey.ITEM_ID, itemId)
-                .dataPairing(ItemFormatDataKey.ITEM_NAME, useName)
-                .build();
-            reply.accept(data);
-            return ItemActionStatus.ITEM_CONFIGURATION_ERROR;
-        }
-
-        if (!removeItem(user, itemId, amount)) {
-            FormattingData data = blankUserService
-                .createFormattingData(user,
-                    ItemMessageType.ITEM_USE_NOT_OWNED)
-                .dataPairing(ItemFormatDataKey.ITEM_ID, itemId)
-                .dataPairing(ItemFormatDataKey.ITEM_NAME, useName)
-                .dataPairing(ItemFormatDataKey.ITEM_AMOUNT, amount)
-                .build();
-            reply.accept(data);
-            return ItemActionStatus.ITEM_NOT_OWNED;
-        }
-
-        ItemActionStatus status = action
-            .get()
-            .executeAction(user, itemDefinition.get(), amount, reply);
-
-        if (status != ItemActionStatus.SUCCESS) {
-            // On Error give Item back
-            giveItem(user, itemId, amount);
-        }
-        return status;
     }
 
     public Optional<ItemDefinition> getItemDefinition(int itemId) {

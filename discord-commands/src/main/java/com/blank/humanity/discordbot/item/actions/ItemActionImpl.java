@@ -12,9 +12,11 @@ import lombok.Getter;
 @Getter
 public enum ItemActionImpl implements ItemAction {
     ROLE_REWARD(RoleRewardAction.class),
-    MESSAGE_ACTION(MessageAction.class);
-    
+    MESSAGE_SEND_ACTION(MessageSendAction.class),
+    MESSAGE_REPLY_ACTION(MessageReplyAction.class),
+    REQUIRED_AMOUNT_ACTION(RequiredAmountAction.class);
+
     @NotNull
     private Class<? extends ExecutableItemAction> executableItemAction;
-    
+
 }
