@@ -8,14 +8,13 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.web3j.abi.datatypes.Address;
 
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
@@ -32,6 +31,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -121,16 +121,22 @@ public class InitializerEmoteCommand extends AbstractCommand {
         reply(embed);
     }
 
+    @Override
+    protected Collection<Command.Choice> onAutoComplete(
+        @NonNull CommandAutoCompleteInteractionEvent event) {
+        return nftResolverService
+            .findOwnedNFTs(INITIALIZER_ADDRESS, getUser())
+            .stream()
+            .map(tokenId -> new Command.Choice("Initializer #" + tokenId,
+                tokenId))
+            .toList();
+    }
+
     private boolean isOwner(BlankUser user, long nftId) {
-        try {
-            return nftResolverService
-                .findBlankUserOwner(INITIALIZER_ADDRESS, nftId)
-                .get()
-                .filter(owner -> owner.getId().equals(user.getId()))
-                .isPresent();
-        } catch (InterruptedException | ExecutionException e) {
-            return false;
-        }
+        return nftResolverService
+            .findBlankUserOwner(INITIALIZER_ADDRESS, nftId)
+            .filter(owner -> owner.getId().equals(user.getId()))
+            .isPresent();
     }
 
     private byte[] drawEmoteImage(long initializerId,

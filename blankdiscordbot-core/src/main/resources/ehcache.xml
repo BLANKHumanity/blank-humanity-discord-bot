@@ -4,7 +4,7 @@
 	<persistence directory="/blankbot/cache" />
 	<cache-template name="default">
 		<expiry>
-			<ttl unit="seconds">30</ttl>
+			<ttl unit="seconds">60</ttl>
 		</expiry>
 		<resources>
 			<heap>1000</heap>
@@ -36,9 +36,5 @@
 	<cache alias="nftImages" uses-template="longlived">
 		<key-type>java.lang.String</key-type>
 		<value-type>[B</value-type>
-	</cache>
-	<cache alias="nftOwners" uses-template="medium">
-		<key-type>java.lang.String</key-type>
-		<value-type>org.web3j.abi.datatypes.Address</value-type>
 	</cache>
 </config>

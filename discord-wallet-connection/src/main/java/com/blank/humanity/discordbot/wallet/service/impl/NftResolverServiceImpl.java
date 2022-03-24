@@ -1,27 +1,27 @@
 package com.blank.humanity.discordbot.wallet.service.impl;
 
-import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
-import org.web3j.tx.gas.DefaultGasProvider;
 
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.smartcontracts.InitializerSmartContract;
+import com.blank.humanity.discordbot.wallet.config.NftResolverConfig;
+import com.blank.humanity.discordbot.wallet.entities.DiscordVerifiedWallet;
+import com.blank.humanity.discordbot.wallet.entities.NftOwnerEntity;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTransferEvent;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTransferEventsResponse;
 import com.blank.humanity.discordbot.wallet.persistence.NftOwnerEntityDao;
 import com.blank.humanity.discordbot.wallet.service.DiscordWalletService;
 import com.blank.humanity.discordbot.wallet.service.EtherscanApiService;
@@ -34,7 +34,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
+@Component
 public class NftResolverServiceImpl implements NftResolverService {
 
     @Setter(onMethod = @__({ @Autowired }))
@@ -48,49 +48,92 @@ public class NftResolverServiceImpl implements NftResolverService {
 
     @Setter(onMethod = @__({ @Autowired }))
     private NftOwnerEntityDao nftOwnerEntityDao;
-    
-    @Setter(onMethod = @__({ @Resource }))
-    private NftResolverService self;
-    
 
+    @Setter(onMethod = @__({ @Autowired }))
+    private NftResolverConfig nftResolverConfig;
+
+    @Scheduled(fixedDelay = 30, timeUnit = TimeUnit.SECONDS)
     @Transactional
-    @Scheduled(fixedDelay = 60000l)
     public void lookupNftTransfers() {
-        nftOwnerEntityDao.findNftContracts().stream()
+        nftResolverConfig
+            .getContracts()
+            .stream()
+            .forEach(this::lookupNftContractsTransfers);
+    }
+
+    private void lookupNftContractsTransfers(String contract) {
+        long lastTransferBlock = nftOwnerEntityDao
+            .findLastKnownTransferBlock(contract)
+            .orElse(0L);
+        log.info("Looking up Transfers for Contract " + contract);
+        etherscanApiService
+            .fetchNftTokenTransferEvents(contract, lastTransferBlock)
+            .map(NftTokenTransferEventsResponse::getTokenTransferEvents)
+            .flatMap(List::stream)
+            .sorted(Comparator.comparing(NftTokenTransferEvent::getBlockNumber))
+            .limit(100)
+            .forEach(transfer -> nftOwnerEntityDao
+                .findByNftContractAndNftTokenId(contract, transfer.getTokenID())
+                .ifPresentOrElse(nftEntity -> {
+                    if (nftEntity.getTransferBlock() < transfer
+                        .getBlockNumber()) {
+                        nftEntity.setOwner(transfer.getTo().toLowerCase());
+                        nftEntity.setTransferBlock(transfer.getBlockNumber());
+                        nftOwnerEntityDao.saveAndFlush(nftEntity);
+                    }
+                }, () -> {
+                    NftOwnerEntity nftEntity = NftOwnerEntity
+                        .builder()
+                        .nftContract(contract)
+                        .nftTokenId(transfer.getTokenID())
+                        .transferBlock(lastTransferBlock)
+                        .owner(transfer.getTo())
+                        .build();
+                    log
+                        .info("Saving new Token " + transfer.getTokenID()
+                            + " for Contract " + contract);
+                    nftOwnerEntityDao.saveAndFlush(nftEntity);
+                }));
     }
 
     @Override
-    @Cacheable(cacheNames = "nftOwners", key = "#root.args[0].concat('_').concat(#root.args[1])")
-    public CompletableFuture<String> findOwner(String nftContractAddress,
+    public Optional<String> findOwner(String nftContractAddress,
         long nftId) {
-        InitializerSmartContract smartContract = InitializerSmartContract
-            .load(nftContractAddress, web3, (Credentials) null,
-                new DefaultGasProvider());
-
-        return smartContract.ownerOf(BigInteger.valueOf(nftId)).sendAsync();
+        return nftOwnerEntityDao
+            .findByNftContractAndNftTokenId(nftContractAddress, nftId)
+            .map(NftOwnerEntity::getOwner);
     }
 
     @Override
-    public CompletableFuture<Optional<BlankUser>> findBlankUserOwner(
+    public Optional<BlankUser> findBlankUserOwner(
         String nftContractAddress, long nftId) {
-        return self
-            .findOwner(nftContractAddress, nftId)
-            .thenApply(
-                address -> discordWalletService.findUserByWallet(address));
+        return findOwner(nftContractAddress, nftId)
+            .flatMap(address -> discordWalletService.findUserByWallet(address));
     }
 
     @Override
-    @Cacheable(cacheNames = "nftOwners")
-    public List<Long> findOwnedNFTs(String nftContractAddress, Address owner) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<Long> findOwnedNFTs(String nftContractAddress,
+        String... ownerAddresses) {
+        List<String> lowercaseAddresses = Arrays
+            .stream(ownerAddresses)
+            .map(String::toLowerCase)
+            .toList();
+        return nftOwnerEntityDao
+            .findByNftContractAndOwnerIn(nftContractAddress, lowercaseAddresses)
+            .stream()
+            .map(NftOwnerEntity::getNftTokenId)
+            .toList();
     }
 
     @Override
     public List<Long> findOwnedNFTs(String nftContractAddress,
         BlankUser owner) {
-        // TODO Auto-generated method stub
-        return null;
+        String[] ownerAddresses = discordWalletService
+            .getWallets(owner)
+            .stream()
+            .map(DiscordVerifiedWallet::getWalletAddress)
+            .toArray(size -> new String[size]);
+        return findOwnedNFTs(nftContractAddress, ownerAddresses);
     }
 
     @Override

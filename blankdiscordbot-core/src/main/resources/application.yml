@@ -22,11 +22,41 @@ web3:
     salesChannel: 934187617895997440
     contractWatchList:
       "0x881d9c2f229323aad28a9c9045111e30e1f1eb25": "Initializer"
+  nfts:
+    contracts:
+      - "0x881d9c2f229323aad28a9c9045111e30e1f1eb25" 
 emotes:
   initializers:
     GM:
       caption: 'Initializer #%(number) says "GM"'
       emoteImage: https://app.blankhumanity.com/GM.png
+    GN:
+      caption: 'Initializer #%(number) says "GN"'
+      emoteImage: https://app.blankhumanity.com/GN.png
+    GL:
+      caption: 'Initializer #%(number) wishes you luck'
+      emoteImage: https://app.blankhumanity.com/GL.png
+    WOW:
+      caption: 'Initializer #%(number) is amazed'
+      emoteImage: https://app.blankhumanity.com/WOW.png
+    TY:
+      caption: 'Initializer #%(number) is grateful'
+      emoteImage: https://app.blankhumanity.com/TY.png
+    lovesThis:
+      caption: 'Initializer #%(number) loves this'
+      emoteImage: https://app.blankhumanity.com/heart.png
+    sendLove:
+      caption: 'Initializer #%(number) sends love'
+      emoteImage: https://app.blankhumanity.com/heart.png
+    CUP:
+      caption: 'Initializer #%(number) is a winner'
+      emoteImage: https://app.blankhumanity.com/CUP.png
+    buyMe:
+      caption: 'Initializer #%(number) says "Buy me on OpenSea"'
+      emoteImage: https://app.blankhumanity.com/MONEY.png
+    WAGMI:
+      caption: "Initializer #%(number) insists We're All Gonna Make It"
+      emoteImage: https://app.blankhumanity.com/GN.png
 discord:
   authToken: ${DISCORD_AUTH_TOKEN}
   guildId: ${DISCORD_GUILD_ID}
@@ -165,9 +195,6 @@ discord:
         startmessageid: "Id of last message to count"
     verify:
       description: "Verify your Wallet"
-      roleRestricted: true
-      allowedRoles:
-        - 123542  # Invalid role, effectively disables command for everyone
     set-airdrop-wallet:
       description: "Set your airdrop wallet"
       options:
@@ -282,6 +309,7 @@ messages:
   WALLET_VERIFY_DISPLAY_LINK: "Please connect your web3 wallet [here](%(walletVerifyLink))"
   SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR: "The specified wallet address has an invalid format. Are you using an ethereum address?"
   SET_AIRDROP_WALLET_SUCCESS: "Your airdrop wallet was sucessfully set to '%(airdropWallet)'!"
+  INITIALIZER_EMOTE_NFT_NOT_OWNED: "You don't own Initializer #%(nftId)! If you actually do, then verify your Address via /verify."
 items:
   definitions:
     -
