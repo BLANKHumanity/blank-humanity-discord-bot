@@ -275,9 +275,15 @@ items:
       name: "High Roller Role"
       description: "Do you want to show off your superiority? Humans are competitive creatures, and with this role, you prove you are among the best. 💸"
       useName: "highRollerRole"
-      action: "ROLE_REWARD"
-      actionArguments:
-        roleId: 923462845688074251
+      actions: 
+        -
+          action: REQUIRED_AMOUNT
+          actionArguments:
+            amount: 1
+        -
+          action: "ROLE_REWARD"
+          actionArguments:
+            roleId: 923462845688074251
     - 
       id: 2
       name: ".1 ETH (1 Available)"
@@ -285,15 +291,15 @@ items:
       useName: "pointOneEth"
       actions:
         -
-          action: REQUIRED_AMOUNT_ACTION
+          action: REQUIRED_AMOUNT
           actionArguments:
-            requiredAmount: 1
+            amount: 1
         -
-          action: MESSAGE_REPLY_ACTION
+          action: MESSAGE_REPLY
           actionArguments:
             message: "%(user) has claimed .1 ETH! The Team has been notified and will reach out as soon as possible."
         - 
-          action: MESSAGE_SEND_ACTION
+          action: MESSAGE_SEND
           actionArguments:
             message: "<@&933314900959301692>, %(user) has claimed .1 ETH. Please open up a ticket with them and request their desired Ethereum address." #Pings @Team
             channel: 925018447572766750 # Fun-Shop-Purchases Channel (note: this item will be in the regular shop)
@@ -309,15 +315,15 @@ items:
       useName: "propagandaToken"
       actions:
         -
-          action: REQUIRED_AMOUNT_ACTION
+          action: REQUIRED_AMOUNT
           actionArguments:
-            requiredAmount: 4
+            amount: 4
         -
-          action: MESSAGE_REPLY_ACTION
+          action: MESSAGE_REPLY
           actionArguments:
             message: "A Propaganda Sticker has been activated by %(user)! The Overseer has been notified!"
         - 
-          action: MESSAGE_SEND_ACTION
+          action: MESSAGE_SEND
           actionArguments:
             message: "<@&927843505202679878>, a Propaganda Sticker has been activated by %(user)!" #Pings @Bitty
             channel: 925018447572766750
@@ -328,15 +334,15 @@ items:
       useName: "factionEmojiToken"
       actions:
         -
-          action: REQUIRED_AMOUNT_ACTION
+          action: REQUIRED_AMOUNT
           actionArguments:
-            requiredAmount: 4
+            amount: 4
         -
-          action: MESSAGE_REPLY_ACTION
+          action: MESSAGE_REPLY
           actionArguments:
             message: "A Faction Emoji has been activated by %(user)! The Overseer has been notified!"
         - 
-          action: MESSAGE_SEND_ACTION
+          action: MESSAGE_SEND
           actionArguments:
             message: "<@&927843505202679878>, a Faction Emoji has been activated by %(user)!" #Pings @Bitty
             channel: 925018447572766750
@@ -347,11 +353,11 @@ items:
       useName: "lootbox"
       actions:
         -
-          action: REQUIRED_AMOUNT_ACTION
+          action: REQUIRED_AMOUNT
           actionArguments:
-            requiredAmount: 1
+            amount: 1
         -
-          action: RANDOM_SELECTION_ACTION
+          action: RANDOM_SELECTION
           actionArguments:
             name: "lootboxItem"
             selections:
@@ -359,13 +365,15 @@ items:
               propagandaToken: 25
               factionEmojiToken: 55
         -
-          action: ITEM_REWARD_ACTION
+          action: ITEM_REWARD
           selectors:
             itemName: 
               selectorType: ENVIRONMENT
               identifier: "lootboxItem"
+          actionArguments:
+            amount: 1
         -
-          action: MESSAGE_REPLY_ACTION
+          action: MESSAGE_REPLY
           actionArguments:
             message: "Hey, you've got %(ITEM_AMOUNT_LATEST) x %(ITEM_NAME_LATEST) from your omega lootbox!"
 shop:

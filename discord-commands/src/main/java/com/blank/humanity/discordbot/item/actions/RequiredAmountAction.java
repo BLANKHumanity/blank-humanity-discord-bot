@@ -20,7 +20,7 @@ public class RequiredAmountAction implements ExecutableItemAction {
     public ItemActionStatus executeAction(BlankUser user,
         ItemActionState itemActionState) {
         int requiredAmount = itemActionState
-            .getProperty("requiredAmount", Integer::parseInt, 1);
+            .getProperty("amount", Integer::parseInt, 1);
 
         ItemDefinition item = itemActionState.getItemDefinition();
 
