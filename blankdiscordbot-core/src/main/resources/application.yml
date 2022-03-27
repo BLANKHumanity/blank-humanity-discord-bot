@@ -340,7 +340,34 @@ items:
           actionArguments:
             message: "<@&927843505202679878>, a Faction Emoji has been activated by %(user)!" #Pings @Bitty
             channel: 925018447572766750
-
+    -
+      id: 6
+      name: "Lootbox"
+      description: "Test Lootbox"
+      useName: "lootbox"
+      actions:
+        -
+          action: REQUIRED_AMOUNT_ACTION
+          actionArguments:
+            requiredAmount: 1
+        -
+          action: RANDOM_SELECTION_ACTION
+          actionArguments:
+            name: "lootboxItem"
+            selections:
+              pointTwoEth: 10 # Item "pointTwoEth" has "Probability" 10
+              propagandaToken: 25
+              factionEmojiToken: 55
+        -
+          action: ITEM_REWARD_ACTION
+          selectors:
+            itemName: 
+              selectorType: ENVIRONMENT
+              identifier: "lootboxItem"
+        -
+          action: MESSAGE_REPLY_ACTION
+          actionArguments:
+            message: "Hey, you've got %(ITEM_AMOUNT_LATEST) x %(ITEM_NAME_LATEST) from your omega lootbox!"
 shop:
   itemsPerPage: 8
   shopItems:  # Latest ID used: 10

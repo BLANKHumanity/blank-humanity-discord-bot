@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.data.util.Pair;
 
 import com.blank.humanity.discordbot.config.items.ActionConfigSelector;
@@ -150,18 +152,75 @@ public class ItemActionState {
         environment.put(key, value);
     }
 
+    public List<String> keys(String key) {
+
+        Stream<String> keys = environment
+            .keySet()
+            .stream()
+            .filter(eKey -> eKey.startsWith(key)
+                && eKey.lastIndexOf('.') == key.length());
+
+        ItemActionDefinition actionDefinition = itemDefinition
+            .getActions()[actionIndex];
+        Optional<Object> selectorKeys = deepGet(actionDefinition.getSelectors(),
+            key);
+        if (selectorKeys.isPresent()) {
+            Object sKeys = selectorKeys.get();
+            if (sKeys instanceof Map<?, ?> sMap) {
+                keys = Stream
+                    .concat(keys,
+                        sMap
+                            .keySet()
+                            .stream()
+                            .map(Object::toString)
+                            .map(str -> key + "." + str));
+            }
+        }
+        System.out.println(actionDefinition.getActionArguments().toString());
+        Optional<Object> actionArgumentKeys = deepGet(
+            actionDefinition.getActionArguments(), key);
+        if (actionArgumentKeys.isPresent()) {
+            Object aKeys = actionArgumentKeys.get();
+            if (aKeys instanceof Map<?, ?> aMap) {
+                keys = Stream
+                    .concat(keys,
+                        aMap
+                            .keySet()
+                            .stream()
+                            .map(Object::toString)
+                            .map(str -> key + "." + str));
+            }
+        }
+
+        return keys.distinct().peek(System.out::println).toList();
+    }
+
     public Object getProperty(String key, Object defaultValue) {
         ItemActionDefinition actionDefinition = itemDefinition
             .getActions()[actionIndex];
-        var selectors = actionDefinition.getSelectors();
-        if (selectors.containsKey(key)) {
-            return resolveSelector(selectors.get(key));
+        Optional<SelectorDefinition> selector = deepGet(
+            actionDefinition.getSelectors(), key);
+        if (selector.isPresent()) {
+            return resolveSelector(selector.get());
         }
-        var actionArguments = actionDefinition.getActionArguments();
-        if (actionArguments.containsKey(key)) {
-            return actionArguments.get(key);
+        Optional<Object> actionArgument = deepGet(
+            actionDefinition.getActionArguments(), key);
+        if (actionArgument.isPresent()) {
+            return actionArgument.get();
         }
         return environment.getOrDefault(key, defaultValue);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private <T> Optional<T> deepGet(Map map, String key) {
+        if (key.contains(".")) {
+            String[] keys = key.split("\\.", 2);
+            return Optional
+                .ofNullable(map.get(keys[0]))
+                .flatMap(
+                    deepMap -> deepGet((Map) deepMap, keys[1]));
+        }
+        return (Optional<T>) Optional.ofNullable(map.get(key));
     }
 
     public Object getProperty(String key) {

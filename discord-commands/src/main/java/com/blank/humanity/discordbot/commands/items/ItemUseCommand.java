@@ -23,6 +23,7 @@ import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
@@ -33,6 +34,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.RestAction;
 
+@Slf4j
 @Component
 public class ItemUseCommand extends AbstractCommand {
 
@@ -127,22 +129,23 @@ public class ItemUseCommand extends AbstractCommand {
 
         ItemActionStatus status = ItemActionStatus.SUCCESS;
 
-        for (int i = 0; i < actions.length
-            && status == ItemActionStatus.SUCCESS; i++) {
-            itemActionState.setActionIndex(i);
-            status = actions[i]
-                .executeAction(getUser(), itemActionState);
+        try {
+            for (int i = 0; i < actions.length
+                && status == ItemActionStatus.SUCCESS; i++) {
+                itemActionState.setActionIndex(i);
+                status = actions[i]
+                    .executeAction(getUser(), itemActionState);
+            }
+        } catch (RuntimeException exc) {
+            log.error("Error occured during Item Usage", exc);
+            throw exc;
         }
-
-        MessageEmbed[] replyEmbeds = itemActionState
-            .getEmbedsToReply()
-            .toArray(size -> new MessageEmbed[size]);
-        reply(replyEmbeds);
         if (status != ItemActionStatus.SUCCESS) {
             // On Error give Item back
             inventoryService.giveItem(getUser(), itemId, amount);
             return;
         }
+
         itemActionState
             .getEmbedsToSend()
             .entrySet()
@@ -154,6 +157,11 @@ public class ItemUseCommand extends AbstractCommand {
             .reduce((action1,
                 action2) -> action1 != null ? action1.and(action2) : action2)
             .ifPresent(RestAction::complete);
+        MessageEmbed[] replyEmbeds = itemActionState
+            .getEmbedsToReply()
+            .toArray(size -> new MessageEmbed[size]);
+        reply(replyEmbeds);
+
     }
 
     @Override

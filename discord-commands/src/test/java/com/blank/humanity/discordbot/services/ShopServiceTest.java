@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import com.blank.humanity.discordbot.utils.item.ItemBuyStatus;
 
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 
+@Disabled
 @Rollback(true)
 @Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD, value = "/shopServiceTestData.sql")
 @Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, value = "/clearShopServiceTestData.sql")

@@ -21,7 +21,7 @@
 			<groupId>com.blank.humanity</groupId>
 			<artifactId>discord-commands</artifactId>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>com.blank.humanity</groupId>
 			<artifactId>discord-games</artifactId>
 		</dependency>
@@ -39,7 +39,7 @@
 			<groupId>com.blank.humanity</groupId>
 			<artifactId>nft-sales</artifactId>
 			<version>1.0.0</version>
-		</dependency>
+		</dependency>-->
 	</dependencies>
 
 	<build>

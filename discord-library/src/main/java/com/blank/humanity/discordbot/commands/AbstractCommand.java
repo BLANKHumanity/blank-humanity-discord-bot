@@ -249,13 +249,9 @@ public abstract class AbstractCommand {
             localMember.set(interactionEvent.getMember());
 
             onCommand(interactionEvent);
-            return true;
-        } catch (Exception exception) {
-            receiveCommandInteractionExceptionHandler(exception);
-            return false;
-        } finally {
             receiveCommandInteractionFinishHandler();
-
+            return true;
+        } finally {
             clearThreadLocals();
         }
     }
@@ -319,20 +315,6 @@ public abstract class AbstractCommand {
                 .error("Error occured during CommandInteractionFinishHandler",
                     exc);
         }
-    }
-
-    /**
-     * Any Exception that is thrown during the
-     * {@link #onCommand(InteractionEvent)} Call is getting logged here and the
-     * user is notified with a Error Message.
-     * 
-     * @param e The exception that was thrown.
-     */
-    private void receiveCommandInteractionExceptionHandler(
-        @NonNull Exception e) {
-        log.error("Transaction threw Exception", e);
-        sendErrorMessage(
-            "This command threw this error '" + e.getMessage() + "'");
     }
 
     /**
