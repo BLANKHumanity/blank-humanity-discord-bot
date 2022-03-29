@@ -3,6 +3,7 @@ package com.blank.humanity.discordbot.commands.items;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -26,6 +27,7 @@ import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -34,6 +36,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 @Slf4j
 @Component
@@ -155,17 +158,33 @@ public class ItemUseCommand extends AbstractCommand {
             return;
         }
 
-        itemActionState
+        Stream<MessageAction> embedsSend = itemActionState
             .getEmbedsToSend()
             .entrySet()
             .stream()
             .map(entry -> getJda()
                 .getTextChannelById(entry.getKey())
-                .sendMessageEmbeds(entry.getValue())
-                .map(i -> (Void) null))
+                .sendMessageEmbeds(entry.getValue()));
+        Stream<MessageAction> messagesSend = itemActionState
+            .getMessagesToSend()
+            .entrySet()
+            .stream()
+            .flatMap(entry -> {
+                TextChannel channel = getJda()
+                    .getTextChannelById(entry.getKey());
+                return entry
+                    .getValue()
+                    .stream()
+                    .map(channel::sendMessage);
+            });
+
+        Stream
+            .concat(embedsSend, messagesSend)
+            .map(action -> action.map(i -> (Void) null))
             .reduce((action1,
                 action2) -> action1 != null ? action1.and(action2) : action2)
             .ifPresent(RestAction::complete);
+
         MessageEmbed[] replyEmbeds = itemActionState
             .getEmbedsToReply()
             .toArray(size -> new MessageEmbed[size]);

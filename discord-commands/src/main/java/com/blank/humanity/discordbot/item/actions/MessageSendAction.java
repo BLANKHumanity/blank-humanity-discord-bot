@@ -26,6 +26,8 @@ public class MessageSendAction implements ExecutableItemAction {
         String messageSend = itemActionState.getStringProperty("message");
         Long messageSendChannel = itemActionState
             .getProperty("channel", Long::parseLong);
+        boolean embed = itemActionState
+            .getProperty("embed", Boolean::parseBoolean, false);
 
         ItemDefinition item = itemActionState.getItemDefinition();
 
@@ -42,9 +44,14 @@ public class MessageSendAction implements ExecutableItemAction {
             return ItemActionStatus.ITEM_CONFIGURATION_ERROR;
         }
 
-        itemActionState
-            .sendMessage(messageSendChannel,
-                createMessage(messageSend, user, itemActionState.getAmount()));
+        FormattingData message = createMessage(messageSend, user,
+            itemActionState.getAmount());
+
+        if (embed) {
+            itemActionState.sendEmbedMessage(messageSendChannel, message);
+        } else {
+            itemActionState.sendMessage(messageSendChannel, message);
+        }
 
         return itemActionState.doNext(user);
     }
