@@ -211,7 +211,6 @@ public class ItemActionState {
                             .map(str -> key + "." + str));
             }
         }
-        System.out.println(actionDefinition.getActionArguments().toString());
         Optional<Object> actionArgumentKeys = deepGet(
             actionDefinition.getActionArguments(), key);
         if (actionArgumentKeys.isPresent()) {
@@ -227,7 +226,7 @@ public class ItemActionState {
             }
         }
 
-        return keys.distinct().peek(System.out::println).toList();
+        return keys.distinct().toList();
     }
 
     public Object getProperty(String key, Object defaultValue) {
