@@ -3,13 +3,10 @@ package com.blank.humanity.discordbot.services;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.entities.item.Item;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
-import com.blank.humanity.discordbot.item.actions.ItemActionStatus;
-import com.blank.humanity.discordbot.utils.FormattingData;
 
 import net.dv8tion.jda.api.interactions.commands.Command;
 

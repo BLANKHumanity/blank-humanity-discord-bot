@@ -18,7 +18,6 @@ import com.blank.humanity.discordbot.item.actions.ItemAction;
 import com.blank.humanity.discordbot.item.actions.ItemActionImpl;
 import com.blank.humanity.discordbot.item.actions.ItemActionState;
 import com.blank.humanity.discordbot.item.actions.ItemActionStatus;
-import com.blank.humanity.discordbot.item.actions.messages.ItemActionFormatDataKey;
 import com.blank.humanity.discordbot.item.actions.messages.ItemActionMessageType;
 import com.blank.humanity.discordbot.services.InventoryService;
 import com.blank.humanity.discordbot.utils.FormattingData;
