@@ -30,6 +30,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 @RequiredArgsConstructor
@@ -48,6 +50,9 @@ public class ItemActionState {
 
     @Getter
     private Map<Long, List<MessageEmbed>> embedsToSend = new HashMap<>();
+
+    @Getter
+    private Map<Long, List<Message>> messagesToSend = new HashMap<>();
 
     private Map<String, Object> environment = new HashMap<>();
 
@@ -81,6 +86,7 @@ public class ItemActionState {
         embedsToSend = original.embedsToSend;
         actionIndex = original.actionIndex;
         messageService = original.messageService;
+        messagesToSend = original.messagesToSend;
     }
 
     public ItemActionStatus doNext(BlankUser user) {
@@ -121,7 +127,43 @@ public class ItemActionState {
         reply(generateEmbed(formattingData, environmentDataKeys));
     }
 
-    public void sendMessage(long channelId, MessageEmbed... embeds) {
+    public void sendMessage(long channelId, FormattingData... formattingDatas) {
+        Map<FormatDataKey, Object> environmentDataKeys = generateEnvironmentFormattingKeys();
+        Arrays
+            .stream(formattingDatas)
+            .forEach(
+                data -> sendMessage(channelId, data, environmentDataKeys));
+    }
+
+    public void sendMessage(long channelId, FormattingData formattingData) {
+        sendMessage(channelId, formattingData,
+            generateEnvironmentFormattingKeys());
+    }
+
+    public void sendMessage(long channelId, FormattingData data,
+        Map<FormatDataKey, Object> environmentDataKeys) {
+        if (data.containsKey(GenericFormatDataKey.USER_MENTION)) {
+            setSelector(ActionConfigSelector.TARGET_USER,
+                data.get(GenericFormatDataKey.USER_MENTION));
+        }
+        sendMessage(channelId,
+            generateMessage(data, environmentDataKeys));
+    }
+
+    public void sendMessage(long channelId, Message... messages) {
+        if (messages.length == 0)
+            return;
+
+        setSelector(ActionConfigSelector.CHANNEL, channelId);
+        setSelector(ActionConfigSelector.MESSAGE,
+            messages[messages.length - 1].getContentRaw());
+
+        List<Message> channelMessagesToSend = messagesToSend
+            .computeIfAbsent(channelId, id -> new LinkedList<>());
+        Collections.addAll(channelMessagesToSend, messages);
+    }
+
+    public void sendEmbedMessage(long channelId, MessageEmbed... embeds) {
         if (embeds.length == 0)
             return;
 
@@ -134,25 +176,28 @@ public class ItemActionState {
         Collections.addAll(channelEmbedsToSend, embeds);
     }
 
-    public void sendMessage(long channelId, FormattingData... formattingDatas) {
+    public void sendEmbedMessage(long channelId,
+        FormattingData... formattingDatas) {
         Map<FormatDataKey, Object> environmentDataKeys = generateEnvironmentFormattingKeys();
         Arrays
             .stream(formattingDatas)
-            .forEach(data -> sendMessage(channelId, data, environmentDataKeys));
+            .forEach(
+                data -> sendEmbedMessage(channelId, data, environmentDataKeys));
     }
 
-    public void sendMessage(long channelId, FormattingData formattingData) {
-        sendMessage(channelId, formattingData,
+    public void sendEmbedMessage(long channelId,
+        FormattingData formattingData) {
+        sendEmbedMessage(channelId, formattingData,
             generateEnvironmentFormattingKeys());
     }
 
-    private void sendMessage(long channelId, FormattingData formattingData,
+    private void sendEmbedMessage(long channelId, FormattingData formattingData,
         Map<FormatDataKey, Object> environmentDataKeys) {
         if (formattingData.containsKey(GenericFormatDataKey.USER_MENTION)) {
             setSelector(ActionConfigSelector.TARGET_USER,
                 formattingData.get(GenericFormatDataKey.USER_MENTION));
         }
-        sendMessage(channelId,
+        sendEmbedMessage(channelId,
             generateEmbed(formattingData, environmentDataKeys));
     }
 
@@ -162,6 +207,14 @@ public class ItemActionState {
         formattingData.dataPairings(environmentDataKeys);
         String message = messageService.format(formattingData);
         return new EmbedBuilder().setDescription(message).build();
+    }
+
+    private Message generateMessage(FormattingData data,
+        Map<FormatDataKey, Object> environmentDataKeys) {
+        environmentDataKeys.putAll(data.dataPairings());
+        data.dataPairings(environmentDataKeys);
+        String message = messageService.format(data);
+        return new MessageBuilder().append(message).build();
     }
 
     private Map<FormatDataKey, Object> generateEnvironmentFormattingKeys() {
