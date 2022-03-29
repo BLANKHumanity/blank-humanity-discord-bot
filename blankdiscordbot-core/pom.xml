@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.blank.humanity</groupId>
 		<artifactId>blankdiscordbot-parent</artifactId>
-		<version>1.3.2</version>
+		<version>1.3.3</version>
 	</parent>
 	<artifactId>blankdiscordbot-core</artifactId>
 	<packaging>jar</packaging>
