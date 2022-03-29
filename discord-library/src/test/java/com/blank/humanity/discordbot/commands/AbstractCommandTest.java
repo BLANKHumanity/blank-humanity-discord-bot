@@ -214,7 +214,7 @@ class AbstractCommandTest {
         Runnable task = mock(Runnable.class);
 
         Message message = mock(Message.class);
-        
+
         BlankUser user = mock(BlankUser.class);
 
         when(event.getHook()).thenReturn(hook);
@@ -290,33 +290,15 @@ class AbstractCommandTest {
         GenericCommandInteractionEvent event = mock(
             GenericCommandInteractionEvent.class);
 
-        InteractionHook hook = mock(InteractionHook.class);
-
-        MessageEmbed embed = mock(MessageEmbed.class);
-        MessageEmbed[] embeds = new MessageEmbed[] { embed };
-
-        @SuppressWarnings("unchecked")
-        WebhookMessageUpdateAction<Message> updateAction = mock(
-            WebhookMessageUpdateAction.class);
-
-        when(event.getHook()).thenReturn(hook);
-        when(hook.editOriginalEmbeds(embeds)).thenReturn(updateAction);
-
         doThrow(RuntimeException.class).when(abstractCommand).onCommand(event);
         doNothing().when(abstractCommand).clearThreadLocals();
-        doNothing().when(abstractCommand).sendErrorMessage(Mockito.anyString());
 
-        doReturn(embeds).when(localEmbedsToSend).get();
-        doReturn(event).when(commandEvent).get();
-
-        Boolean result = abstractCommand.receiveCommandInteraction(event);
-
-        assertThat(result).isFalse();
+        assertThatThrownBy(
+            () -> abstractCommand.receiveCommandInteraction(event))
+                .isInstanceOf(RuntimeException.class);
 
         verify(abstractCommand).onCommand(event);
         verify(abstractCommand).clearThreadLocals();
-        verify(updateAction).complete();
-        verify(abstractCommand).sendErrorMessage(Mockito.anyString());
 
         verify(abstractCommand, never())
             .reply(Mockito.any(FormattingData[].class));

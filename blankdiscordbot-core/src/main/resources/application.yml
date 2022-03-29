@@ -200,6 +200,7 @@ messages:
   ITEM_USE_NOT_OWNED: "%(userMention), you don't have %(itemAmount) of this item"
   ITEM_USE_ONLY_SINGLE_ITEM: "%(userMention), the item '%(itemName)' can only be used seperately"
   ITEM_USE_ONLY_REQUIRED_AMOUNT: "%(userMention), the item '%(itemName)' requires the use of exactly '%(itemAmount)'x"
+  ITEM_USE_TOO_MANY_REPLIES: "%(userMention), this item usage generated too many replies. If you used multiple items, try using less (10 usually works)"
   ITEM_GIVE_NOT_ENOUGH_OWNED: "%(userMention), you don't have %(itemAmount) of %(itemName) to give away"
   ITEM_GIVE_SUCCESS: "%(userMention), you gave %(receivingUserMention) %(itemAmount) x %(itemName)"
   BUY_ITEM_NO_SUPPLY: "%(userMention), this item has no supply left"
@@ -270,77 +271,198 @@ messages:
   SET_AIRDROP_WALLET_SUCCESS: "Your airdrop wallet was sucessfully set to '%(airdropWallet)'!"
 items:
   definitions:
-    - id: 1
-      name: "First Class Ticket"
-      description: "Useful for you"
-      useName: "firstClassTicket"
-      action: "ROLE_REWARD"
-      actionArguments:
-        roleId: 923197747153223700
-    - id: 2
+    -
+      id: 1
       name: "High Roller Role"
-      description: "Why is this more expensive?"
+      description: "Do you want to show off your superiority? Humans are competitive creatures, and with this role, you prove you are among the best. 💸"
       useName: "highRollerRole"
-      action: "ROLE_REWARD"
-      actionArguments:
-        roleId: 923652378803187802
-    - id: 3
-      name: "Kingpin"
-      description: "Become the Kingpin"
-      useName: "kingpin"
-    - id: 4
-      name: ".1 ETH"
-      description: "Redeemable for 0.1 ETH after Bitizen Mint"
-      useName: "dotOneEth"
-      action: MESSAGE_ACTION
-      actionArguments:
-        requiredAmount: 1
-        replyMessage: "Hello World"
-        messageSend: "Ping Moderator that %(user) redeemed .1 ETH Item"
-        messageSendChannel: 797928031229444116
-    - id: 5
-      name: ".2 ETH"
-      useName: "dotTwoEth"
-      description: "Redeemable for 0.2 ETH after Bitizen Mint"
+      actions: 
+        -
+          action: REQUIRED_AMOUNT
+          actionArguments:
+            amount: 1
+        -
+          action: "ROLE_REWARD"
+          actionArguments:
+            roleId: 923462845688074251
+    - 
+      id: 2
+      name: ".1 ETH (1 Available)"
+      description: ".1 ETH paid directly to your wallet."
+      useName: "pointOneEth"
+      actions:
+        -
+          action: REQUIRED_AMOUNT
+          actionArguments:
+            amount: 1
+        -
+          action: MESSAGE_REPLY
+          actionArguments:
+            message: "%(user) has claimed .1 ETH! The Team has been notified and will reach out as soon as possible."
+        - 
+          action: MESSAGE_SEND
+          actionArguments:
+            message: "<@&933314900959301692>, %(user) has claimed .1 ETH. Please open up a ticket with them and request their desired Ethereum address." #Pings @Team
+            channel: 925018447572766750 # Fun-Shop-Purchases Channel (note: this item will be in the regular shop)
+    - 
+      id: 3
+      name: ".2 ETH (1 Available)"
+      description: ".2 ETH paid directly to your wallet." 
+      useName: "pointTwoEth"
+    - 
+      id: 4
+      name: "Propaganda Token"
+      description: "Each Faction Propaganda sticker requires 4 tokens to unlock and resets on Tuesdays. See <#940002641088512050> for details." #Channel ID links to the-cup-shop
+      useName: "propagandaToken"
+      actions:
+        -
+          action: REQUIRED_AMOUNT
+          actionArguments:
+            amount: 4
+        -
+          action: MESSAGE_REPLY
+          actionArguments:
+            message: "A Propaganda Sticker has been activated by %(user)! The Overseer has been notified!"
+        - 
+          action: MESSAGE_SEND
+          actionArguments:
+            message: "<@&927843505202679878>, a Propaganda Sticker has been activated by %(user)!" #Pings @Bitty
+            channel: 925018447572766750
+    - 
+      id: 5
+      name: "Faction Emoji Token"
+      description: "Each emoji requires 4 tokens to unlock. There are four purchasable emojis per faction. See <#940002641088512050> for details." #Channel ID links to the-cup-shop
+      useName: "factionEmojiToken"
+      actions:
+        -
+          action: REQUIRED_AMOUNT
+          actionArguments:
+            amount: 4
+        -
+          action: MESSAGE_REPLY
+          actionArguments:
+            message: "A Faction Emoji has been activated by %(user)! The Overseer has been notified!"
+        - 
+          action: MESSAGE_SEND
+          actionArguments:
+            message: "<@&927843505202679878>, a Faction Emoji has been activated by %(user)!" #Pings @Bitty
+            channel: 925018447572766750
+    -
+      id: 19
+      name: "Lootbox"
+      description: "Test Lootbox"
+      useName: "lootbox"
+      actions:
+        -
+          action: REQUIRED_AMOUNT
+          actionArguments:
+            amount: 1
+            supportMultiUse: true
+        -
+          action: RANDOM_SELECTION
+          actionArguments:
+            name: "piggyBankItem"
+            selections:
+              initializer:
+                value: "Initializer #769"
+                probability: 1
+              250k:
+                value: "250k <:HC:928474815986302997>"
+                probability: 1
+              100k:
+                value: "100k <:HC:928474815986302997>"
+                probability: 3
+              25k:
+                value: "25k <:HC:928474815986302997>"
+                probability: 5
+              10k:
+                value: "10k <:HC:928474815986302997>"
+                probability: 30
+              5k:
+                value: "5k <:HC:928474815986302997>"
+                probability: 60
+        -
+          action: MESSAGE_SEND
+          actionArguments:
+            channel: 934187617895997440
+            message: "<@&927843505202679878>, %(user) has received %(piggyBankItem) from their Piggy Bank v0.0."
+        -
+          action: MESSAGE_REPLY
+          actionArguments:
+            message: "%(user) breaks into their Piggy Bank v0.0 and finds %(piggyBankItem)! Bitty has been notified and will add that to your balance as soon as possible."
 shop:
   itemsPerPage: 8
-  shopItems:
-    - id: 1
-      itemId: 1
-      buyName: "firstClassTicket"
-      price: 50
-      amountAvailable: 100
-      order: 5
-    - id: 2
-      itemId: 2
-      buyName: "highRollerRole"
-      price: 100
-      amountAvailable: 5
-      order: 4
-    - id: 3
-      itemId: 3
-      buyName: "kingpin"
-      price: 200
-      amountAvailable: 1
-      order: 3
-    - id: 4
-      itemId: 4
-      buyName: "pointOneEth"
-      price: 1000
-      amountAvailable: 1
-      order: 2
-    - id: 5
-      itemId: 5
-      buyName: "pointTwoEth"
-      price: 2000
-      amountAvailable: 1
-      order: 1
-funshop: # Different Shop, uses different IDs
+  shopItems:  # Latest ID used: 10
+    -
+     order: 1
+     id: 4
+     itemId: 4
+     buyName: "propagandaToken"
+     price: 5000
+     amountAvailable: -1
+    -
+     order: 2
+     id: 5
+     itemId: 5
+     buyName: "factionEmojiToken"
+     price: 25000
+     amountAvailable: -1
+    -
+     order: 3
+     id: 1
+     itemId: 1
+     buyName: "highRollerRole"
+     price: 100000
+     amountAvailable: -1
+    -
+     order: 4
+     id: 2
+     itemId: 2
+     buyName: "pointOneEth"
+     price: 750000
+     amountAvailable: 1
+funshop:  # Different Shop, uses different IDs
   itemsPerPage: 8
-  shopItems:
-    - id: 1
-      itemId: 1
-      buyName: "firstClassTicket"
-      price: 10
-      amountAvailable: 5
-      order: 1
+  shopItems:  # Latest ID used: 6
+    -
+     order: 1
+     id: 1
+     itemId: 8
+     buyName: "BLANKAds"
+     price: 8000
+     amountAvailable: -1
+    -
+     order: 2
+     id: 2
+     itemId: 9
+     buyName: "learnToLove"
+     price: 10000
+     amountAvailable: -1
+    -
+     order: 3
+     id: 3
+     itemId: 10
+     buyName: "learnToSendLove"
+     price: 10000
+     amountAvailable: -1
+    -
+     order: 4
+     id: 4
+     itemId: 11
+     buyName: "boldestInitializer"
+     price: 15000
+     amountAvailable: -1
+    -
+     order: 5
+     id: 5
+     itemId: 12
+     buyName: "partialTruth"
+     price: 30000
+     amountAvailable: -1
+    -
+     order: 6
+     id: 6
+     itemId: 13
+     buyName: "doubleUp"
+     price: 40000
+     amountAvailable: -1

@@ -1,8 +1,5 @@
 package com.blank.humanity.discordbot.config.items;
 
-import java.util.Map;
-
-import javax.annotation.Nullable;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -30,9 +27,7 @@ public class ItemDefinition {
     @NotNull
     private String useName;
 
-    @Nullable
-    private String action;
-
-    private Map<String, Object> actionArguments;
-
+    @NotNull
+    private ItemActionDefinition[] actions;
+    
 }

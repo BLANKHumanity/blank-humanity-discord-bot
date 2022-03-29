@@ -776,6 +776,9 @@
 				"ITEM_USE_ONLY_REQUIRED_AMOUNT": {
 					"$ref": "#/$defs/message"
 				},
+				"ITEM_USE_TOO_MANY_REPLIES": {
+					"$ref": "#/$defs/message"
+				},
 				"ITEM_GIVE_NOT_ENOUGH_OWNED": {
 					"$ref": "#/$defs/message"
 				},
@@ -949,6 +952,7 @@
 				"ITEM_NOT_EXISTS",
 				"ITEM_USE_NOT_OWNED",
 				"ITEM_USE_ONLY_SINGLE_ITEM",
+				"ITEM_USE_TOO_MANY_REPLIES",
 				"ITEM_GIVE_NOT_ENOUGH_OWNED",
 				"ITEM_GIVE_SUCCESS",
 				"BUY_ITEM_NO_SUPPLY",
@@ -1129,15 +1133,32 @@
 					"type": "string",
 					"pattern": "^[a-zA-Z0-9]+$"
 				},
-				"action": {
-					"type": "string",
-					"enum": [
-						"ROLE_REWARD",
-						"MESSAGE_ACTION"
+				"actions": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"$ref": "#/$defs/itemAction"
+					},
+					"anyOf": [
+						{
+							"contains": {
+								"properties": {
+									"action": {
+										"const": "MESSAGE_REPLY"
+									}
+								}
+							}
+						},
+						{
+							"contains": {
+								"properties": {
+									"action": {
+										"const": "ROLE_REWARD"
+									}
+								}
+							}
+						}
 					]
-				},
-				"actionArguments": {
-					"type": "object"
 				}
 			},
 			"required": [
@@ -1146,55 +1167,229 @@
 				"description",
 				"useName"
 			],
-			"additionalProperties": false,
+			"additionalProperties": false
+		},
+		"itemAction": {
+			"type": "object",
+			"properties": {
+				"action": {
+					"type": "string",
+					"enum": [
+						"ROLE_REWARD",
+						"MESSAGE_SEND",
+						"MESSAGE_REPLY",
+						"REQUIRED_AMOUNT",
+						"RANDOM_NUMBER",
+						"RANDOM_SELECTION",
+						"ITEM_REWARD"
+					]
+				},
+				"selectors": {
+					"type": "object"
+				},
+				"actionArguments": {
+					"type": "object"
+				}
+			},
 			"allOf": [
-				{
-					"if": {
-						"required": [
-							"actionArguments"
-						]
-					},
-					"then": {
-						"required": [
-							"action"
-						]
-					}
-				},
-				{
-					"if": {
-						"required": [
-							"action"
-						]
-					},
-					"then": {
-						"required": [
-							"useName"
-						]
-					},
-					"else": {
-						"not": {
-							"required": [
-								"actionArguments"
-							]
-						}
-					}
-				},
 				{
 					"if": {
 						"properties": {
 							"action": {
 								"const": "ROLE_REWARD"
 							}
-						},
-						"required": [
-							"action"
-						]
+						}
 					},
 					"then": {
+						"$ref": "#/$defs/itemConfigKeys/roleId"
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"action": {
+								"const": "MESSAGE_SEND"
+							}
+						}
+					},
+					"then": {
+						"allOf": [
+							{
+								"$ref": "#/$defs/itemConfigKeys/message"
+							},
+							{
+								"$ref": "#/$defs/itemConfigKeys/channel"
+							}
+						]
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"action": {
+								"const": "MESSAGE_REPLY"
+							}
+						}
+					},
+					"then": {
+						"$ref": "#/$defs/itemConfigKeys/message"
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"action": {
+								"const": "REQUIRED_AMOUNT"
+							}
+						}
+					},
+					"then": {
+						"allOf": [
+							{
+								"$ref": "#/$defs/itemConfigKeys/amount"
+							},
+							{
+								"$ref": "#/$defs/itemConfigKeys/supportMultiUse"
+							}
+						]
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"action": {
+								"const": "RANDOM_NUMBER"
+							}
+						}
+					},
+					"then": {
+						"allOf": [
+							{
+								"$ref": "#/$defs/itemConfigKeys/name"
+							},
+							{
+								"$ref": "#/$defs/itemConfigKeys/minimum"
+							},
+							{
+								"$ref": "#/$defs/itemConfigKeys/maximum"
+							}
+						]
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"action": {
+								"const": "RANDOM_SELECTION"
+							}
+						}
+					},
+					"then": {
+						"allOf": [
+							{
+								"$ref": "#/$defs/itemConfigKeys/name"
+							},
+							{
+								"properties": {
+									"actionArguments": {
+										"properties": {
+											"selections": {
+												"patternProperties": {
+													"": {
+														"type": "object",
+														"properties": {
+															"value": {
+																"type": "string"
+															},
+															"probability": {
+																"type": "number"
+															}
+														},
+														"required": [
+															"value",
+															"probability"
+														],
+														"additionalProperties": false
+													}
+												},
+												"minProperties": 2
+											}
+										},
+										"required": [
+											"selections"
+										]
+									}
+								},
+								"required": [
+									"actionArguments"
+								]
+							}
+						]
+					}
+				},
+				{
+					"if": {
+						"properties": {
+							"action": {
+								"const": "ITEM_REWARD"
+							}
+						}
+					},
+					"then": {
+						"allOf": [
+							{
+								"anyOf": [
+									{
+										"$ref": "#/$defs/itemConfigKeys/itemName"
+									},
+									{
+										"$ref": "#/$defs/itemConfigKeys/itemId"
+									}
+								]
+							},
+							{
+								"$ref": "#/$defs/itemConfigKeys/amount"
+							}
+						]
+					}
+				}
+			]
+		},
+		"itemConfigSelector": {
+			"type": "object",
+			"properties": {
+				"selectorType": {
+					"type": "string",
+					"enum": [
+						"CHANNEL",
+						"MESSAGE",
+						"TARGET_USER",
+						"ENVIRONMENT",
+						"ITEM_ID",
+						"ITEM_NAME",
+						"ITEM_USE_NAME",
+						"ITEM_AMOUNT"
+					]
+				},
+				"identifier": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"selectorType",
+				"identifier"
+			],
+			"additionalProperties": false
+		},
+		"itemConfigKeys": {
+			"roleId": {
+				"anyOf": [
+					{
 						"properties": {
 							"actionArguments": {
 								"properties": {
 									"roleId": {
+										"description": "Discord Role Id",
 										"type": "number"
 									}
 								},
@@ -1207,79 +1402,367 @@
 						"required": [
 							"actionArguments"
 						]
-					}
-				},
-				{
-					"if": {
-						"properties": {
-							"action": {
-								"const": "MESSAGE_ACTION"
-							}
-						},
-						"required": [
-							"action"
-						]
 					},
-					"then": {
+					{
 						"properties": {
-							"actionArguments": {
+							"selectors": {
 								"properties": {
-									"requiredAmount": {
-										"type": "number",
-										"min": 1,
-										"default": 1,
-										"description": "What amount of Items need to be used at once?"
-									},
-									"replyMessage": {
-										"type": "string",
-										"description": "Reply to the users command"
-									},
-									"messageSend": {
-										"type": "string",
-										"description": "Message that should be sent to a different channel (for example notifying game moderators etc.)"
-									},
-									"messageSendChannel": {
-										"type": "number",
-										"description": "Channel Id where a message should be sent to"
+									"roleId": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
 									}
 								},
 								"required": [
-									"replyMessage"
+									"roleId"
 								],
-								"allOf": [
-									{
-										"if": {
-											"required": [
-												"messageSend"
-											]
-										},
-										"then": {
-											"required": [
-												"messageSendChannel"
-											]
-										}
-									},
-									{
-										"if": {
-											"required": [
-												"messageSendChannel"
-											]
-										},
-										"then": {
-											"required": [
-												"messageSend"
-											]
-										}
+								"additionalProperties": false
+							}
+						},
+						"required": [
+							"selectors"
+						]
+					}
+				]
+			},
+			"message": {
+				"anyOf": [
+					{
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"message": {
+										"type": "string"
 									}
+								},
+								"required": [
+									"message"
 								]
 							}
 						},
 						"required": [
 							"actionArguments"
 						]
+					},
+					{
+						"properties": {
+							"selectors": {
+								"properties": {
+									"message": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
+									}
+								},
+								"required": [
+									"message"
+								]
+							}
+						},
+						"required": [
+							"selectors"
+						]
 					}
-				}
-			]
+				]
+			},
+			"channel": {
+				"anyOf": [
+					{
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"channel": {
+										"type": "number"
+									}
+								},
+								"required": [
+									"channel"
+								]
+							}
+						},
+						"required": [
+							"actionArguments"
+						]
+					},
+					{
+						"properties": {
+							"selectors": {
+								"properties": {
+									"channel": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
+									}
+								},
+								"required": [
+									"channel"
+								]
+							}
+						},
+						"required": [
+							"selectors"
+						]
+					}
+				]
+			},
+			"amount": {
+				"anyOf": [
+					{
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"amount": {
+										"type": "integer"
+									}
+								},
+								"required": [
+									"amount"
+								]
+							}
+						},
+						"required": [
+							"actionArguments"
+						]
+					},
+					{
+						"properties": {
+							"selectors": {
+								"properties": {
+									"amount": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
+									}
+								},
+								"required": [
+									"amount"
+								]
+							}
+						},
+						"required": [
+							"selectors"
+						]
+					}
+				]
+			},
+			"supportMultiUse": {
+				"allOf": [
+					{
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"supportMultiUse": {
+										"type": "boolean"
+									}
+								}
+							}
+						}
+					},
+					{
+						"properties": {
+							"selectors": {
+								"properties": {
+									"supportMultiUse": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
+									}
+								}
+							}
+						}
+					}
+				]
+			},
+			"name": {
+				"anyOf": [
+					{
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name"
+								]
+							}
+						},
+						"required": [
+							"actionArguments"
+						]
+					},
+					{
+						"properties": {
+							"selectors": {
+								"properties": {
+									"name": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
+									}
+								},
+								"required": [
+									"name"
+								]
+							}
+						},
+						"required": [
+							"selectors"
+						]
+					}
+				]
+			},
+			"minimum": {
+				"anyOf": [
+					{
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"minimum": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"minimum"
+								]
+							}
+						},
+						"required": [
+							"actionArguments"
+						]
+					},
+					{
+						"properties": {
+							"selectors": {
+								"properties": {
+									"minimum": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
+									}
+								},
+								"required": [
+									"minimum"
+								]
+							}
+						},
+						"required": [
+							"selectors"
+						]
+					}
+				]
+			},
+			"maximum": {
+				"anyOf": [
+					{
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"maximum": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"maximum"
+								]
+							}
+						},
+						"required": [
+							"actionArguments"
+						]
+					},
+					{
+						"properties": {
+							"selectors": {
+								"properties": {
+									"maximum": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
+									}
+								},
+								"required": [
+									"maximum"
+								]
+							}
+						},
+						"required": [
+							"selectors"
+						]
+					}
+				]
+			},
+			"itemName": {
+				"anyOf": [
+					{
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"itemName": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"itemName"
+								]
+							}
+						},
+						"required": [
+							"actionArguments"
+						]
+					},
+					{
+						"properties": {
+							"selectors": {
+								"properties": {
+									"itemName": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
+									}
+								},
+								"required": [
+									"itemName"
+								]
+							}
+						},
+						"required": [
+							"selectors"
+						]
+					}
+				]
+			},
+			"itemId": {
+				"anyOf": [
+					{
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"itemId": {
+										"type": "integer"
+									}
+								},
+								"required": [
+									"itemId"
+								]
+							}
+						},
+						"required": [
+							"actionArguments"
+						]
+					},
+					{
+						"properties": {
+							"selectors": {
+								"properties": {
+									"itemId": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
+									}
+								},
+								"required": [
+									"itemId"
+								]
+							}
+						},
+						"required": [
+							"selectors"
+						]
+					}
+				]
+			}
 		},
 		"shopEntry": {
 			"type": "object",

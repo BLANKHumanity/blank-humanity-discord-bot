@@ -179,17 +179,9 @@ public class CommandServiceImpl implements CommandService, EventListener {
     private void transactionFinishHandler(
         @NonNull GenericCommandInteractionEvent event, Boolean success) {
         if (Boolean.FALSE.equals(success)) {
-            FormattingData errorMessage = FormattingData
-                .builder()
-                .messageType(GenericMessageType.ERROR_MESSAGE)
-                .dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
-                    "This command somehow didn't respond!")
-                .build();
-
-            event
-                .getHook()
-                .editOriginal(messageService.format(errorMessage))
-                .complete();
+            log
+                .warn("The command execution for " + event.getCommandString()
+                    + " returned an error status.");
         }
     }
 
@@ -210,7 +202,7 @@ public class CommandServiceImpl implements CommandService, EventListener {
             .builder()
             .messageType(GenericMessageType.ERROR_MESSAGE)
             .dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
-                e.getMessage())
+                e.getClass().getSimpleName() + ": " + e.getMessage())
             .build();
 
         event

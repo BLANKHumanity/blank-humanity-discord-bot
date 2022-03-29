@@ -16,6 +16,8 @@ services:
       DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
       INFURA_PROJECT_ID: ${INFURA_PROJECT_ID}
       ETHERSCAN_APIKEY: ${ETHERSCAN_APIKEY}
+    entrypoint: /bin/sh
+    command: -c './wait-for-it.sh mysql:3306 -- java -jar BlankDiscordBot.jar -Dspring.config.location=config/application.yml'
   mysql:
     image: "mariadb"
     environment:
