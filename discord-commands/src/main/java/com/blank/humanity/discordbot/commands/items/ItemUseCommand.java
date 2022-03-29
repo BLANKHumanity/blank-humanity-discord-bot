@@ -18,6 +18,8 @@ import com.blank.humanity.discordbot.item.actions.ItemAction;
 import com.blank.humanity.discordbot.item.actions.ItemActionImpl;
 import com.blank.humanity.discordbot.item.actions.ItemActionState;
 import com.blank.humanity.discordbot.item.actions.ItemActionStatus;
+import com.blank.humanity.discordbot.item.actions.messages.ItemActionFormatDataKey;
+import com.blank.humanity.discordbot.item.actions.messages.ItemActionMessageType;
 import com.blank.humanity.discordbot.services.InventoryService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;
@@ -125,21 +127,29 @@ public class ItemUseCommand extends AbstractCommand {
 
         ItemActionState itemActionState = new ItemActionState(
             event.getChannel().getIdLong(), resolvedItemDefinition, amount,
-            getMessageService());
+            actions, getMessageService());
 
         ItemActionStatus status = ItemActionStatus.SUCCESS;
 
         try {
-            for (int i = 0; i < actions.length
-                && status == ItemActionStatus.SUCCESS; i++) {
-                itemActionState.setActionIndex(i);
-                status = actions[i]
-                    .executeAction(getUser(), itemActionState);
-            }
+            itemActionState.setActionIndex(-1);
+            status = itemActionState.doNext(getUser());
         } catch (RuntimeException exc) {
             log.error("Error occured during Item Usage", exc);
             throw exc;
         }
+
+        if (itemActionState.getEmbedsToReply().size() > 10) {
+            FormattingData data = getBlankUserService()
+                .createFormattingData(getUser(),
+                    ItemActionMessageType.ITEM_USE_TOO_MANY_REPLIES)
+                .dataPairing(ItemFormatDataKey.ITEM_NAME, item)
+                .dataPairing(ItemFormatDataKey.ITEM_ID, itemId)
+                .build();
+            reply(data);
+            status = ItemActionStatus.GENERIC_ERROR;
+        }
+
         if (status != ItemActionStatus.SUCCESS) {
             // On Error give Item back
             inventoryService.giveItem(getUser(), itemId, amount);

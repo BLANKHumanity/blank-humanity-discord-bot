@@ -11,7 +11,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.data.util.Pair;
 
 import com.blank.humanity.discordbot.config.items.ActionConfigSelector;
@@ -20,9 +19,11 @@ import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.items.SelectorDefinition;
 import com.blank.humanity.discordbot.config.messages.CustomFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
+import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.services.MessageService;
 import com.blank.humanity.discordbot.utils.FormatDataKey;
 import com.blank.humanity.discordbot.utils.FormattingData;
+import com.blank.humanity.discordbot.utils.item.ExecutableItemAction;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -54,7 +55,41 @@ public class ItemActionState {
     @Setter
     private int actionIndex = 0;
 
+    @Getter
+    private final ExecutableItemAction[] actions;
+
     private final MessageService messageService;
+
+    public ItemActionState(ItemActionState original) {
+        this(original, original.amount);
+    }
+
+    public ItemActionState(ItemActionState original, int amount) {
+        this(original, amount, original.actions);
+    }
+
+    public ItemActionState(ItemActionState original, int amount,
+        ExecutableItemAction[] actions) {
+        this.amount = amount;
+        this.actions = actions;
+
+        environment.putAll(original.environment);
+
+        replyChannelId = original.replyChannelId;
+        itemDefinition = original.itemDefinition;
+        embedsToReply = original.embedsToReply;
+        embedsToSend = original.embedsToSend;
+        actionIndex = original.actionIndex;
+        messageService = original.messageService;
+    }
+
+    public ItemActionStatus doNext(BlankUser user) {
+        setActionIndex(getActionIndex() + 1);
+        if (getActionIndex() < actions.length) {
+            return actions[getActionIndex()].executeAction(user, this);
+        }
+        return ItemActionStatus.SUCCESS;
+    }
 
     public void reply(MessageEmbed... embeds) {
         if (embeds.length == 0)

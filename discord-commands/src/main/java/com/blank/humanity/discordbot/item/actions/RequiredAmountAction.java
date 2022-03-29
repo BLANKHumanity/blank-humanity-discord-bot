@@ -21,8 +21,27 @@ public class RequiredAmountAction implements ExecutableItemAction {
         ItemActionState itemActionState) {
         int requiredAmount = itemActionState
             .getProperty("amount", Integer::parseInt, 1);
+        boolean supportMultiUse = itemActionState
+            .getProperty("supportMultiUse", Boolean::parseBoolean, false);
 
         ItemDefinition item = itemActionState.getItemDefinition();
+
+        boolean validMultiUse = supportMultiUse
+            && (itemActionState.getAmount() % requiredAmount == 0);
+
+        if (validMultiUse) {
+            int count = itemActionState.getAmount() / requiredAmount;
+           
+            for (int i = 0; i < count; i++) {
+                ItemActionState copy = new ItemActionState(itemActionState,
+                    requiredAmount);
+                ItemActionStatus status = copy.doNext(user);
+                if (status != ItemActionStatus.SUCCESS) {
+                    return status;
+                }
+            }            
+            return ItemActionStatus.SUCCESS;
+        }
 
         if (itemActionState.getAmount() != requiredAmount) {
             itemActionState
@@ -38,7 +57,7 @@ public class RequiredAmountAction implements ExecutableItemAction {
                     .build());
             return ItemActionStatus.GENERIC_ERROR;
         }
-        return ItemActionStatus.SUCCESS;
+        return itemActionState.doNext(user);
     }
 
 }

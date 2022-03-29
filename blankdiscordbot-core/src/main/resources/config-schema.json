@@ -776,6 +776,9 @@
 				"ITEM_USE_ONLY_REQUIRED_AMOUNT": {
 					"$ref": "#/$defs/message"
 				},
+				"ITEM_USE_TOO_MANY_REPLIES": {
+					"$ref": "#/$defs/message"
+				},
 				"ITEM_GIVE_NOT_ENOUGH_OWNED": {
 					"$ref": "#/$defs/message"
 				},
@@ -949,6 +952,7 @@
 				"ITEM_NOT_EXISTS",
 				"ITEM_USE_NOT_OWNED",
 				"ITEM_USE_ONLY_SINGLE_ITEM",
+				"ITEM_USE_TOO_MANY_REPLIES",
 				"ITEM_GIVE_NOT_ENOUGH_OWNED",
 				"ITEM_GIVE_SUCCESS",
 				"BUY_ITEM_NO_SUPPLY",
@@ -1240,7 +1244,14 @@
 						}
 					},
 					"then": {
-						"$ref": "#/$defs/itemConfigKeys/amount"
+						"allOf": [
+							{
+								"$ref": "#/$defs/itemConfigKeys/amount"
+							},
+							{
+								"$ref": "#/$defs/itemConfigKeys/supportMultiUse"
+							}
+						]
 					}
 				},
 				{
@@ -1279,52 +1290,38 @@
 								"$ref": "#/$defs/itemConfigKeys/name"
 							},
 							{
-								"anyOf": [
-									{
+								"properties": {
+									"actionArguments": {
 										"properties": {
-											"selectors": {
-												"properties": {
-													"selections": {
+											"selections": {
+												"patternProperties": {
+													"": {
 														"type": "object",
-														"patternProperties": {
-															"": {
-																"type": "object",
-																"$ref": "#/$defs/itemConfigSelector"
-															}
-														}
-													}
-												},
-												"required": [
-													"selections"
-												]
-											}
-										},
-										"required": [
-											"selectors"
-										]
-									},
-									{
-										"properties": {
-											"actionArguments": {
-												"properties": {
-													"selections": {
-														"patternProperties": {
-															"": {
+														"properties": {
+															"value": {
+																"type": "string"
+															},
+															"probability": {
 																"type": "number"
 															}
 														},
-														"minProperties": 2
+														"required": [
+															"value",
+															"probability"
+														],
+														"additionalProperties": false
 													}
 												},
-												"required": [
-													"selections"
-												]
+												"minProperties": 2
 											}
 										},
 										"required": [
-											"actionArguments"
+											"selections"
 										]
 									}
+								},
+								"required": [
+									"actionArguments"
 								]
 							}
 						]
@@ -1541,6 +1538,33 @@
 						"required": [
 							"selectors"
 						]
+					}
+				]
+			},
+			"supportMultiUse": {
+				"allOf": [
+					{
+						"properties": {
+							"actionArguments": {
+								"properties": {
+									"supportMultiUse": {
+										"type": "boolean"
+									}
+								}
+							}
+						}
+					},
+					{
+						"properties": {
+							"selectors": {
+								"properties": {
+									"supportMultiUse": {
+										"type": "object",
+										"$ref": "#/$defs/itemConfigSelector"
+									}
+								}
+							}
+						}
 					}
 				]
 			},

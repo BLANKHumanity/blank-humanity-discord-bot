@@ -200,6 +200,7 @@ messages:
   ITEM_USE_NOT_OWNED: "%(userMention), you don't have %(itemAmount) of this item"
   ITEM_USE_ONLY_SINGLE_ITEM: "%(userMention), the item '%(itemName)' can only be used seperately"
   ITEM_USE_ONLY_REQUIRED_AMOUNT: "%(userMention), the item '%(itemName)' requires the use of exactly '%(itemAmount)'x"
+  ITEM_USE_TOO_MANY_REPLIES: "%(userMention), this item usage generated too many replies. If you used multiple items, try using less (10 usually works)"
   ITEM_GIVE_NOT_ENOUGH_OWNED: "%(userMention), you don't have %(itemAmount) of %(itemName) to give away"
   ITEM_GIVE_SUCCESS: "%(userMention), you gave %(receivingUserMention) %(itemAmount) x %(itemName)"
   BUY_ITEM_NO_SUPPLY: "%(userMention), this item has no supply left"
@@ -347,7 +348,7 @@ items:
             message: "<@&927843505202679878>, a Faction Emoji has been activated by %(user)!" #Pings @Bitty
             channel: 925018447572766750
     -
-      id: 6
+      id: 19
       name: "Lootbox"
       description: "Test Lootbox"
       useName: "lootbox"
@@ -356,26 +357,39 @@ items:
           action: REQUIRED_AMOUNT
           actionArguments:
             amount: 1
+            supportMultiUse: true
         -
           action: RANDOM_SELECTION
           actionArguments:
-            name: "lootboxItem"
+            name: "piggyBankItem"
             selections:
-              pointTwoEth: 10 # Item "pointTwoEth" has "Probability" 10
-              propagandaToken: 25
-              factionEmojiToken: 55
+              initializer:
+                value: "Initializer #769"
+                probability: 1
+              250k:
+                value: "250k <:HC:928474815986302997>"
+                probability: 1
+              100k:
+                value: "100k <:HC:928474815986302997>"
+                probability: 3
+              25k:
+                value: "25k <:HC:928474815986302997>"
+                probability: 5
+              10k:
+                value: "10k <:HC:928474815986302997>"
+                probability: 30
+              5k:
+                value: "5k <:HC:928474815986302997>"
+                probability: 60
         -
-          action: ITEM_REWARD
-          selectors:
-            itemName: 
-              selectorType: ENVIRONMENT
-              identifier: "lootboxItem"
+          action: MESSAGE_SEND
           actionArguments:
-            amount: 1
+            channel: 934187617895997440
+            message: "<@&927843505202679878>, %(user) has received %(piggyBankItem) from their Piggy Bank v0.0."
         -
           action: MESSAGE_REPLY
           actionArguments:
-            message: "Hey, you've got %(ITEM_AMOUNT_LATEST) x %(ITEM_NAME_LATEST) from your omega lootbox!"
+            message: "%(user) breaks into their Piggy Bank v0.0 and finds %(piggyBankItem)! Bitty has been notified and will add that to your balance as soon as possible."
 shop:
   itemsPerPage: 8
   shopItems:  # Latest ID used: 10

@@ -43,9 +43,9 @@ public class RandomSelectionAction implements ExecutableItemAction {
 
         List<Long> numbers = selections
             .stream()
-            .map(key -> itemActionState.getProperty(key, Long::parseLong))
+            .map(key -> itemActionState
+                .getProperty(key + ".probability", Long::parseLong))
             .toList();
-        System.out.println(numbers);
 
         long sum = numbers
             .stream()
@@ -55,14 +55,16 @@ public class RandomSelectionAction implements ExecutableItemAction {
         long randomNumber = random.nextLong(0, sum);
 
         int index = -1;
-        while (randomNumber > 0) {
+        while (randomNumber >= 0) {
             index++;
             randomNumber -= numbers.get(index);
         }
 
-        itemActionState.setEnvironment(name, selections.get(index).split("\\.", 2)[1]);
+        itemActionState
+            .setEnvironment(name, itemActionState
+                .getStringProperty(selections.get(index) + ".value"));
 
-        return ItemActionStatus.SUCCESS;
+        return itemActionState.doNext(user);
     }
 
 }

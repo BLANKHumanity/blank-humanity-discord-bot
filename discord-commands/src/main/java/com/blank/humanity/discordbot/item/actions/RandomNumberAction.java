@@ -38,7 +38,7 @@ public class RandomNumberAction implements ExecutableItemAction {
         
         itemActionState.setEnvironment(name, randomNumber);
         
-        return ItemActionStatus.SUCCESS;
+        return itemActionState.doNext(user);
     }
 
 }

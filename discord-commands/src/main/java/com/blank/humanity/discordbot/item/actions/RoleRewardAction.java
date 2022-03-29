@@ -90,7 +90,7 @@ public class RoleRewardAction implements ExecutableItemAction {
                     .dataPairing(ItemActionFormatDataKey.ROLE,
                         role.get().getName())
                     .build());
-            return ItemActionStatus.SUCCESS;
+            return itemActionState.doNext(user);
         }
     }
 

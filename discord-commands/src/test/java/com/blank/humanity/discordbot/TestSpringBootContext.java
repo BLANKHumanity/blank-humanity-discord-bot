@@ -1,9 +1,12 @@
 package com.blank.humanity.discordbot;
 
+import java.security.SecureRandom;
+
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.AdviceMode;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -39,4 +42,8 @@ public class TestSpringBootContext {
     @MockBean
     public InventoryService inventoryService;
     
+    @Bean
+    public SecureRandom random() {
+        return new SecureRandom();
+    }
 }

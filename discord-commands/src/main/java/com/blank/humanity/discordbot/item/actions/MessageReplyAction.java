@@ -37,7 +37,7 @@ public class MessageReplyAction implements ExecutableItemAction {
         itemActionState
             .reply(createMessage(message, user, itemActionState.getAmount()));
 
-        return ItemActionStatus.SUCCESS;
+        return itemActionState.doNext(user);
     }
 
     private FormattingData createMessage(String replyMessage, BlankUser user,

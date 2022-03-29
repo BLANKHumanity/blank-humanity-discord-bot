@@ -46,7 +46,7 @@ public class MessageSendAction implements ExecutableItemAction {
             .sendMessage(messageSendChannel,
                 createMessage(messageSend, user, itemActionState.getAmount()));
 
-        return ItemActionStatus.SUCCESS;
+        return itemActionState.doNext(user);
     }
 
     private FormattingData createMessage(String replyMessage, BlankUser user,
