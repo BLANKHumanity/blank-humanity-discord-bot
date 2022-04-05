@@ -20,7 +20,8 @@ public enum WalletMessageType implements MessageType {
         GenericFormatDataKey.USER_MENTION),
     SET_AIRDROP_WALLET_SUCCESS(WalletFormatDataKey.AIRDROP_WALLET,
         GenericFormatDataKey.USER, GenericFormatDataKey.USER_MENTION),
-    INITIALIZER_EMOTE_NFT_NOT_OWNED(WalletFormatDataKey.NFT_ID);
+    INITIALIZER_EMOTE_NFT_NOT_OWNED(WalletFormatDataKey.NFT_ID),
+    INITIALIZER_EMOTE_NOT_BOUGHT(WalletFormatDataKey.EMOTE_ID);
 
     private WalletMessageType(FormatDataKey... keys) {
         this.availableDataKeys = keys;

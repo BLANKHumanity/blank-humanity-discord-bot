@@ -6,6 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.Positive;
 
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 
@@ -29,5 +30,14 @@ public class DiscordVerifiedWallet {
 
     @NonNull
     private String walletAddress;
+
+    @NonNull
+    private String salt;
+
+    @NonNull
+    private String signature;
+
+    @Positive
+    private int signatureVersion;
 
 }

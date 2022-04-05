@@ -10,6 +10,8 @@ import javax.transaction.Transactional;
 
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
@@ -55,13 +57,24 @@ public class DiscordWalletServiceImpl implements DiscordWalletService {
 
     @Override
     @Transactional
-    public Optional<DiscordVerifiedWallet> registerVerifiedWallet(
-        String sigData, String salt) {
+    public ResponseEntity<Void> registerVerifiedWallet(
+        String requestedAddress, String sigData, String salt) {
+        boolean alreadyVerified = discordWalletDao
+            .findBySalt(salt)
+            .map(DiscordVerifiedWallet::getWalletAddress)
+            .filter(verifiedAddress -> verifiedAddress
+                .equalsIgnoreCase(requestedAddress))
+            .isPresent();
+
+        if (alreadyVerified) {
+            return ResponseEntity.ok().build();
+        }
+
         Optional<DiscordWalletSalt> walletSalt = discordWalletSaltDao
             .findBySalt(salt);
 
         if (walletSalt.isEmpty()) {
-            return Optional.empty();
+            return ResponseEntity.notFound().build();
         }
 
         DiscordWalletSalt saltWallet = walletSalt.get();
@@ -74,21 +87,36 @@ public class DiscordWalletServiceImpl implements DiscordWalletService {
         byte[] messageData = message.getBytes();
 
         Optional<String> pubAddress = recoverAddressFromSignature(messageData,
-            signature);
+            signature)
+                .filter(address -> address.equalsIgnoreCase(requestedAddress));
 
         if (pubAddress.isEmpty()) {
-            return Optional.empty();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+
+        Optional<DiscordVerifiedWallet> existingRegistration = pubAddress
+            .flatMap(discordWalletDao::findByWalletAddress);
 
         DiscordVerifiedWallet discordWallet = new DiscordVerifiedWallet();
 
+        if (existingRegistration.isPresent()) {
+            Long userId = existingRegistration.get().getUser().getId();
+            if (userId.equals(saltWallet.getUser().getId())) {
+                return ResponseEntity.ok().build();
+            } else {
+                discordWallet = existingRegistration.get();
+            }
+        }
+
+        discordWallet.setSalt(salt);
+        discordWallet.setSignature(sigData);
+        discordWallet.setSignatureVersion(1);
         discordWallet.setUser(saltWallet.getUser());
         discordWallet.setWalletAddress(pubAddress.get());
 
-        Optional<DiscordVerifiedWallet> optDiscordWallet = Optional
-            .of(discordWalletDao.save(discordWallet));
+        discordWalletDao.save(discordWallet);
         discordWalletSaltDao.delete(saltWallet);
-        return optDiscordWallet;
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     public Optional<String> recoverAddressFromSignature(byte[] messageData,

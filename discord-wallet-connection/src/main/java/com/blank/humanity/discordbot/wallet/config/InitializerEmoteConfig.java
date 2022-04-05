@@ -1,11 +1,9 @@
 package com.blank.humanity.discordbot.wallet.config;
 
-import java.util.Map;
+import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-
-import com.blank.humanity.discordbot.wallet.entities.EmoteDefinition;
 
 import lombok.Data;
 
@@ -14,6 +12,10 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "emotes")
 public class InitializerEmoteConfig {
 
-    private Map<String, EmoteDefinition> initializers;
-    
+    /**
+     * List of all emotes for Initializers
+     */
+    private List<String> initializers;
+
+    private String size;
 }

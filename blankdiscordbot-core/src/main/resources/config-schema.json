@@ -127,12 +127,42 @@
 							}
 						}
 					}
+				},
+				"nfts": {
+					"type": "object",
+					"properties": {
+						"contracts": {
+							"type": "array",
+							"items": "string"
+						}
+					},
+					"additionalProperties": false
 				}
 			},
 			"required": [
-				"wallet"
+				"wallet",
+				"provider",
+				"etherscan",
+				"salestracker",
+				"nfts"
 			],
 			"additionalProperties": false
+		},
+		"emotes": {
+			"type": "object",
+			"properties": {
+				"size": {
+					"enum": [
+						"small",
+						"medium",
+						"large"
+					]
+				},
+				"initializers": {
+					"type": "array",
+					"items": "string"
+				}
+			}
 		},
 		"discord": {
 			"type": "object",
@@ -675,6 +705,25 @@
 									}
 								}
 							}
+						},
+						"emote": {
+							"type": "object",
+							"$ref": "#/$defs/command",
+							"properties": {
+								"options": {
+									"type": "object",
+									"properties": {
+										"emote": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										},
+										"initializer": {
+											"type": "string",
+											"$ref": "#/$defs/argument"
+										}
+									}
+								}
+							}
 						}
 					},
 					"required": [
@@ -934,6 +983,9 @@
 				},
 				"SET_AIRDROP_WALLET_SUCCESS": {
 					"$ref": "#/$defs/message"
+				},
+				"INITIALIZER_EMOTE_NFT_NOT_OWNED": {
+					"$ref": "#/$defs/message"
 				}
 			},
 			"required": [
@@ -1004,7 +1056,8 @@
 				"FUN_PLACE_SHOP_FOOTER",
 				"WALLET_VERIFY_DISPLAY_LINK",
 				"SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR",
-				"SET_AIRDROP_WALLET_SUCCESS"
+				"SET_AIRDROP_WALLET_SUCCESS",
+				"INITIALIZER_EMOTE_NFT_NOT_OWNED"
 			],
 			"additionalProperties": false
 		},

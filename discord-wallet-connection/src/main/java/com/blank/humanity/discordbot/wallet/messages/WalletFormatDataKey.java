@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 public enum WalletFormatDataKey implements FormatDataKey {
     WALLET_VERIFY_LINK("walletVerifyLink"),
     AIRDROP_WALLET("airdropWallet"), 
-    NFT_ID("nftId");
+    NFT_ID("nftId"), EMOTE_ID("emoteId");
 
     @NonNull
     private String key;

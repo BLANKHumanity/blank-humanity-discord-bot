@@ -46,7 +46,8 @@ public class VerifyCommand extends AbstractHiddenCommand {
             .createFormattingData(user,
                 WalletMessageType.WALLET_VERIFY_DISPLAY_LINK)
             .dataPairing(WalletFormatDataKey.WALLET_VERIFY_LINK,
-                walletVerifyConfig.getBaseUrl() + "?salt=" + salt)
+                walletVerifyConfig.getBaseUrl() + "?salt=" + salt
+                    + "&discord_id=" + user.getDiscordId())
             .build());
     }
 

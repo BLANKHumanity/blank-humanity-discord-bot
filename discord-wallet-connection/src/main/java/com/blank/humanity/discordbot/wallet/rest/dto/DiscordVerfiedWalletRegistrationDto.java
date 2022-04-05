@@ -9,6 +9,8 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class DiscordVerfiedWalletRegistrationDto {
 
+    private String address;
+
     private String salt;
 
     private String signature;

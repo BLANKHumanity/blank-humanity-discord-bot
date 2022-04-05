@@ -18,4 +18,6 @@ public interface DiscordVerifiedWalletDao
 
     public List<DiscordVerifiedWallet> findAllByUser(BlankUser user);
 
+    public Optional<DiscordVerifiedWallet> findBySalt(String salt);
+
 }
