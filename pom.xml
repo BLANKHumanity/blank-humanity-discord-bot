@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.blank.humanity</groupId>
 	<artifactId>blankdiscordbot-parent</artifactId>
-	<version>1.3.3</version>
+	<version>1.3.4</version>
 	<packaging>pom</packaging>
 
 	<name>BlankDiscordBot-Parent</name>
@@ -37,27 +37,27 @@
 			<dependency>
 				<groupId>com.blank.humanity</groupId>
 				<artifactId>discord-library</artifactId>
-				<version>1.3.3</version>
+				<version>1.3.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.blank.humanity</groupId>
 				<artifactId>discord-commands</artifactId>
-				<version>1.3.3</version>
+				<version>1.3.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.blank.humanity</groupId>
 				<artifactId>discord-games</artifactId>
-				<version>1.3.3</version>
+				<version>1.3.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.blank.humanity</groupId>
 				<artifactId>discord-wallet-connection</artifactId>
-				<version>0.1.1</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.blank.humanity</groupId>
 				<artifactId>discord-library-test</artifactId>
-				<version>1.3.3</version>
+				<version>1.3.4</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
