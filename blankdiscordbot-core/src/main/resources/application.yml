@@ -7,6 +7,9 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: update
+  cache:
+    jcache:
+      config: classpath:ehcache.xml
 web3:
   wallet:
     verify:
@@ -19,6 +22,22 @@ web3:
     salesChannel: 934187617895997440
     contractWatchList:
       "0x881d9c2f229323aad28a9c9045111e30e1f1eb25": "Initializer"
+  nfts:
+    contracts:
+      - "0x881d9c2f229323aad28a9c9045111e30e1f1eb25" 
+emotes:
+  size: medium
+  initializers:
+    - GM
+    - GN
+    - GL
+    - WOW
+    - TY
+    - lovesThis
+    - sendLove
+    - CUP
+    - buyMe
+    - WAGMI
 discord:
   authToken: ${DISCORD_AUTH_TOKEN}
   guildId: ${DISCORD_GUILD_ID}
@@ -157,13 +176,15 @@ discord:
         startmessageid: "Id of last message to count"
     verify:
       description: "Verify your Wallet"
-      roleRestricted: true
-      allowedRoles:
-        - 123542  # Invalid role, effectively disables command for everyone
     set-airdrop-wallet:
       description: "Set your airdrop wallet"
       options:
         wallet: "Your ethereum wallet"
+    emote:
+      description: "Temporary"
+      options:
+        initializer: "Temporary"
+        emote: "Temporary"
 games:
   dice:
     displayName: Dice
@@ -269,6 +290,7 @@ messages:
   WALLET_VERIFY_DISPLAY_LINK: "Please connect your web3 wallet [here](%(walletVerifyLink))"
   SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR: "The specified wallet address has an invalid format. Are you using an ethereum address?"
   SET_AIRDROP_WALLET_SUCCESS: "Your airdrop wallet was sucessfully set to '%(airdropWallet)'!"
+  INITIALIZER_EMOTE_NFT_NOT_OWNED: "You don't own Initializer #%(nftId)! If you actually do, then verify your Address via /verify."
 items:
   definitions:
     -

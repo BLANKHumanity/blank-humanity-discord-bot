@@ -17,8 +17,8 @@ import org.web3j.ens.EnsResolver;
 
 import com.blank.humanity.discordbot.config.NftSalesTrackerConfig;
 import com.blank.humanity.discordbot.config.commands.CommandConfig;
-import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTrade;
-import com.blank.humanity.discordbot.services.etherscan.NftSalesService;
+import com.blank.humanity.discordbot.services.NftSalesService;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTrade;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

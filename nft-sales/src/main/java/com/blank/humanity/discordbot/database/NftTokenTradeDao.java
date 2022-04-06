@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.blank.humanity.discordbot.entities.etherscan.trade.NftTokenTrade;
+import com.blank.humanity.discordbot.wallet.entities.etherscan.trade.NftTokenTrade;
 
 @Repository
 public interface NftTokenTradeDao extends JpaRepository<NftTokenTrade, Long> {

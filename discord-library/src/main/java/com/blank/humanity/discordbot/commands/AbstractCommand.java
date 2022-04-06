@@ -1,8 +1,10 @@
 package com.blank.humanity.discordbot.commands;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -45,6 +47,7 @@ import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction;
+import net.dv8tion.jda.api.utils.AttachmentOption;
 import net.dv8tion.jda.internal.utils.Checks;
 
 /**
@@ -86,6 +89,9 @@ public abstract class AbstractCommand {
     private static ThreadLocal<Member> localMember = new ThreadLocal<>();
 
     private static ThreadLocal<MessageEmbed[]> localEmbedsToSend = new ThreadLocal<>();
+
+    private static ThreadLocal<List<FileSendRequest>> localFilesToSend = ThreadLocal
+        .withInitial(ArrayList::new);
 
     private static ThreadLocal<DiscordMenu> localMenu = new ThreadLocal<>();
 
@@ -211,6 +217,10 @@ public abstract class AbstractCommand {
         return localEmbedsToSend.get();
     }
 
+    protected List<FileSendRequest> getUnsentFiles() {
+        return localFilesToSend.get();
+    }
+
     /**
      * @see AbstractHiddenCommand
      * @return True if command should always be hidden.
@@ -230,6 +240,7 @@ public abstract class AbstractCommand {
         localCachedTasks.remove();
         localMenu.remove();
         localMember.remove();
+        localFilesToSend.remove();
     }
 
     /**
@@ -297,13 +308,8 @@ public abstract class AbstractCommand {
         if (localEmbedsToSend.get() == null) {
             sendErrorMessage("This command somehow didn't respond!");
         }
-
-        WebhookMessageUpdateAction<Message> messageUpdateAction = getCommandEvent()
-            .getHook()
-            .editOriginalEmbeds(localEmbedsToSend.get());
-
         try {
-            Message message = messageUpdateAction.complete();
+            Message message = prepareMessageUpdateAction().complete();
             Optional<DiscordMenu> menu = getMenu();
             if (menu.isPresent()) {
                 menu.get().buildMenu(getJda(), message, getMenuService());
@@ -315,6 +321,18 @@ public abstract class AbstractCommand {
                 .error("Error occured during CommandInteractionFinishHandler",
                     exc);
         }
+    }
+
+    private WebhookMessageUpdateAction<Message> prepareMessageUpdateAction() {
+        WebhookMessageUpdateAction<Message> updateAction = getCommandEvent()
+            .getHook()
+            .editOriginalEmbeds(localEmbedsToSend.get());
+        for (FileSendRequest file : localFilesToSend.get()) {
+            updateAction = updateAction
+                .addFile(file.data(), file.name(),
+                    file.attachmentOptions());
+        }
+        return updateAction;
     }
 
     /**
@@ -331,6 +349,13 @@ public abstract class AbstractCommand {
             .dataPairing(GenericFormatDataKey.ERROR_MESSAGE,
                 errorMessage)
             .build());
+    }
+
+    protected void sendFile(String fileName, byte[] data,
+        AttachmentOption... attachmentOptions) {
+        localFilesToSend
+            .get()
+            .add(new FileSendRequest(fileName, data, attachmentOptions));
     }
 
     /**
@@ -485,4 +510,5 @@ public abstract class AbstractCommand {
         @NonNull CommandAutoCompleteInteractionEvent autoCompleteEvent) {
         return Collections.emptyList();
     }
+
 }

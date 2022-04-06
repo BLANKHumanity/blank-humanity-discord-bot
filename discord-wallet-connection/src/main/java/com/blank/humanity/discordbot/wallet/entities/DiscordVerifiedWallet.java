@@ -5,7 +5,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
+import javax.validation.constraints.Positive;
 
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 
@@ -23,11 +24,20 @@ public class DiscordVerifiedWallet {
     private int id;
 
     @NonNull
-    @OneToOne
-    @JoinColumn(name = "userId", nullable = false, unique = true, referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name = "userId", nullable = false, referencedColumnName = "id")
     private BlankUser user;
 
     @NonNull
     private String walletAddress;
+
+    @NonNull
+    private String salt;
+
+    @NonNull
+    private String signature;
+
+    @Positive
+    private int signatureVersion;
 
 }
