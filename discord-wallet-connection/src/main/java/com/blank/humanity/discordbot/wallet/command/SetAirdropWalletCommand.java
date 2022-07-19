@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.ens.EnsResolver;
 
+import com.blank.humanity.discordbot.aop.Argument;
 import com.blank.humanity.discordbot.commands.AbstractHiddenCommand;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.wallet.messages.WalletFormatDataKey;
@@ -43,11 +44,9 @@ public class SetAirdropWalletCommand extends AbstractHiddenCommand {
     }
 
     @Override
+    @Argument(name = WALLET)
     public CommandData createCommandData(SlashCommandData commandData,
         CommandDefinition definition) {
-        commandData
-            .addOption(OptionType.STRING, WALLET,
-                definition.getOptionDescription(WALLET), true);
         return commandData;
     }
 

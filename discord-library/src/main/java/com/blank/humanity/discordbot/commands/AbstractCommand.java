@@ -12,8 +12,13 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.aop.Argument;
+import com.blank.humanity.discordbot.aop.CommandArgumentAdvice;
+import com.blank.humanity.discordbot.aop.DiscordCommand;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericMessageType;
@@ -79,6 +84,9 @@ public abstract class AbstractCommand {
 
     @Setter(onMethod = @__({ @Autowired }))
     private MessageService messageService;
+    
+    @Setter(onMethod = @__({ @Autowired }))
+    private Environment environment;
 
     private static ThreadLocal<GenericCommandInteractionEvent> commandEvent = new ThreadLocal<>();
 
@@ -109,6 +117,8 @@ public abstract class AbstractCommand {
         commandService.registerCommand(this);
     }
 
+    private String commandNameCache = "";
+
     /**
      * Specifies the command name of this command class.<br>
      * The name needs to always be lower-case, which is a restriction of
@@ -116,7 +126,24 @@ public abstract class AbstractCommand {
      * 
      * @return The command name.
      */
-    public abstract String getCommandName();
+    public String getCommandName() {
+        if (commandNameCache.isEmpty()) {
+            DiscordCommand discordCommand = this
+                .getClass()
+                .getDeclaredAnnotation(DiscordCommand.class);
+            if (discordCommand != null) {
+                commandNameCache = MergedAnnotations
+                    .from(discordCommand)
+                    .get(DiscordCommand.class)
+                    .getString("name");
+            }
+        }
+
+        if (commandNameCache.isEmpty()) {
+            throw new UnsupportedOperationException();
+        }
+        return commandNameCache;
+    }
 
     /**
      * Creates CommandData including subcommands and arguments etc. to be
@@ -131,8 +158,13 @@ public abstract class AbstractCommand {
      *                    names and descriptions
      * @return The modified CommandData
      */
-    public abstract CommandData createCommandData(SlashCommandData commandData,
-        CommandDefinition definition);
+    public CommandData createCommandData(SlashCommandData commandData,
+        CommandDefinition definition) {
+        for(Argument argument : this.getClass().getAnnotationsByType(Argument.class)) {
+            CommandArgumentAdvice.addArgument(commandData, definition, argument, environment);
+        }
+        return commandData;
+    }
 
     /**
      * Sets the User of the thread-local execution environment.
@@ -221,12 +253,25 @@ public abstract class AbstractCommand {
         return localFilesToSend.get();
     }
 
+    private Boolean ephemeralCache = null;
+
     /**
      * @see AbstractHiddenCommand
      * @return True if command should always be hidden.
      */
     public boolean isEphemeral() {
-        return false;
+        if (ephemeralCache == null) {
+            DiscordCommand discordCommand = this
+                .getClass()
+                .getDeclaredAnnotation(DiscordCommand.class);
+            if (discordCommand != null) {
+                ephemeralCache = discordCommand.hidden();
+            } else {
+                ephemeralCache = false;
+            }
+        }
+
+        return ephemeralCache.booleanValue();
     }
 
     /**

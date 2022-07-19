@@ -390,6 +390,7 @@ class AbstractCommandTest {
 
         when(autoCompleteInteractionEvent.getMember()).thenReturn(member);
         when(blankUserService.getUser(member)).thenReturn(user);
+        doReturn("").when(abstractCommand).getCommandName();
 
         doThrow(new RuntimeException("Test Error"))
             .when(this.abstractCommand)

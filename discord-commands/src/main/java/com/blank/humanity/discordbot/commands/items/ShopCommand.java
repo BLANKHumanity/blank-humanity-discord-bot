@@ -4,8 +4,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.aop.Argument;
+import com.blank.humanity.discordbot.aop.DiscordCommand;
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
@@ -24,7 +25,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-@Component
+@DiscordCommand("shop")
 public class ShopCommand extends AbstractCommand {
 
     @Autowired
@@ -32,11 +33,6 @@ public class ShopCommand extends AbstractCommand {
 
     @Autowired
     private ItemConfiguration itemConfiguration;
-
-    @Override
-    public String getCommandName() {
-        return "shop";
-    }
 
     @Override
     public SlashCommandData createCommandData(SlashCommandData shopCommand,

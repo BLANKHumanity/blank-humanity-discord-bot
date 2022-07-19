@@ -122,6 +122,7 @@ class AbstractGameTest {
 
         when(metadata.getLastPlayed()).thenReturn(LocalDateTime.MIN);
         when(metadata.isGameFinished()).thenReturn(true);
+        doReturn("").when(game).getCommandName();
 
         doReturn(Optional.of(metadata))
             .when(gameService)
@@ -153,6 +154,7 @@ class AbstractGameTest {
             .getGameMetadata(Mockito.any(), Mockito.any());
 
         when(metadata.getLastPlayed()).thenReturn(LocalDateTime.MAX);
+        doReturn("").when(game).getCommandName();
 
         when(blankUserService
             .createFormattingData(user,

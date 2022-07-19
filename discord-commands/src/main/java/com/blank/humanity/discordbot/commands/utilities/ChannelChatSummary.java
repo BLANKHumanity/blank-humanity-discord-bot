@@ -11,8 +11,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.springframework.stereotype.Component;
-
+import com.blank.humanity.discordbot.aop.Argument;
+import com.blank.humanity.discordbot.aop.DiscordCommand;
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.utilities.messages.UtilityFormatDataKey;
 import com.blank.humanity.discordbot.commands.utilities.messages.UtilityMessageType;
@@ -32,35 +32,15 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.utils.TimeUtil;
 
-@Component
+@DiscordCommand("chatsummary")
+@Argument(name = "channel", type = OptionType.CHANNEL)
+@Argument(name = "hours", type = OptionType.INTEGER, minValue = 1, maxValue = 480, required = false)
+@Argument(name = "startmessageid", required = false)
 public class ChannelChatSummary extends AbstractCommand {
 
     private static final String CHANNEL = "channel";
     private static final String HOURS = "hours";
     private static final String START_MESSAGE_ID = "startmessageid";
-
-    @Override
-    public String getCommandName() {
-        return "chatsummary";
-    }
-
-    @Override
-    public SlashCommandData createCommandData(SlashCommandData commandData,
-        CommandDefinition definition) {
-        commandData
-            .addOption(OptionType.CHANNEL, CHANNEL,
-                definition.getOptionDescription(CHANNEL),
-                true);
-        OptionData hours = new OptionData(OptionType.INTEGER, HOURS,
-            definition.getOptionDescription(HOURS));
-        hours.setMinValue(1);
-        hours.setMaxValue(480);
-        OptionData startingMessage = new OptionData(OptionType.STRING,
-            START_MESSAGE_ID,
-            definition.getOptionDescription(START_MESSAGE_ID));
-        commandData.addOptions(hours, startingMessage);
-        return commandData;
-    }
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {

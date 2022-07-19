@@ -24,8 +24,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.blank.humanity.discordbot.aop.CommandArgumentAdvice;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.messages.CustomFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
@@ -84,6 +87,9 @@ public abstract class CommandUnitTest<C extends AbstractCommand> {
     @Mock
     protected CommandService commandService;
 
+    @Mock
+    protected Environment environment;
+    
     protected CommandUnitTest(Class<C> commandClass) {
         this.commandClass = commandClass;
     }
@@ -123,7 +129,15 @@ public abstract class CommandUnitTest<C extends AbstractCommand> {
             .thenReturn("TEST_DESCRIPTION");
 
         prepareCreateCommandData(commandData, definition);
-        commandData = (SlashCommandData) commandMock
+
+        AspectJProxyFactory factory = new AspectJProxyFactory();
+        factory.setTargetClass(commandClass);
+        factory.setTarget(commandMock);
+        CommandArgumentAdvice aspect = new CommandArgumentAdvice();
+        factory.addAspect(aspect);
+        C proxy = factory.getProxy();
+
+        commandData = (SlashCommandData) proxy
             .createCommandData(commandData, definition);
         testCreateCommandData(commandData);
     }

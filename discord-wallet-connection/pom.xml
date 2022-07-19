@@ -13,5 +13,9 @@
 			<groupId>com.blank.humanity</groupId>
 			<artifactId>discord-library</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.blank.humanity</groupId>
+			<artifactId>event-system</artifactId>
+		</dependency>
 	</dependencies>
 </project>
