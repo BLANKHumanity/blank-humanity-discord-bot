@@ -1,4 +1,4 @@
-package de.zorro909.blank.event;
+package com.blank.humanity.discordbot;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

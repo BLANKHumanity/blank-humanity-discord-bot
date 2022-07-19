@@ -1,8 +1,9 @@
-package de.zorro909.blank.event.config;
+package com.blank.humanity.discordbot.config;
 
 import javax.validation.constraints.NotNull;
 
-import de.zorro909.blank.event.BlankEvent;
+import com.blank.humanity.discordbot.BlankEvent;
+
 import lombok.Data;
 
 @Data

@@ -10,41 +10,24 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.util.Pair;
 import org.springframework.data.util.StreamUtils;
-import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.aop.Argument;
+import com.blank.humanity.discordbot.aop.DiscordCommand;
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyFormatDataKey;
 import com.blank.humanity.discordbot.commands.economy.messages.EconomyMessageType;
-import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.entities.user.BlankUser;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-@Component
+@DiscordCommand(name = "richest")
+@Argument(name = "page", type = OptionType.INTEGER, required = false, minValue = 1)
 public class RichestCommand extends AbstractCommand {
 
     private static final String PAGE = "page";
-
-    @Override
-    public String getCommandName() {
-        return "richest";
-    }
-
-    @Override
-    public SlashCommandData createCommandData(SlashCommandData commandData,
-        CommandDefinition definition) {
-        OptionData page = new OptionData(OptionType.INTEGER, PAGE,
-            definition.getOptionDescription(PAGE));
-        page.setMinValue(1);
-        commandData
-            .addOptions(page);
-        return commandData;
-    }
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {

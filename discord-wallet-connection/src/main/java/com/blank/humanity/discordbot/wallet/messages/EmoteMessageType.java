@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import org.springframework.core.env.Environment;
 
-import com.blank.humanity.discordbot.config.messages.GenericFormatDataKey;
 import com.blank.humanity.discordbot.config.messages.MessageType;
 import com.blank.humanity.discordbot.utils.FormatDataKey;
 
@@ -13,15 +12,18 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public enum WalletMessageType implements MessageType {
-    WALLET_VERIFY_DISPLAY_LINK(WalletFormatDataKey.WALLET_VERIFY_LINK,
-        GenericFormatDataKey.USER, GenericFormatDataKey.USER_MENTION),
-    SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR(GenericFormatDataKey.USER,
-        GenericFormatDataKey.USER_MENTION),
-    SET_AIRDROP_WALLET_SUCCESS(WalletFormatDataKey.AIRDROP_WALLET,
-        GenericFormatDataKey.USER, GenericFormatDataKey.USER_MENTION);
+public enum EmoteMessageType implements MessageType {
+    INITIALIZER_EMOTE_NFT_NOT_OWNED(EmoteFormatDataKey.NFT_ID),
+    INITIALIZER_EMOTE_NOT_BOUGHT(EmoteFormatDataKey.EMOTE_ID),
+    INITIALIZER_LEARN_UNKNOWN_EMOTE(EmoteFormatDataKey.EMOTE_ID),
+    INITIALIZER_EMOTE_ALREADY_LEARNT(EmoteFormatDataKey.NFT_ID,
+        EmoteFormatDataKey.EMOTE_ID),
+    INITIALIZER_EMOTE_LEARN_NO_ITEM(EmoteFormatDataKey.NFT_ID,
+        EmoteFormatDataKey.EMOTE_ID),
+    INITIALIZER_LEARNS_EMOTE(EmoteFormatDataKey.NFT_ID,
+        EmoteFormatDataKey.EMOTE_ID);
 
-    private WalletMessageType(FormatDataKey... keys) {
+    private EmoteMessageType(FormatDataKey... keys) {
         this.availableDataKeys = keys;
     }
 

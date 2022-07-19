@@ -1,11 +1,12 @@
-package de.zorro909.blank.event.service;
+package com.blank.humanity.discordbot.service;
 
 import java.util.concurrent.ExecutionException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import com.blank.humanity.discordbot.BlankEvent;
+import com.blank.humanity.discordbot.BlankRpcEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import de.zorro909.blank.event.BlankEvent;
-import de.zorro909.blank.event.BlankRpcEvent;
 
 public interface EventService {
 

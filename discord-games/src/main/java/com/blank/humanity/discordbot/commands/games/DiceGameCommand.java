@@ -54,6 +54,7 @@ public class DiceGameCommand extends AbstractGame {
             getBlankUserService().decreaseUserBalance(user, betAmount);
         } catch (NotEnoughBalanceException e) {
             abortInsufficientBalance(user, metadata, betAmount);
+            return null;
         }
 
         FakeUser diceJackpot = FakeUserType.DICE_JACKPOT

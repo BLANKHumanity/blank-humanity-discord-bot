@@ -1,9 +1,10 @@
-package de.zorro909.blank.event.service.impl;
+package com.blank.humanity.discordbot.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import de.zorro909.blank.event.BlankEvent;
+
+import com.blank.humanity.discordbot.BlankEvent;
 
 @Service
 class SpringEventService {

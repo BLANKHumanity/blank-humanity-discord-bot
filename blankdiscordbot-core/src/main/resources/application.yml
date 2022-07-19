@@ -26,9 +26,11 @@ web3:
     contracts:
       - "0x881d9c2f229323aad28a9c9045111e30e1f1eb25" 
 emotes:
+  url: "https://app.blankhumanity.com/api/emote/%(initializer)/%(emote)/%(size)"
   size: medium
-  initializers:
+  unlocked:
     - GM
+  locked:
     - GN
     - GL
     - WOW
@@ -38,6 +40,7 @@ emotes:
     - CUP
     - buyMe
     - WAGMI
+  emotePrice: 100
 discord:
   authToken: ${DISCORD_AUTH_TOKEN}
   guildId: ${DISCORD_GUILD_ID}
@@ -185,6 +188,11 @@ discord:
       options:
         initializer: "Temporary"
         emote: "Temporary"
+    learn-emote:
+      description: "Learn a new emote here :D"
+      options:
+        initializer: "For what initializer?"
+        emote: "Which emote to learn?"
 games:
   dice:
     displayName: Dice
@@ -291,6 +299,7 @@ messages:
   SET_AIRDROP_WALLET_WRONG_FORMAT_ERROR: "The specified wallet address has an invalid format. Are you using an ethereum address?"
   SET_AIRDROP_WALLET_SUCCESS: "Your airdrop wallet was sucessfully set to '%(airdropWallet)'!"
   INITIALIZER_EMOTE_NFT_NOT_OWNED: "You don't own Initializer #%(nftId)! If you actually do, then verify your Address via /verify."
+  INITIALIZER_LEARNS_EMOTE: "#%(nftId) learns emote %(emoteId)!"
 items:
   definitions:
     -
@@ -412,6 +421,51 @@ items:
           action: MESSAGE_REPLY
           actionArguments:
             message: "%(user) breaks into their Piggy Bank v0.0 and finds %(piggyBankItem)! Bitty has been notified and will add that to your balance as soon as possible."
+    -
+      id: 20
+      name: "Learn GN"
+      description: ""
+      useName: "learnToGN"      
+    -
+      id: 21
+      name: "Learn GL"
+      description: ""
+      useName: "learnToGL"       
+    -
+      id: 22
+      name: "Learn WOW"
+      description: ""
+      useName: "learnToWOW"                 
+    -
+      id: 23
+      name: "Learn TY"
+      description: ""
+      useName: "learnToTY"      
+    -
+      id: 24
+      name: "Learn lovesThis"
+      description: ""
+      useName: "learnTolovesThis"      
+    -
+      id: 25
+      name: "Learn sendLove"
+      description: ""
+      useName: "learnTosendLove"      
+    -
+      id: 26
+      name: "Learn CUP"
+      description: ""
+      useName: "learnToCUP"      
+    -
+      id: 27
+      name: "Learn buyMe"
+      description: ""
+      useName: "learnTobuyMe"      
+    -
+      id: 28
+      name: "Learn WAGMI"
+      description: ""
+      useName: "learnToWAGMI"      
 shop:
   itemsPerPage: 8
   shopItems:  # Latest ID used: 10
