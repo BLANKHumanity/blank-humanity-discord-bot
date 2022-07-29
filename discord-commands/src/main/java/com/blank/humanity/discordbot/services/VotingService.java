@@ -61,14 +61,14 @@ public class VotingService {
     public VotingCampaign createVotingCampaign(String campaign,
         String description) {
         VotingCampaign votingCampaign = new VotingCampaign();
-        votingCampaign.setName(campaign.toLowerCase());
+        votingCampaign.setName(campaign.toLowerCase().replace(" ", "_"));
         votingCampaign.setDescription(description);
         return votingCampaignDao.save(votingCampaign);
     }
 
     @Transactional
     public Optional<VotingCampaign> getVotingCampaign(String campaign) {
-        return votingCampaignDao.findByName(campaign.toLowerCase());
+        return votingCampaignDao.findByName(campaign.toLowerCase().replace(" ", "_"));
     }
 
     public boolean hasUserVoted(VotingCampaign campaign, BlankUser user) {

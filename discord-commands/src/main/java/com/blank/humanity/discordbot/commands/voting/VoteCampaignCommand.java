@@ -1,7 +1,12 @@
 package com.blank.humanity.discordbot.commands.voting;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,12 +15,16 @@ import com.blank.humanity.discordbot.commands.AbstractHiddenCommand;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingFormatDataKey;
 import com.blank.humanity.discordbot.commands.voting.messages.VotingMessageType;
 import com.blank.humanity.discordbot.config.commands.CommandDefinition;
+import com.blank.humanity.discordbot.entities.voting.VoteChoice;
 import com.blank.humanity.discordbot.entities.voting.VotingCampaign;
 import com.blank.humanity.discordbot.services.VotingService;
 import com.blank.humanity.discordbot.utils.FormattingData;
 
+import lombok.NonNull;
 import lombok.Setter;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -64,7 +73,7 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
         addChoice
             .addOption(OptionType.STRING, CAMPAIGN,
                 definition.getOptionDescription(CAMPAIGN),
-                true);
+                true, true);
         addChoice
             .addOption(OptionType.STRING, CHOICE,
                 definition.getOptionDescription(CHOICE),
@@ -75,25 +84,25 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
         removeChoice
             .addOption(OptionType.STRING, CAMPAIGN,
                 definition.getOptionDescription(CAMPAIGN),
-                true);
+                true, true);
         removeChoice
             .addOption(OptionType.STRING, CHOICE,
                 definition.getOptionDescription(CHOICE),
-                true);
+                true, true);
 
         SubcommandData start = new SubcommandData(START,
             definition.getOptionDescription(START));
         start
             .addOption(OptionType.STRING, CAMPAIGN,
                 definition.getOptionDescription(CAMPAIGN),
-                true);
+                true, true);
 
         SubcommandData stop = new SubcommandData(STOP,
             definition.getOptionDescription(STOP));
         stop
             .addOption(OptionType.STRING, CAMPAIGN,
                 definition.getOptionDescription(CAMPAIGN),
-                true);
+                true, true);
 
         SubcommandData list = new SubcommandData(LIST,
             definition.getOptionDescription(LIST));
@@ -120,6 +129,67 @@ public class VoteCampaignCommand extends AbstractHiddenCommand {
         default -> throw new UnsupportedOperationException(
             "Unknown Subcommand");
         }
+    }
+
+    @NonNull
+    protected Collection<Command.Choice> onAutoComplete(
+        @NonNull CommandAutoCompleteInteractionEvent autoCompleteEvent) {
+        return switch (autoCompleteEvent.getFocusedOption().getName()) {
+        case CAMPAIGN -> autoCompleteCampaign(autoCompleteEvent);
+        case CHOICE -> autoCompleteChoice(autoCompleteEvent);
+        default -> Collections.emptyList();
+        };
+    }
+
+    private Collection<Command.Choice> autoCompleteCampaign(
+        @NonNull CommandAutoCompleteInteractionEvent autoCompleteEvent) {
+        String campaignName = autoCompleteEvent
+            .getFocusedOption()
+            .getValue()
+            .toLowerCase()
+            .replace(" ", "_");
+
+        Stream<VotingCampaign> campaigns = votingService
+            .getVotingCampaigns()
+            .stream()
+            .filter(campaign -> campaign.getName().contains(campaignName));
+
+        if (autoCompleteEvent.getSubcommandName().equalsIgnoreCase(START)) {
+            campaigns = campaigns
+                .filter(Predicate.not(VotingCampaign::isRunning));
+        } else if (autoCompleteEvent
+            .getSubcommandName()
+            .equalsIgnoreCase(STOP)) {
+            campaigns = campaigns
+                .filter(VotingCampaign::isRunning);
+        }
+
+        return campaigns
+            .map(campaign -> new Command.Choice(campaign.getName(),
+                campaign.getName()))
+            .toList();
+    }
+
+    private Collection<Command.Choice> autoCompleteChoice(
+        @NonNull CommandAutoCompleteInteractionEvent autoCompleteEvent) {
+        Optional<VotingCampaign> campaign = autoCompleteEvent
+            .getOption(NAME, mapping -> votingService
+                .getVotingCampaign(mapping.getAsString()));
+
+        String userChoice = autoCompleteEvent
+            .getFocusedOption()
+            .getValue()
+            .toLowerCase();
+
+        return campaign
+            .map(VotingCampaign::getChoices)
+            .stream()
+            .flatMap(List::stream)
+            .map(VoteChoice::getValue)
+            .filter(
+                choice -> choice.toLowerCase().contains(userChoice))
+            .map(choice -> new Command.Choice(choice, choice))
+            .toList();
     }
 
     private void create(GenericCommandInteractionEvent event) {

@@ -4,12 +4,12 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.aop.Argument;
+import com.blank.humanity.discordbot.aop.DiscordCommand;
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
-import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.items.ItemConfiguration;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.config.items.ShopItem;
@@ -26,10 +26,10 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-@Component
+@DiscordCommand("buy")
+@Argument(name = "item", type = OptionType.STRING, autocomplete = true)
+@Argument(name = "amount", type = OptionType.INTEGER, required = false, minValue = 1)
 public class BuyItemCommand extends AbstractCommand {
 
     private static final String AMOUNT = "amount";
@@ -40,25 +40,6 @@ public class BuyItemCommand extends AbstractCommand {
 
     @Setter(onMethod = @__({ @Autowired }))
     private ItemConfiguration itemConfiguration;
-
-    @Override
-    public String getCommandName() {
-        return "buy";
-    }
-
-    @Override
-    public SlashCommandData createCommandData(SlashCommandData commandData,
-        CommandDefinition definition) {
-        commandData
-            .addOption(OptionType.STRING, ITEM,
-                definition.getOptionDescription(ITEM),
-                true, true);
-        OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
-            definition.getOptionDescription(AMOUNT));
-        amount.setMinValue(1);
-        commandData.addOptions(amount);
-        return commandData;
-    }
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {

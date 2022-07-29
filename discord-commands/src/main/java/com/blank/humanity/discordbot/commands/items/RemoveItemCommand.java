@@ -3,8 +3,7 @@ package com.blank.humanity.discordbot.commands.items;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.springframework.stereotype.Component;
-
+import com.blank.humanity.discordbot.aop.DiscordCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
@@ -18,13 +17,8 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
-@Component
+@DiscordCommand("remove-item")
 public class RemoveItemCommand extends ItemInteractionCommand {
-
-    @Override
-    public String getCommandName() {
-        return "remove-item";
-    }
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {

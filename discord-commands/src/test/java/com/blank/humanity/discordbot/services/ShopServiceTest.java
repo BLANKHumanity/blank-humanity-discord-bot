@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -50,7 +51,7 @@ class ShopServiceTest extends ServiceIntegrationTest {
 
     @Autowired
     private BuyLogDao buyLogDao;
-
+   
     private final double SHOP_ITEMS = 5;
 
     private final double ITEMS_PER_PAGE = 2;

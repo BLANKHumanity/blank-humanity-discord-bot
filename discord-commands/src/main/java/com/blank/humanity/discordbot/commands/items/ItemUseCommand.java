@@ -7,12 +7,12 @@ import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.aop.Argument;
+import com.blank.humanity.discordbot.aop.DiscordCommand;
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
-import com.blank.humanity.discordbot.config.commands.CommandDefinition;
 import com.blank.humanity.discordbot.config.items.ItemActionDefinition;
 import com.blank.humanity.discordbot.config.items.ItemDefinition;
 import com.blank.humanity.discordbot.item.actions.ItemAction;
@@ -33,13 +33,13 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 @Slf4j
-@Component
+@DiscordCommand("use")
+@Argument(name = "item", autocomplete = true)
+@Argument(name = "amount", type = OptionType.INTEGER, required = false, minValue = 1)
 public class ItemUseCommand extends AbstractCommand {
 
     private static final String ITEM = "item";
@@ -50,25 +50,6 @@ public class ItemUseCommand extends AbstractCommand {
 
     @Setter(onMethod = @__({ @Autowired }))
     private ApplicationContext applicationContext;
-
-    @Override
-    public String getCommandName() {
-        return "use";
-    }
-
-    @Override
-    public SlashCommandData createCommandData(SlashCommandData commandData,
-        CommandDefinition definition) {
-        commandData
-            .addOption(OptionType.STRING, ITEM,
-                definition.getOptionDescription(ITEM),
-                true, true);
-        OptionData amount = new OptionData(OptionType.INTEGER, AMOUNT,
-            definition.getOptionDescription(AMOUNT));
-        amount.setMinValue(1);
-        commandData.addOptions(amount);
-        return commandData;
-    }
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {

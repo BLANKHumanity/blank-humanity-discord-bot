@@ -4,8 +4,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
+import com.blank.humanity.discordbot.aop.Argument;
+import com.blank.humanity.discordbot.aop.DiscordCommand;
 import com.blank.humanity.discordbot.commands.AbstractCommand;
 import com.blank.humanity.discordbot.commands.items.messages.ItemFormatDataKey;
 import com.blank.humanity.discordbot.commands.items.messages.ItemMessageType;
@@ -20,25 +21,12 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-@Component
+@DiscordCommand("inventory")
+@Argument(name = "user", required = false, type = OptionType.USER)
 public class InventoryCommand extends AbstractCommand {
 
     @Autowired
     private InventoryService inventoryService;
-
-    @Override
-    public String getCommandName() {
-        return "inventory";
-    }
-
-    @Override
-    public SlashCommandData createCommandData(SlashCommandData commandData,
-        CommandDefinition definition) {
-        commandData
-            .addOption(OptionType.USER, "user",
-                definition.getOptionDescription("user"));
-        return commandData;
-    }
 
     @Override
     protected void onCommand(GenericCommandInteractionEvent event) {
